@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+ADMIN_TOKEN="${ADMIN_TOKEN:-}"
+if [[ -z "$ADMIN_TOKEN" && -f .admintoken ]]; then
+  ADMIN_TOKEN=$(cat .admintoken | tr -d '[:space:]')
+fi
+
+if [[ -z "$ADMIN_TOKEN" ]]; then
+  echo "musn-repl: missing ADMIN_TOKEN or .admintoken" >&2
+  exit 2
+fi
+
+exec clojure -M -e "(require 'repl.http) (repl.http/start! {:port 6767 :bind \"127.0.0.1\" :token \"$ADMIN_TOKEN\" :allow [\"127.0.0.1\"]}) (println \"Drawbridge ready on http://127.0.0.1:6767/repl\") (flush) (Thread/sleep 1000000000)"

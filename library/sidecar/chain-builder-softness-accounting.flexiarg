@@ -1,0 +1,20 @@
+@flexiarg sidecar/chain-builder-softness-accounting
+@title Chain Builder with Softness Accounting
+@audience musn architects, query UX
+@tone technical
+@style pattern
+
+! conclusion: Build short chains and report softness per hop.
+  + context: Users need explainable chains, not just candidate lists.
+  + IF:
+    Queries return flat neighbor lists without justification.
+  + HOWEVER:
+    You want puzzle-like chain recovery with clear evidence.
+  + THEN:
+    Build short chains over arrows, bridges, and proposals, and report softness metrics.
+  + BECAUSE:
+    Softness accounting shows where fuzz enters the chain and enables review.
+  + NEXT-STEPS:
+    - Implement chain scoring that prioritizes arrows over bridges over proposals.
+    - Output per-hop evidence and softness counts.
+    - Add penalties for ungated sense shifts.

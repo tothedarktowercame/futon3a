@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 4 ]]; then
+  echo "usage: musn-evidence <session-id> <pattern-id> <file> <note>" >&2
+  exit 2
+fi
+
+sid="$1"
+pattern="$2"
+file="$3"
+shift 3
+note="$*"
+
+exec "$(dirname "$0")/portal" "(musn.core/evidence! \"$sid\" {:pattern/id \"$pattern\" :files [\"$file\"] :note \"$note\"})"

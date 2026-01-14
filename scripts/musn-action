@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 4 ]]; then
+  echo "usage: musn-action <session-id> <pattern-id> <action> <note>" >&2
+  exit 2
+fi
+
+sid="$1"
+pattern="$2"
+action="$3"
+shift 3
+note="$*"
+
+exec "$(dirname "$0")/portal" "(musn.core/action! \"$sid\" {:pattern/id \"$pattern\" :action \"$action\" :note \"$note\"})"

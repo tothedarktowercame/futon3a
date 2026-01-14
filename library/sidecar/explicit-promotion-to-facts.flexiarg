@@ -1,0 +1,20 @@
+@flexiarg sidecar/explicit-promotion-to-facts
+@title Explicit Promotion to Facts
+@audience musn architects, governance
+@tone technical
+@style pattern
+
+! conclusion: Promote proposals to facts only via explicit, logged actions.
+  + context: Facts must remain authoritative and defeasible.
+  + IF:
+    Proposals become facts implicitly or through side effects.
+  + HOWEVER:
+    You want good proposals to become facts when warranted.
+  + THEN:
+    Require a promote action that validates constraints and appends a promotion record.
+  + BECAUSE:
+    Explicit promotion prevents silent contamination and preserves auditability.
+  + NEXT-STEPS:
+    - Define promotion log records with rationale and decided_by.
+    - Add constraint checks before writing to XTDB.
+    - Record facts as fact, warrant, and retired event types.

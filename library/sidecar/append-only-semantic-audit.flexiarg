@@ -1,0 +1,20 @@
+@flexiarg sidecar/append-only-semantic-audit
+@title Append-Only Semantic Audit
+@audience musn architects, governance
+@tone technical
+@style pattern
+
+! conclusion: Keep proposals and promotions append-only with provenance.
+  + context: Semantic evolution must be inspectable and reversible.
+  + IF:
+    Proposal or fact updates overwrite prior states.
+  + HOWEVER:
+    You need to revise or retire claims over time.
+  + THEN:
+    Record status transitions as append-only events with decided_by and rationale.
+  + BECAUSE:
+    Append-only logs enable audits and provenance tracking.
+  + NEXT-STEPS:
+    - Add explicit status transitions in the proposals table.
+    - Append promotion and retirement events with timestamps.
+    - Provide a simple audit query for state history.

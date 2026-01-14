@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: musn-end <session-id> [summary]" >&2
+  exit 2
+fi
+
+sid="$1"
+shift
+summary="$*"
+
+if [[ -n "$summary" ]]; then
+  exec "$(dirname "$0")/portal" "(musn.core/end-turn! \"$sid\" {:summary {:note \"$summary\"}})"
+else
+  exec "$(dirname "$0")/portal" "(musn.core/end-turn! \"$sid\" {})"
+fi

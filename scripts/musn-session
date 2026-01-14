@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "usage: musn-session <intent>" >&2
+  exit 2
+fi
+
+intent="$*"
+
+sid=$("$(dirname "$0")/portal" "(-> (musn.core/create-session!) :session/id)" | tail -n 1 | tr -d '"')
+
+if [[ -z "$sid" ]]; then
+  echo "musn-session: failed to create session" >&2
+  exit 2
+fi
+
+echo "Session: $sid"
+"$(dirname "$0")/musn-start" "$sid" "$intent"

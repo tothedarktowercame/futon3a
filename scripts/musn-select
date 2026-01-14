@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 3 ]]; then
+  echo "usage: musn-select <session-id> <pattern-id> <reason>" >&2
+  exit 2
+fi
+
+sid="$1"
+pattern="$2"
+shift 2
+reason="$*"
+
+exec "$(dirname "$0")/portal" "(musn.core/select! \"$sid\" {:pattern/id \"$pattern\" :reason \"$reason\"})"

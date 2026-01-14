@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log_root="${MUSN_LOG_ROOT:-log}"
+if [[ ! -d "$log_root" ]]; then
+  echo "musn-summary: log root not found: $log_root" >&2
+  exit 2
+fi
+
+latest=$(ls -t "$log_root"/*.edn 2>/dev/null | head -n 1)
+if [[ -z "$latest" ]]; then
+  echo "musn-summary: no log files in $log_root" >&2
+  exit 2
+fi
+
+echo "Log: $latest"
+cat "$latest"

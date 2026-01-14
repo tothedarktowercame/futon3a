@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "usage: musn-start <session-id> <intent>" >&2
+  exit 2
+fi
+
+sid="$1"
+shift
+intent="$*"
+
+exec "$(dirname "$0")/portal" "(musn.core/start-turn! \"$sid\" {:intent \"$intent\"})"
