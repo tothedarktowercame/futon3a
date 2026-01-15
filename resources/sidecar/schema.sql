@@ -61,3 +61,43 @@ CREATE TABLE IF NOT EXISTS proposals (
   created_at TEXT NOT NULL,
   CHECK (status IN ('pending', 'accepted', 'rejected'))
 );
+
+CREATE TABLE IF NOT EXISTS promotions (
+  promotion_id TEXT PRIMARY KEY,
+  proposal_id TEXT NOT NULL,
+  promoted_kind TEXT NOT NULL,
+  target_id TEXT,
+  decided_by TEXT NOT NULL,
+  rationale TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (proposal_id) REFERENCES proposals(proposal_id)
+);
+
+CREATE TABLE IF NOT EXISTS promotion_log (
+  promotion_log_id TEXT PRIMARY KEY,
+  promotion_id TEXT NOT NULL,
+  decision TEXT NOT NULL,
+  actor TEXT NOT NULL,
+  source TEXT NOT NULL,
+  run_id TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+  metadata_json TEXT,
+  FOREIGN KEY (promotion_id) REFERENCES promotions(promotion_id),
+  CHECK (decision IN ('accepted', 'rejected'))
+);
+
+CREATE TABLE IF NOT EXISTS bridge_triples (
+  bridge_id TEXT PRIMARY KEY,
+  subject_entity_id TEXT NOT NULL,
+  predicate TEXT NOT NULL,
+  object_entity_id TEXT NOT NULL,
+  rationale TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  status TEXT NOT NULL,
+  supersedes_bridge_id TEXT,
+  FOREIGN KEY (subject_entity_id) REFERENCES entities(entity_id),
+  FOREIGN KEY (object_entity_id) REFERENCES entities(entity_id),
+  FOREIGN KEY (supersedes_bridge_id) REFERENCES bridge_triples(bridge_id),
+  CHECK (status IN ('active', 'retired'))
+);

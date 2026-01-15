@@ -14,6 +14,8 @@
     Require a promote action that validates constraints and appends a promotion record.
   + BECAUSE:
     Explicit promotion prevents silent contamination and preserves auditability.
+  + BECAUSE->EVIDENCE: docs/sidecar-promotions.md; resources/sidecar/schema.sql
+  + BECAUSE->EVIDENCE: docs/sidecar-audit-flow.md; resources/sidecar/schema.sql
   + NEXT-STEPS:
     - Define promotion log records with rationale and decided_by.
     - Add constraint checks before writing to XTDB.

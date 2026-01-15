@@ -14,6 +14,7 @@
     Gate sense-broaden and sense-narrow steps to typed arrows or bridge triples.
   + BECAUSE:
     Gating reduces drift and keeps chains explainable.
+  + evidence: docs/sidecar-chains.md
   + NEXT-STEPS:
     - Implement gate rules in the chain scorer.
     - Record when a sense shift was allowed and why.

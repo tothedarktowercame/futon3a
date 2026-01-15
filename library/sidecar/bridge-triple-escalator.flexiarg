@@ -14,6 +14,7 @@
     Store minimal bridge triples in SQLite and use them to justify or gate hops.
   + BECAUSE:
     Curated bridges provide explicit warrants without inflating facts prematurely.
+  + BECAUSE->EVIDENCE: docs/sidecar-promotions.md; resources/sidecar/schema.sql
   + NEXT-STEPS:
     - Define the bridge_triples table and editing workflow.
     - Reference bridge triples in chain evidence output.

@@ -14,6 +14,8 @@
     Record status transitions as append-only events with decided_by and rationale.
   + BECAUSE:
     Append-only logs enable audits and provenance tracking.
+  + BECAUSE->EVIDENCE: docs/sidecar-promotions.md; resources/sidecar/schema.sql
+  + BECAUSE->EVIDENCE: docs/sidecar-audit-flow.md; resources/sidecar/schema.sql
   + NEXT-STEPS:
     - Add explicit status transitions in the proposals table.
     - Append promotion and retirement events with timestamps.

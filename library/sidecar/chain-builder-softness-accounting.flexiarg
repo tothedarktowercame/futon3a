@@ -14,6 +14,7 @@
     Build short chains over arrows, bridges, and proposals, and report softness metrics.
   + BECAUSE:
     Softness accounting shows where fuzz enters the chain and enables review.
+  + evidence: docs/sidecar-chains.md
   + NEXT-STEPS:
     - Implement chain scoring that prioritizes arrows over bridges over proposals.
     - Output per-hop evidence and softness counts.
