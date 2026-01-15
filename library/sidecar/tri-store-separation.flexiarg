@@ -14,6 +14,8 @@
     Use XTDB for facts, SQLite for inspectable memes, and ANN/HNSW for notions, and enforce boundaries.
   + BECAUSE:
     Each store has a different trust level; separation keeps fuzz from becoming fact.
+  + evidence: docs/sidecar-query-flow.md; docs/sidecar-promotion-flow.md
+  + use: docs/sidecar-query-flow.md; docs/sidecar-promotion-flow.md
   + NEXT-STEPS:
     - Define the three adapters and enforce that ANN results only create proposals.
     - Add checks that facts are written only through explicit promotion.

@@ -15,6 +15,7 @@
   + BECAUSE:
     Softness accounting shows where fuzz enters the chain and enables review.
   + evidence: docs/sidecar-chains.md
+  + evidence: src/sidecar/store.clj; test/sidecar/store_test.clj
   + NEXT-STEPS:
     - Implement chain scoring that prioritizes arrows over bridges over proposals.
     - Output per-hop evidence and softness counts.

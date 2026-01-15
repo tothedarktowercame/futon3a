@@ -11,12 +11,12 @@
   + HOWEVER:
     You want good proposals to become facts when warranted.
   + THEN:
-    Require a promote action that validates constraints and appends a promotion record.
+    Require a promote action that passes the validation gate and appends a promotion record.
   + BECAUSE:
     Explicit promotion prevents silent contamination and preserves auditability.
-  + BECAUSE->EVIDENCE: docs/sidecar-promotions.md; resources/sidecar/schema.sql
-  + BECAUSE->EVIDENCE: docs/sidecar-audit-flow.md; resources/sidecar/schema.sql
+  + BECAUSE->EVIDENCE: docs/sidecar-promotions.md; docs/sidecar-promotion-flow.md; resources/sidecar/schema.sql
+  + BECAUSE->EVIDENCE: docs/sidecar-audit-flow.md; docs/sidecar-promotion-flow.md; resources/sidecar/schema.sql
   + NEXT-STEPS:
     - Define promotion log records with rationale and decided_by.
-    - Add constraint checks before writing to XTDB.
-    - Record facts as fact, warrant, and retired event types.
+    - Route promotion writes through the validation gate (required fields, enum constraints, score bounds).
+    - Reject direct fact writes outside the promotion action.

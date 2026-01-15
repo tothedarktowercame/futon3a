@@ -1,0 +1,21 @@
+@flexiarg sidecar/fact-lifecycle-event-types
+@title Fact Lifecycle Event Types
+@audience musn architects, governance
+@tone technical
+@style pattern
+
+! conclusion: Model facts with explicit lifecycle event types (fact, warrant, retired).
+  + context: Facts must be authoritative, defeasible, and auditable over time.
+  + IF:
+    Fact state changes are implicit or modeled as overwrites.
+  + HOWEVER:
+    You still need fast reads and clear current truth.
+  + THEN:
+    Record lifecycle events as append-only types (fact, warrant, retired) with rationale and actor metadata.
+  + BECAUSE:
+    Explicit lifecycle events preserve audit trails and clarify which facts are currently active.
+  + evidence: docs/sidecar-promotion-flow.md; docs/sidecar-promotions.md
+  + NEXT-STEPS:
+    - Define the event type enum and required fields.
+    - Require lifecycle events for all promoted facts.
+    - Add a view that resolves the active fact state from the event stream.

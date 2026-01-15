@@ -14,6 +14,7 @@
     Store artifacts, entities, aliases, and mentions as deterministic extraction outputs.
   + BECAUSE:
     Grounding makes proposals auditable and promotes stable chain building.
+  + evidence: docs/sidecar-grounding-and-chains.md
   + NEXT-STEPS:
     - Define the artifacts, entities, aliases, and mentions tables.
     - Implement ingestion that hashes artifacts and records mention spans.
