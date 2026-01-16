@@ -14,6 +14,7 @@
     Store arrows with mode, payload, scope, confidence, and status.
   + BECAUSE:
     Typed arrows make transforms inspectable and scoreable in chains.
+  + evidence: docs/sidecar-grounding-and-chains.md
   + NEXT-STEPS:
     - Define the arrows table and a required mode vocabulary.
     - Require status transitions (draft, active, retired).

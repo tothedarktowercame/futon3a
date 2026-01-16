@@ -1,4 +1,4 @@
-{:paths ["src"]
+{:paths ["src" "test"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/data.json {:mvn/version "2.5.0"}
         com.cemerick/drawbridge {:mvn/version "0.0.7"}
@@ -8,4 +8,5 @@
         ring/ring-core {:mvn/version "1.11.0"}
         ;; Meme layer (SQLite)
         com.github.seancorfield/next.jdbc {:mvn/version "1.3.909"}
-        org.xerial/sqlite-jdbc {:mvn/version "3.44.1.0"}}}
+        org.xerial/sqlite-jdbc {:mvn/version "3.44.1.0"}}
+ :aliases {:test {:exec-fn clojure.test/run-all-tests}}}

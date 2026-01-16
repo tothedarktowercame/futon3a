@@ -18,6 +18,12 @@ A small Clojure core with:
 There is no HTTP server in this repo. All interaction is via Drawbridge.
 Drawbridge keeps querying as a first-class operation (not limited to pre-made endpoints).
 
+## Portal and sidecar interop
+
+Portal is the query/eval surface; sidecar is the append-only audit surface.
+Portal retrieves pattern guidance and intent, while sidecar records selections, actions,
+evidence, promotions, and chains. See `docs/portal-interop.md` for the developer view.
+
 ## User story (plain)
 
 1. The user asks the agent to retrieve relevant patterns using `portal`.
@@ -65,6 +71,17 @@ Set `PORTAL_FUTON1_URL` or `MUSN_FUTON1_URL` to override.
 
 Scoring is simple token matching against pattern IDs and names. This can be replaced later.
 
+## Pattern indexing (notions store)
+
+Futon3a's fuzzy recall expects a local notions index derived from the Futon3
+library patterns. Build it with:
+
+```
+scripts/index_patterns.sh
+```
+
+See `docs/pattern-indexing.md` for optional GloVe, fastText, and MiniLM embeddings.
+
 ## Usage
 
 Start Drawbridge (local):
@@ -87,6 +104,14 @@ scripts/portal patterns list --limit 8
 scripts/portal patterns list --namespace vsatlas --limit 10
 scripts/portal patterns search "building community" --limit 8
 scripts/portal patterns get vsatlas/some-pattern-id
+```
+
+Portal helpers for sidecar logging:
+
+```
+scripts/portal suggest "building community" --limit 8
+scripts/portal propose prop-001 --kind proposal --target vsatlas/some-pattern-id --score 0.72 --method ann
+scripts/portal promote prom-001 prop-001 --kind proposal --decided-by reviewer:jo --rationale "validated in source"
 ```
 
 Log selections and actions:
