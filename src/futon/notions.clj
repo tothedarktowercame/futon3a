@@ -72,10 +72,20 @@
       "resources/notions/minilm_pattern_embeddings.json"))
 
 (defn- venv-python []
-  (let [venv-path ".venv/bin/python3"]
-    (if (.exists (io/file venv-path))
-      venv-path
-      "python3")))
+  (let [env-python (System/getenv "NOTIONS_PYTHON")
+        venv-rel ".venv/bin/python3"
+        start (try
+                (.getCanonicalFile (io/file "."))
+                (catch Exception _
+                  (io/file ".")))
+        venv-paths (->> (iterate #(when % (.getParentFile %)) start)
+                        (take 6)
+                        (keep identity)
+                        (map #(io/file % venv-rel)))]
+    (cond
+      (seq env-python) env-python
+      (some #(.exists %) venv-paths) (->> venv-paths (filter #(.exists %)) first str)
+      :else "python3")))
 
 (defn search-embeddings
   "Search patterns using MiniLM embeddings (requires sentence-transformers)."
