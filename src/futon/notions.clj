@@ -195,6 +195,66 @@
                         (take-while #(str/starts-with? (str/trim %) "- "))
                         (mapv #(str/replace (str/trim %) #"^- " "")))})))
 
+(def ^:private devmap-header-re
+  #"^!\s+instantiated-by:\s+Prototype\s+(\d+)\s+—\s+(.*)\s+\[(.*)\]\s*$")
+
+(def ^:private clause-re
+  #"^\s*[+!]\s+([^:]+):\s*(.*)$")
+
+(defn- parse-devmap-block
+  [lines]
+  (->> lines
+       (keep (fn [line]
+               (when-let [[_ label text] (re-matches clause-re line)]
+                 [(keyword (str/lower-case (str/trim label))) (str/trim text)])))
+       (reduce (fn [acc [k v]]
+                 (update acc k (fnil conj []) v))
+               {})))
+
+(defn- devmap-paths
+  []
+  (let [roots ["holes/"
+               "../futon3/holes/"
+               "/home/joe/code/futon3/holes/"
+               (when-let [r (System/getenv "FUTON3_ROOT")] (str r "/holes/"))]]
+    (->> roots
+         (remove nil?)
+         (map #(io/file %))
+         (filter #(.exists %))
+         (mapcat #(file-seq %))
+         (filter #(and (.isFile %) (str/ends-with? (.getName %) ".devmap"))))))
+
+(defn- load-devmap
+  "Load a devmap entry for pattern IDs like f3/p4."
+  [pattern-id]
+  (when-let [[_ futon proto] (re-matches #"f(\d+)/p(\d+)" pattern-id)]
+    (let [target-futon (str "futon" futon ".devmap")
+          files (filter #(= target-futon (.getName %)) (devmap-paths))]
+      (some (fn [^java.io.File file]
+              (let [lines (str/split-lines (slurp file))
+                    sentinel (str "! instantiated-by: Prototype 0 — END [x/y]")]
+                (loop [remaining (concat lines [sentinel])]
+                  (when-let [line (first remaining)]
+                    (if-let [[_ pnum title _] (re-matches devmap-header-re line)]
+                      (let [block (->> (rest remaining)
+                                       (take-while #(not (re-matches devmap-header-re %))))
+                            data (parse-devmap-block block)]
+                        (if (= pnum proto)
+                          (let [pick (fn [k] (first (get data k)))
+                                then (or (pick :then) (pick :conclusion) (pick :claim))]
+                            {:path (.getPath file)
+                             :id pattern-id
+                             :title title
+                             :if (pick :if)
+                             :however (pick :however)
+                             :then then
+                             :because (pick :because)
+                             :context (pick :context)
+                             :devmap? true})
+                          (recur (drop (count block) (rest remaining)))))
+                      (recur (rest remaining)))))))
+            files))))
+
 (defn get-pattern-details
   "Load full pattern details from its flexiarg source."
   [pattern-id]
@@ -209,7 +269,8 @@
         paths (->> roots
                    (remove nil?)
                    (map #(str % file-path)))]
-    (some load-flexiarg paths)))
+    (or (some load-flexiarg paths)
+        (load-devmap pattern-id))))
 
 (defn enrich-results
   "Enrich search results with TSV data and flexiarg details.
