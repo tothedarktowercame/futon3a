@@ -71,13 +71,20 @@
   (or (System/getenv "NOTIONS_EMBEDDINGS_PATH")
       "resources/notions/minilm_pattern_embeddings.json"))
 
+(defn- venv-python []
+  (let [venv-path ".venv/bin/python3"]
+    (if (.exists (io/file venv-path))
+      venv-path
+      "python3")))
+
 (defn search-embeddings
   "Search patterns using MiniLM embeddings (requires sentence-transformers)."
   ([query] (search-embeddings query 5))
   ([query top-k]
    (let [script (notions-search-path)
          embeddings (embeddings-path)
-         result (shell/sh "python3" script
+         python (venv-python)
+         result (shell/sh python script
                           "--query" query
                           "--top" (str top-k)
                           "--embeddings" embeddings)]
@@ -96,6 +103,24 @@
        (do
          (println "[notions] Embedding search failed, falling back to keywords")
          (search-keywords query top-k))))))
+
+;; --- TSV lookup by ID ---
+
+(defn- index-by-id
+  "Create a map from pattern ID to pattern data."
+  [patterns]
+  (into {} (map (juxt :id identity) patterns)))
+
+(defonce ^:private tsv-index-cache (atom nil))
+
+(defn- get-tsv-index []
+  (or @tsv-index-cache
+      (reset! tsv-index-cache (index-by-id (load-pattern-index)))))
+
+(defn get-tsv-data
+  "Get TSV data for a pattern ID."
+  [pattern-id]
+  (get (get-tsv-index) pattern-id))
 
 ;; --- Unified interface ---
 
@@ -124,11 +149,29 @@
   (when (.exists (io/file path))
     (let [content (slurp path)
           lines (str/split-lines content)
+          ;; Parse field that may have content on same line or next line
           parse-field (fn [prefix]
-                        (->> lines
-                             (filter #(str/starts-with? (str/trim %) prefix))
-                             first
-                             (#(when % (str/trim (subs % (count prefix)))))))]
+                        (let [idx (->> lines
+                                       (map-indexed vector)
+                                       (filter #(str/starts-with? (str/trim (second %)) prefix))
+                                       first)]
+                          (when idx
+                            (let [[i line] idx
+                                  trimmed-line (str/trim line)
+                                  ;; Get content after prefix from the trimmed line
+                                  same-line (str/trim (subs trimmed-line (count prefix)))]
+                              (if (str/blank? same-line)
+                                ;; Content on next line(s) - take until next + or ! or @ or blank
+                                (->> lines
+                                     (drop (inc i))
+                                     (take-while #(let [t (str/trim %)]
+                                                    (and (not (str/blank? t))
+                                                         (not (str/starts-with? t "+"))
+                                                         (not (str/starts-with? t "!"))
+                                                         (not (str/starts-with? t "@")))))
+                                     (map str/trim)
+                                     (str/join " "))
+                                same-line)))))]
       {:path path
        :id (parse-field "@flexiarg ")
        :title (parse-field "@title ")
@@ -145,19 +188,28 @@
 (defn get-pattern-details
   "Load full pattern details from its flexiarg source."
   [pattern-id]
-  (let [;; Try common paths
-        paths [(str "library/" (str/replace pattern-id #"/" "/") ".flexiarg")
-               (str "../futon3/library/" (str/replace pattern-id #"/" "/") ".flexiarg")
-               (str (System/getenv "FUTON3_ROOT") "/library/" (str/replace pattern-id #"/" "/") ".flexiarg")]]
+  (let [;; Pattern ID like 'agent/evidence-over-assertion' maps to
+        ;; 'library/agent/evidence-over-assertion.flexiarg'
+        file-path (str pattern-id ".flexiarg")
+        ;; Try common library roots
+        roots ["library/"
+               "../futon3/library/"
+               "/home/joe/code/futon3/library/"
+               (when-let [r (System/getenv "FUTON3_ROOT")] (str r "/library/"))]
+        paths (->> roots
+                   (remove nil?)
+                   (map #(str % file-path)))]
     (some load-flexiarg paths)))
 
 (defn enrich-results
-  "Enrich search results with full pattern details."
+  "Enrich search results with TSV data and flexiarg details.
+   TSV provides: hotwords, rationale, tokipona, sigil
+   Flexiarg provides: if, however, then, because, next-steps"
   [results]
   (mapv (fn [r]
-          (if-let [details (get-pattern-details (:id r))]
-            (merge r details)
-            r))
+          (let [tsv-data (get-tsv-data (:id r))
+                flexiarg-data (get-pattern-details (:id r))]
+            (merge r tsv-data flexiarg-data)))
         results))
 
 ;; --- Demo ---
