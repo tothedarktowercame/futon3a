@@ -160,3 +160,10 @@ pragmatic  = how well does expected outcome align with desired future?
 - **Codex changes for step 2**: Pattern retrieval improvements (sync first)
 - **futon5 adapters**: For richer policy simulation
 - **ANN layer**: For semantic pattern matching (optional upgrade)
+
+## Implementation Notes
+
+- Emit provenance for each extracted preference field (e.g., which clause supplied `:desired`).
+- When THEN/NEXT-STEPS are missing, fall back to CONCLUSION/CLAIM with lowered confidence.
+- Keep `:uncertainty` as a first-class output with sources, not just a derived score.
+- Define a clear adapter boundary so futon5 MMCA can replace the policy simulator later.
