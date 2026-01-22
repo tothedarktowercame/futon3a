@@ -1,15 +1,27 @@
 (ns musn.portal
   (:require [cemerick.drawbridge.client :as drawbridge]
             [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.tools.nrepl :as nrepl]))
+            [clojure.tools.nrepl :as nrepl]
+            [sidecar.store :as sidecar.store]))
 
 (defn- usage []
   (str "usage: portal [--url URL] [--token TOKEN] <clj-code>\n"
        "   or: portal patterns <list|search|get> [args]\n"
+       "   or: portal suggest <query> [--limit N] [--namespace NS] [--json]\n"
+       "   or: portal propose <proposal-id> [--kind KW] [--target ID]\n"
+       "                         [--score N] [--method METHOD] [--status KW]\n"
+       "                         [--evidence EDN] [--json]\n"
+       "   or: portal promote <promotion-id> <proposal-id> --kind KW\n"
+       "                         --decided-by NAME --rationale TEXT [--json]\n"
+       "   or: portal action <action-id> --type KW [--note TEXT] [--json]\n"
+       "   or: portal evidence <evidence-id> --target-type KW --target-id ID\n"
+       "                         --method METHOD [--payload EDN] [--json]\n"
        "env: ADMIN_TOKEN or .admintoken, PORTAL_URL (default http://127.0.0.1:6767/repl)\n"
-       "env: PORTAL_FUTON1_URL or MUSN_FUTON1_URL (default http://localhost:8080/api/alpha)\n"))
+       "env: PORTAL_FUTON1_URL or MUSN_FUTON1_URL (default http://localhost:8080/api/alpha)\n"
+       "env: SIDECAR_LOG_ROOT (default log/)\n"))
 
 (defn- patterns-usage []
   (str "usage: portal patterns list [--limit N] [--namespace NS] [--json]\n"
@@ -109,6 +121,73 @@
         "--json" (recur (assoc opts :format :json) (next remaining))
         (recur (update opts :args conj (first remaining)) (next remaining))))))
 
+(defn- parse-suggest-args [args]
+  (loop [opts {:limit 8
+               :format :edn
+               :args []}
+         remaining args]
+    (if (empty? remaining)
+      opts
+      (case (first remaining)
+        "--limit" (recur (assoc opts :limit (parse-int (second remaining) (:limit opts)))
+                         (nnext remaining))
+        "--namespace" (recur (assoc opts :namespace (second remaining))
+                             (nnext remaining))
+        "--json" (recur (assoc opts :format :json) (next remaining))
+        (recur (update opts :args conj (first remaining)) (next remaining))))))
+
+(defn- parse-keyword [value]
+  (when (and value (not (str/blank? (str value))))
+    (if (keyword? value)
+      value
+      (keyword value))))
+
+(defn- parse-double [value fallback]
+  (try
+    (Double/parseDouble (str value))
+    (catch Throwable _ fallback)))
+
+(defn- parse-edn [value fallback]
+  (try
+    (edn/read-string (str value))
+    (catch Throwable _ fallback)))
+
+(defn- parse-propose-args [args]
+  (loop [opts {:format :edn
+               :kind :pattern
+               :status :pending
+               :score 0.5
+               :method "portal"
+               :evidence []
+               :args []}
+         remaining args]
+    (if (empty? remaining)
+      opts
+      (case (first remaining)
+        "--kind" (recur (assoc opts :kind (parse-keyword (second remaining))) (nnext remaining))
+        "--target" (recur (assoc opts :target (second remaining)) (nnext remaining))
+        "--score" (recur (assoc opts :score (parse-double (second remaining) (:score opts)))
+                         (nnext remaining))
+        "--method" (recur (assoc opts :method (second remaining)) (nnext remaining))
+        "--status" (recur (assoc opts :status (parse-keyword (second remaining))) (nnext remaining))
+        "--evidence" (recur (assoc opts :evidence (parse-edn (second remaining) (:evidence opts)))
+                            (nnext remaining))
+        "--json" (recur (assoc opts :format :json) (next remaining))
+        (recur (update opts :args conj (first remaining)) (next remaining))))))
+
+(defn- parse-promote-args [args]
+  (loop [opts {:format :edn
+               :args []}
+         remaining args]
+    (if (empty? remaining)
+      opts
+      (case (first remaining)
+        "--kind" (recur (assoc opts :kind (parse-keyword (second remaining))) (nnext remaining))
+        "--decided-by" (recur (assoc opts :decided-by (second remaining)) (nnext remaining))
+        "--rationale" (recur (assoc opts :rationale (second remaining)) (nnext remaining))
+        "--json" (recur (assoc opts :format :json) (next remaining))
+        (recur (update opts :args conj (first remaining)) (next remaining))))))
+
 (defn- filter-by-namespace [entries ns]
   (if (and ns (not (str/blank? ns)))
     (let [prefix (if (str/ends-with? ns "/") ns (str ns "/"))]
@@ -131,6 +210,7 @@
 (defn- patterns-search [query opts]
   (let [tokens (tokenize query)
         entries (registry-entities)
+        entries (filter-by-namespace entries (:namespace opts))
         scored (->> entries
                     (map (fn [entry]
                            (let [score (score-candidate tokens entry)]
@@ -144,10 +224,10 @@
              :score (:score entry)})
           scored)))
 
-(defn- patterns-get [pattern-id]
+(defn- patterns-get [pid]
   (let [entries (registry-entities)]
     (some (fn [entry]
-            (when (= pattern-id (pattern-id entry))
+            (when (= pid (pattern-id entry))
               entry))
           entries)))
 
@@ -166,9 +246,69 @@
               (exit! 2 (patterns-usage)))
       (exit! 2 (patterns-usage)))))
 
+(defn- handle-suggest [args]
+  (let [{:keys [args format] :as opts} (parse-suggest-args args)
+        query (str/join " " args)]
+    (if (str/blank? query)
+      (exit! 2 (usage))
+      (render-output (patterns-search query opts) format))))
+
+(defn- require-nonblank [label value]
+  (if (and value (not (str/blank? value)))
+    value
+    (exit! 2 (str "portal: missing " label))))
+
+(defn- handle-propose [args]
+  (let [{:keys [args format kind target score method status evidence]} (parse-propose-args args)
+        proposal-id (first args)
+        proposal-id (require-nonblank "proposal-id" proposal-id)
+        evidence (cond
+                   (nil? evidence) []
+                   (coll? evidence) evidence
+                   :else [evidence])
+        proposal {:proposal/id proposal-id
+                  :proposal/kind kind
+                  :proposal/status status
+                  :proposal/score score
+                  :proposal/method method
+                  :proposal/evidence evidence
+                  :proposal/target-id target}
+        store (sidecar.store/load-store-from-audit-log)
+        result (sidecar.store/record-proposal! store proposal)]
+    (render-output result format)))
+
+(defn- handle-promote [args]
+  (let [{:keys [args format kind decided-by rationale]} (parse-promote-args args)
+        promotion-id (first args)
+        proposal-id (second args)
+        promotion-id (require-nonblank "promotion-id" promotion-id)
+        proposal-id (require-nonblank "proposal-id" proposal-id)
+        kind (or kind (exit! 2 "portal: missing --kind"))
+        decided-by (require-nonblank "--decided-by" decided-by)
+        rationale (require-nonblank "--rationale" rationale)
+        promotion {:promotion/id promotion-id
+                   :proposal/id proposal-id
+                   :promotion/kind kind
+                   :promotion/decided-by decided-by
+                   :promotion/rationale rationale}
+        store (sidecar.store/load-store-from-audit-log)
+        result (sidecar.store/record-promotion! store promotion)]
+    (render-output result format)))
+
+(defn- handle-action [_args]
+  (exit! 2 "portal: action not implemented"))
+
+(defn- handle-evidence [_args]
+  (exit! 2 "portal: evidence not implemented"))
+
 (defn -main [& args]
-  (if (= "patterns" (first args))
-    (handle-patterns (rest args))
+  (case (first args)
+    "patterns" (handle-patterns (rest args))
+    "suggest" (handle-suggest (rest args))
+    "propose" (handle-propose (rest args))
+    "promote" (handle-promote (rest args))
+    "action" (handle-action (rest args))
+    "evidence" (handle-evidence (rest args))
     (let [{:keys [url token code]} (parse-args args)]
       (when-not drawbridge-transport
         (exit! 2 "portal: drawbridge transport missing"))

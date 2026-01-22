@@ -16,7 +16,8 @@
     Softness accounting shows where fuzz enters the chain and enables review.
   + evidence: docs/sidecar-chains.md
   + evidence: src/sidecar/store.clj; test/sidecar/store_test.clj
+  + BECAUSE->EVIDENCE: src/sidecar/store.clj (chain-score, step-evidence); test/sidecar/store_test.clj
+  + BECAUSE->EVIDENCE: test/sidecar/store_test.clj (chain-softness-scoring)
+  + use: docs/sidecar-usage.md; docs/sidecar-demo.md
   + NEXT-STEPS:
-    - Implement chain scoring that prioritizes arrows over bridges over proposals.
-    - Output per-hop evidence and softness counts.
-    - Add penalties for ungated sense shifts.
+    - Document chain scoring and per-hop evidence output in docs/sidecar-chains.md.

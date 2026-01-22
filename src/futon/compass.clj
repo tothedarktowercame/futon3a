@@ -62,21 +62,34 @@
 
 ;; === Exotype-Style Policy Simulator ===
 
+(defn- rng-shuffle
+  "Deterministically shuffle a vector using the provided RNG."
+  [^java.util.Random rng xs]
+  (let [arr (object-array xs)]
+    (loop [i (dec (alength arr))]
+      (if (pos? i)
+        (let [j (.nextInt rng (inc i))
+              tmp (aget arr i)]
+          (aset arr i (aget arr j))
+          (aset arr j tmp)
+          (recur (dec i)))
+        (vec arr)))))
+
 (defn- apply-mutation
   "Apply a small mutation to state based on policy."
   [state policy rng]
   (let [mutation-rate (or (:mutation-rate policy) 0.1)
         concepts (or (:concepts state) #{})
         policy-concepts (or (:concepts policy) #{})
-        policy-seq (seq policy-concepts)
+        policy-seq (seq (sort policy-concepts))
         ;; Add some policy concepts
         added (if (and policy-seq (< (.nextDouble rng) mutation-rate))
-                (set/union concepts (set (take 2 (shuffle policy-seq))))
+                (set/union concepts (set (take 2 (rng-shuffle rng (vec policy-seq)))))
                 concepts)
         ;; Maybe remove an obstacle
-        obstacles (or (:obstacles state) [])
+        obstacles (vec (or (:obstacles state) []))
         obstacles' (if (and (seq obstacles) (< (.nextDouble rng) (* 0.5 mutation-rate)))
-                     (vec (rest (shuffle obstacles)))
+                     (vec (rest (rng-shuffle rng obstacles)))
                      obstacles)]
     (-> state
         (assoc :concepts added)

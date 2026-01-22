@@ -83,12 +83,14 @@
   #{:action/id :action/type :action/actor :action/note :action/created-at})
 
 (def fact-allowed-keys
-  #{:fact/id :fact/kind :fact/body :fact/created-at})
+  #{:fact/id :fact/kind :fact/body :fact/created-at
+    :fact/event-type :fact/actor :fact/rationale :fact/event-id})
 
 (def chain-step-allowed-keys
   #{:step/type :step/id :step/shift? :step/gate :step/notes})
 
 (def chain-step-types #{:arrow :bridge :proposal})
+(def fact-event-types #{:fact :warrant :retired})
 (def sense-shift-gates #{:typed-arrow :bridge-triple})
 
 (defn validate-proposal [proposal]
@@ -151,10 +153,16 @@
 
 (defn validate-fact [fact]
   (let [errors (-> []
-                   (require-fields fact [:fact/id :fact/kind :fact/created-at])
+                   (require-fields fact [:fact/id :fact/kind :fact/created-at
+                                         :fact/event-id :fact/event-type
+                                         :fact/actor :fact/rationale])
                    (forbid-unknown fact fact-allowed-keys)
                    (require-string fact :fact/id)
+                   (require-string fact :fact/event-id)
                    (require-keyword fact :fact/kind)
+                   (require-enum fact :fact/event-type fact-event-types)
+                   (require-string fact :fact/actor)
+                   (require-string fact :fact/rationale)
                    (require-instantish fact :fact/created-at))]
     {:ok? (empty? errors) :errors errors}))
 
@@ -167,6 +175,10 @@
                    (require-enum step :step/type chain-step-types))
         errors (if (true? (:step/shift? step))
                  (require-enum errors step :step/gate sense-shift-gates)
+                 errors)
+        errors (if (and (contains? step :step/gate)
+                        (not (true? (:step/shift? step))))
+                 (add-error errors :step/gate :invalid "sense shift gate requires :step/shift? true")
                  errors)]
     {:ok? (empty? errors) :errors errors}))
 

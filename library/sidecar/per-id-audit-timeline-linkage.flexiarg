@@ -16,6 +16,9 @@
   + BECAUSE:
     Cross-entity linkage turns append-only logs into inspectable histories.
   + BECAUSE->EVIDENCE: src/sidecar/store.clj; test/sidecar/store_test.clj
+  + BECAUSE->EVIDENCE: src/sidecar/inspect.clj; scripts/sidecar-inspect
+  + BECAUSE->EVIDENCE: src/sidecar/store.clj (latest-active-state); src/sidecar/cli.clj; src/sidecar/inspect.clj
+  + use: docs/sidecar-usage.md; docs/sidecar-demo.md
   + NEXT-STEPS:
     - Add explicit ordering rules when timestamps collide.
-    - Provide a query that returns only the latest active fact state for an id.
+    - Document latest active state queries in docs/sidecar-usage.md.

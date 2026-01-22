@@ -1,7 +1,11 @@
 (ns sidecar.store
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
+            [clojure.walk :as walk]
             [sidecar.validation :as v]))
+
+(declare apply-event!)
 
 (defn- now [] (java.time.Instant/now))
 
@@ -10,20 +14,50 @@
 
 (defn- log-root []
   (or (some-> (System/getenv "SIDECAR_LOG_ROOT") str/trim not-empty)
+      (some-> (System/getProperty "SIDECAR_LOG_ROOT") str/trim not-empty)
       "log"))
 
 (defn- audit-path []
   (io/file (log-root) "sidecar-audit.edn"))
 
+(defn default-audit-path []
+  (audit-path))
+
+(defn- log-serializable [entry]
+  (walk/postwalk
+   (fn [value]
+     (if (instance? java.time.Instant value)
+       (java.util.Date/from ^java.time.Instant value)
+       value))
+   entry))
+
+(defn- parse-log-line [line]
+  (let [line (str/replace line
+                          #"#object\\[java.time.Instant[^\\\"]*\"([^\"]+)\"\\]"
+                          "#inst \"$1\"")]
+    (try
+      (walk/postwalk
+       (fn [value]
+         (if (instance? java.util.Date value)
+           (.toInstant ^java.util.Date value)
+           value))
+       (edn/read-string line))
+      (catch Throwable _ nil))))
+
 (defn- append-audit! [entry]
   (let [path (audit-path)]
     (.mkdirs (.getParentFile path))
-    (spit path (str (pr-str entry) "\n") :append true)))
+    (spit path (str (pr-str (log-serializable entry)) "\n") :append true)))
 
 (defn- record-audit! [store entry]
   (swap! store update :audit (fnil conj []) entry)
   (append-audit! entry)
   entry)
+
+(defn- record-success! [store event]
+  (record-audit! store {:audit/type :success
+                        :event event
+                        :at (now)}))
 
 (defn new-store []
   (atom {:proposals {}
@@ -37,6 +71,21 @@
 
 (defn audit-log [store]
   (:audit @store))
+
+(defn load-store-from-audit-log
+  ([] (load-store-from-audit-log (default-audit-path)))
+  ([path]
+   (let [path (io/file path)
+         store (new-store)]
+    (when (.exists path)
+      (with-open [r (io/reader path)]
+        (doseq [line (line-seq r)]
+          (when-not (str/blank? line)
+            (when-let [entry (parse-log-line line)]
+              (swap! store update :audit (fnil conj []) entry)
+              (when (= :success (:audit/type entry))
+                (apply-event! store (:event entry))))))))
+    store)))
 
 (defn- event-entity-ids [event]
   (let [ids (transient #{})
@@ -57,7 +106,8 @@
       (when-let [target (:evidence/target evidence)]
         (add-id (:id target))))
     (when-let [fact (:fact event)]
-      (add-id (:promotion/id fact)))
+      (add-id (:promotion/id fact))
+      (add-id (:proposal/id fact)))
     (when-let [chain (:chain event)]
       (doseq [step (:chain/steps chain)]
         (add-id (:step/id step))))
@@ -70,13 +120,23 @@
        (sort-by :at)
        vec))
 
+(defn- failure-entries-for-id [store entity-id]
+  (->> (audit-entries-for-id store entity-id)
+       (remove #(= :success (:audit/type %)))))
+
 (defn failure-reasons [store entity-id]
   (mapv (fn [entry]
           {:audit/type (:audit/type entry)
            :event/type (get-in entry [:event :event/type])
            :errors (:errors entry)
            :at (:at entry)})
-        (audit-entries-for-id store entity-id)))
+        (failure-entries-for-id store entity-id)))
+
+(defn failure-reasons-by-type [store entity-id]
+  (->> (failure-reasons store entity-id)
+       (group-by :audit/type)
+       (into {} (map (fn [[audit-type entries]]
+                       [audit-type (mapv #(dissoc % :audit/type) entries)])))))
 
 (defn- success-entry [event-type at entity]
   {:kind :success
@@ -98,10 +158,18 @@
                (some #(= (:step/id %) entity-id) (:chain/steps record)))
     false))
 
+(defn- fact-related? [snapshot entity-id fact]
+  (or (= (:fact/id fact) entity-id)
+      (= (:promotion/id fact) entity-id)
+      (when-let [promotion (get-in snapshot [:promotions (:promotion/id fact)])]
+        (= (:proposal/id promotion) entity-id))))
+
 (defn- success-entries-for
   [records kind time-key entity-id]
-  (->> records
-       vals
+  (let [records (case kind
+                  :fact (mapcat val records)
+                  (vals records))]
+    (->> records
        (filter #(matches-entity? entity-id % kind))
        (mapv #(success-entry (case kind
                                :proposal :proposal/recorded
@@ -111,16 +179,21 @@
                                :fact :fact/materialized
                                :chain :chain/built)
                              (get % time-key)
-                             %))))
+                             %)))))
 
 (defn event-timeline [store entity-id]
   (let [snapshot @store
+        fact-success (->> (mapcat val (:facts snapshot))
+                          (filter #(fact-related? snapshot entity-id %))
+                          (mapv #(success-entry :fact/materialized
+                                                (:fact/created-at %)
+                                                %)))
         success (concat
                  (success-entries-for (:proposals snapshot) :proposal :proposal/created-at entity-id)
                  (success-entries-for (:promotions snapshot) :promotion :promotion/created-at entity-id)
                  (success-entries-for (:evidence snapshot) :evidence :evidence/created-at entity-id)
                  (success-entries-for (:actions snapshot) :action :action/created-at entity-id)
-                 (success-entries-for (:facts snapshot) :fact :fact/created-at entity-id)
+                 fact-success
                  (success-entries-for (:chains snapshot) :chain :chain/created-at entity-id))
         failures (mapv (fn [entry]
                          {:kind :failure
@@ -129,7 +202,7 @@
                           :errors (:errors entry)
                           :at (:at entry)
                           :event (:event entry)})
-                       (audit-entries-for-id store entity-id))]
+                       (failure-entries-for-id store entity-id))]
     (->> (concat success failures)
          (sort-by :at)
          vec)))
@@ -160,6 +233,7 @@
       :else
       (do
         (swap! store assoc-in [:proposals (:proposal/id proposal)] proposal)
+        (record-success! store event)
         {:ok true :proposal/id (:proposal/id proposal)}))))
 
 (defn record-promotion!
@@ -186,6 +260,7 @@
       :else
       (do
         (swap! store assoc-in [:promotions (:promotion/id promotion)] promotion)
+        (record-success! store event)
         {:ok true :promotion/id (:promotion/id promotion)}))))
 
 (defn record-evidence!
@@ -216,6 +291,7 @@
       :else
       (do
         (swap! store assoc-in [:evidence (:evidence/id evidence)] evidence)
+        (record-success! store event)
         {:ok true :evidence/id (:evidence/id evidence)}))))
 
 (defn record-action!
@@ -237,42 +313,98 @@
       :else
       (do
         (swap! store assoc-in [:actions (:action/id action)] action)
+        (record-success! store event)
         {:ok true :action/id (:action/id action)}))))
+
+(defn- append-fact-event! [store fact]
+  (swap! store update-in [:facts (:fact/id fact)] (fnil conj []) fact))
+
+(defn fact-events [store fact-id]
+  (->> (get-in @store [:facts fact-id])
+       (sort-by :fact/created-at)
+       vec))
+
+(defn- active-fact-event? [event]
+  (contains? #{:fact :warrant} (:fact/event-type event)))
+
+(defn latest-active-fact [store fact-id]
+  (let [events (fact-events store fact-id)
+        latest (last events)]
+    (when (active-fact-event? latest)
+      latest)))
+
+(defn latest-active-state [store fact-id]
+  (some-> (latest-active-fact store fact-id)
+          (select-keys [:fact/id :fact/kind :fact/event-type
+                        :fact/actor :fact/rationale :fact/created-at
+                        :promotion/id :fact/event-id :fact/body])))
+
+(defn active-fact-ids [store]
+  (->> (:facts @store)
+       (keep (fn [[fact-id events]]
+               (let [latest (last (sort-by :fact/created-at events))]
+                 (when (active-fact-event? latest)
+                   fact-id))))
+       sort
+       vec))
 
 (defn record-fact!
   [store fact opts]
   (let [promotion-id (:promotion/id opts)
-        fact (assoc fact :fact/created-at (or (:fact/created-at fact) (now)))
+        fact-id (:fact/id fact)
+        fact (assoc fact
+                    :fact/created-at (or (:fact/created-at fact) (now))
+                    :fact/event-id (or (:fact/event-id fact) (gen-id "fact-event")))
         event {:event/type :fact/materialized
                :event/id (gen-id "event")
                :event/at (now)
                :fact fact}
         result (v/validate-event event)
-        promotion (when promotion-id (get-in @store [:promotions promotion-id]))]
+        event-type (:fact/event-type fact)
+        promotion (when promotion-id (get-in @store [:promotions promotion-id]))
+        proposal-id (or (:proposal/id fact) (:proposal/id promotion))
+        existing-events (get-in @store [:facts fact-id])
+        existing-event-id? (some #(= (:fact/event-id %) (:fact/event-id fact)) existing-events)]
     (cond
       (not (:ok? result))
       (fail! store event (:errors result) :validation-failure)
 
-      (nil? promotion-id)
-      (fail! store event [{:field :promotion/id :type :missing :msg "promotion required for fact writes"}]
+      (and (contains? #{:fact :warrant} event-type)
+           (nil? promotion-id))
+      (fail! store event [{:field :promotion/id :type :missing :msg "promotion required for fact events"}]
              :boundary-violation)
 
-      (nil? promotion)
+      (and (contains? #{:fact :warrant} event-type)
+           (nil? promotion))
       (fail! store event [{:field :promotion/id :type :missing :msg "promotion not found"}]
              :boundary-violation)
 
-      (and (:promotion/kind promotion)
+      (and promotion
+           (:promotion/kind promotion)
            (not= (:promotion/kind promotion) (:fact/kind fact)))
       (fail! store event [{:field :fact/kind :type :mismatch :msg "fact kind mismatches promotion"}]
              :boundary-violation)
 
-      (get-in @store [:facts (:fact/id fact)])
+      (and (= :fact event-type) (seq existing-events))
       (fail! store event [{:field :fact/id :type :duplicate :msg "fact already recorded"}]
              :append-only-violation)
 
+      (and (contains? #{:warrant :retired} event-type)
+           (empty? existing-events))
+      (fail! store event [{:field :fact/id :type :missing :msg "fact not found"}]
+             :boundary-violation)
+
+      existing-event-id?
+      (fail! store event [{:field :fact/event-id :type :duplicate :msg "fact event already recorded"}]
+             :append-only-violation)
+
       :else
-      (do
-        (swap! store assoc-in [:facts (:fact/id fact)] (assoc fact :promotion/id promotion-id))
+      (let [fact (cond-> fact
+                   promotion-id (assoc :promotion/id promotion-id)
+                   proposal-id (assoc :proposal/id proposal-id))
+            event (assoc event :fact fact)]
+        (append-fact-event! store fact)
+        (record-success! store event)
         {:ok true :fact/id (:fact/id fact)}))))
 
 (defn record-bridge-triple!
@@ -280,7 +412,12 @@
   (let [fact {:fact/id (:bridge/id bridge)
               :fact/kind :bridge-triple
               :fact/body bridge
-              :fact/created-at (:bridge/created-at bridge)}]
+              :fact/created-at (:bridge/created-at bridge)
+              :fact/event-type (or (:fact/event-type opts) :fact)
+              :fact/actor (or (:fact/actor opts) (:bridge/actor bridge) "bridge-triple")
+              :fact/rationale (or (:fact/rationale opts)
+                                  (:bridge/rationale bridge)
+                                  "bridge triple promotion")}]
     (if-let [result (record-fact! store fact opts)]
       (if (:ok result)
         (do
@@ -290,21 +427,69 @@
         result)
       {:ok false :errors [{:field :bridge/id :type :invalid :msg "bridge write failed"}]})))
 
+(def ^:private base-weights {:arrow 3.0 :bridge 2.0 :proposal 1.0})
 (def ^:private softness-weights {:arrow 0.0 :bridge 0.5 :proposal 1.0})
+(def ^:private sense-shift-allowed-gates {:arrow :typed-arrow :bridge :bridge-triple})
+(def ^:private sense-shift-penalty 0.5)
 
-(defn- chain-softness [steps]
-  (let [by-step (mapv (fn [step]
-                        {:step/id (:step/id step)
-                         :step/type (:step/type step)
-                         :softness (get softness-weights (:step/type step) 0)})
-                      steps)
-        total (reduce + 0.0 (map :softness by-step))
-        average (if (seq by-step)
-                  (/ total (count by-step))
+(defn- step-evidence [store step]
+  (case (:step/type step)
+    :proposal (some-> (get-in @store [:proposals (:step/id step)])
+                      (select-keys [:proposal/id :proposal/method :proposal/score :proposal/evidence]))
+    :bridge (get-in @store [:bridge-triples (:step/id step)])
+    :arrow {:arrow/id (:step/id step)}
+    nil))
+
+(defn- shift-annotation [step]
+  (when (true? (:step/shift? step))
+    (let [required (get sense-shift-allowed-gates (:step/type step))
+          gate (:step/gate step)]
+      {:shift/required required
+       :shift/gate gate
+       :shift/allowed? (= required gate)})))
+
+(defn- step-score [store step]
+  (let [annotation (shift-annotation step)
+        shift-penalty (if (and annotation (:shift/allowed? annotation))
+                        sense-shift-penalty
+                        0.0)
+        base-softness (get softness-weights (:step/type step) 0.0)]
+    {:step/id (:step/id step)
+     :step/type (:step/type step)
+     :step/shift? (:step/shift? step)
+     :step/gate (:step/gate step)
+     :step/annotation annotation
+     :score/base (get base-weights (:step/type step) 0.0)
+     :score/shift-penalty shift-penalty
+     :score/softness (+ base-softness shift-penalty)
+     :step/evidence (step-evidence store step)}))
+
+(defn- chain-score [store steps]
+  (let [scored (mapv (fn [step] (step-score store step)) steps)
+        base-total (reduce + 0.0 (map :score/base scored))
+        shift-total (reduce + 0.0 (map :score/shift-penalty scored))
+        softness-total (reduce + 0.0 (map :score/softness scored))
+        average (if (seq scored)
+                  (/ softness-total (count scored))
                   0.0)]
-    {:softness/total total
+    {:score/base base-total
+     :score/shift-penalty shift-total
+     :softness/total softness-total
      :softness/average average
-     :softness/steps by-step}))
+     :score/steps scored}))
+
+(defn- sense-shift-issue [step]
+  (when (true? (:step/shift? step))
+    (let [required (get sense-shift-allowed-gates (:step/type step))]
+      (cond
+        (nil? required)
+        {:field :step/type :type :invalid :msg "sense shift not allowed for step type"}
+
+        (not= (:step/gate step) required)
+        {:field :step/gate
+         :type :invalid
+         :msg "ungated sense shift"
+         :detail {:required required :actual (:step/gate step)}}))))
 
 (defn build-chain!
   [store chain]
@@ -325,7 +510,16 @@
                                       :bridge (when-not (get-in @store [:bridge-triples (:step/id step)])
                                                 {:field :step/id :type :missing :msg "bridge triple not found"})
                                       nil))
-                                  steps))]
+                                  steps))
+        sense-shift-error (first
+                           (keep-indexed
+                            (fn [idx step]
+                              (when-let [issue (sense-shift-issue step)]
+                                (assoc issue :detail (merge (:detail issue)
+                                                            {:step/index idx
+                                                             :step/id (:step/id step)
+                                                             :step/type (:step/type step)}))))
+                            steps))]
     (cond
       (not (:ok? result))
       (fail! store event (:errors result) :validation-failure)
@@ -333,12 +527,34 @@
       missing-step
       (fail! store event [missing-step] :boundary-violation)
 
+      sense-shift-error
+      (fail! store event [sense-shift-error] :drift)
+
       (get-in @store [:chains chain-id])
       (fail! store event [{:field :chain/id :type :duplicate :msg "chain already recorded"}]
              :append-only-violation)
 
       :else
-      (let [softness (chain-softness steps)
-            chain-record (merge chain softness)]
+      (let [scoring (chain-score store steps)
+            chain-record (merge chain scoring)]
         (swap! store assoc-in [:chains chain-id] chain-record)
-        {:ok true :chain/id chain-id :softness softness}))))
+        (record-success! store event)
+        {:ok true :chain/id chain-id :scoring scoring}))))
+
+(defn apply-event!
+  [store event]
+  (case (:event/type event)
+    :proposal/recorded (swap! store assoc-in [:proposals (get-in event [:proposal :proposal/id])]
+                              (:proposal event))
+    :promotion/recorded (swap! store assoc-in [:promotions (get-in event [:promotion :promotion/id])]
+                               (:promotion event))
+    :evidence/attached (swap! store assoc-in [:evidence (get-in event [:evidence :evidence/id])]
+                              (:evidence event))
+    :action/recorded (swap! store assoc-in [:actions (get-in event [:action :action/id])]
+                            (:action event))
+    :fact/materialized (append-fact-event! store (:fact event))
+    :chain/built (let [chain (:chain event)
+                       scoring (chain-score store (:chain/steps chain))
+                       chain-record (merge chain scoring)]
+                   (swap! store assoc-in [:chains (:chain/id chain)] chain-record))
+    nil))

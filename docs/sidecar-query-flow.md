@@ -22,11 +22,19 @@
 
 Score each chain hop by source trust and transformation type:
 
-- 0.0 = fact-to-fact arrow (typed, promoted).
-- 0.5 = bridge triple grounded in an artifact (inspectable meme).
-- 1.0 = proposal seeded by notion recall.
+- Base weights reflect evidence strength:
+  - 3.0 = typed arrow
+  - 2.0 = bridge triple
+  - 1.0 = proposal
+- Softness is still computed per hop as:
+  - 0.0 = typed arrow
+  - 0.5 = bridge triple
+  - 1.0 = proposal
 
-Chain softness = average hop softness. Any chain with average > 0.6 is flagged as soft and must show per-hop evidence.
+Chain scores record base totals and softness totals/average. Softness average is used
+to flag chains that need stronger evidence.
+
+Any chain with average softness > 0.6 is flagged as soft and must show per-hop evidence.
 
 ## Sense-shift gate
 
@@ -35,7 +43,8 @@ Sense-broaden and sense-narrow steps are allowed only when:
 - The hop is a typed arrow (explicitly labeled shift), or
 - A bridge triple cites an artifact that justifies the shift.
 
-Ungated sense shifts are rejected and logged as drift.
+Ungated sense shifts are rejected and logged as drift. Allowed shifts apply a
+small penalty to the hop score.
 
 ## Example chain
 

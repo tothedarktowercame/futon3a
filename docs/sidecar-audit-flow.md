@@ -15,6 +15,9 @@
   for the decision context (who, why, where, and when).
 - Bridge triples are immutable facts; superseding a triple creates a new
   record that points at the prior bridge entry.
+- Facts are modeled as lifecycle events (fact, warrant, retired) and the
+  active state is derived from the latest event per fact id. Retired
+  clears the active status.
 
 ## Concrete example
 
