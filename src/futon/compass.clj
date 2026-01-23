@@ -97,8 +97,9 @@
    :zhou 0.10   ; elbow - small centered adjustment
    :kao  0.07}) ; lean - structural consolidation
 
-(defn- select-energy
-  "Select an energy mode based on weights using the RNG."
+(defn select-energy
+  "Select an energy mode based on weights using the RNG.
+   Public for GFE integration."
   [rng]
   (let [roll (.nextDouble rng)
         energies (keys energy-weights)]
@@ -112,8 +113,9 @@
             e
             (recur (rest remaining) threshold)))))))
 
-(defn- apply-energy
+(defn apply-energy
   "Apply a specific energy's mutation to state.
+   Public for GFE integration.
 
    Each energy transforms state differently:
    - Péng (ward off): expand concepts, slight risk awareness
@@ -283,8 +285,9 @@
 
 ;; === GFE-Inspired Scoring ===
 
-(defn- concept-overlap
-  "Compute normalized overlap between two concept sets."
+(defn concept-overlap
+  "Compute normalized overlap between two concept sets.
+   Public for GFE integration."
   [a b]
   (if (or (empty? a) (empty? b))
     0.0
@@ -294,8 +297,9 @@
         0.0
         (double (/ intersection union))))))
 
-(defn- risk-awareness
-  "How many risks have been acknowledged/investigated."
+(defn risk-awareness
+  "How many risks have been acknowledged/investigated.
+   Public for GFE integration."
   [total-risks acknowledged-risks]
   (let [total (count total-risks)
         acknowledged (count acknowledged-risks)]

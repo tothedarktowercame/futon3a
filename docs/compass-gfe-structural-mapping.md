@@ -258,29 +258,36 @@ Implement proper active inference:
 
 This is a significant undertaking.
 
-### Recommended: Option B (Minimal Structure)
+### Recommended: Option B (Minimal Structure) — IMPLEMENTED
 
-Add prediction error and precision modulation without full generative modeling:
+Add prediction error and precision modulation without full generative modeling.
+
+**Implementation:** `src/futon/gfe.clj` and `src/futon/compass_gfe.clj`
 
 ```clojure
-;; Before retrieval, predict expected patterns
-(defn predict-patterns [preference-model]
-  ;; Based on current beliefs, what patterns do we expect?
-  ...)
+;; Protocols define the structure (invariant across levels)
+(defprotocol IGenerativeModel
+  (predict-observations [this state])
+  (observation-likelihood [this observation state]))
 
-;; After retrieval, compute prediction error
-(defn prediction-error [predicted actual]
-  ;; Mismatch between expected and observed
-  ...)
+(defprotocol IPrecision
+  (get-precision [this signal-type])
+  (update-precision! [this signal-type error])
+  (precision-weights [this]))
 
-;; Update precision based on error
-(defn update-precision [precision error]
-  ;; High error → lower precision on that signal
-  ...)
+;; Level 0: Fixed precision (current behavior)
+(gfe/fixed-precision 0.6 0.4)
+
+;; Level 1: Adaptive precision
+(gfe/adaptive-precision :learning-rate 0.1)
+
+;; Usage
+(compass-gfe/compass-report-gfe narrative :level 1)
 ```
 
-This preserves GFE structure (predict → observe → update) without requiring
-a full probabilistic generative model.
+The gfe-cycle structure (predict → observe → error → update → evaluate)
+is preserved across implementation levels. Only the protocol implementations
+change during upgrades.
 
 ---
 
