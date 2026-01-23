@@ -52,8 +52,27 @@ All energies require rooting:
 
 In pattern terms: **verify scope conditions before engaging with risks or pursuing desired outcomes.** Without grounding, no energy mode works—you either collapse (ungrounded yield) or break (ungrounded resist).
 
+## Implementation
+
+The compass simulation (`src/futon/compass.clj`) uses eight-energy dynamics:
+
+```clojure
+(def energy-weights
+  {:peng 0.30   ; ward off - default, expand from rooted base
+   :lu   0.15   ; roll back - yield and acknowledge risks
+   :ji   0.10   ; press - focus on single concept
+   :an   0.10   ; push - aggressive forward motion
+   :cai  0.10   ; pluck - ground by connecting risk to concept
+   :lie  0.08   ; split - trade concept for risk awareness
+   :zhou 0.10   ; elbow - small centered adjustment
+   :kao  0.07}) ; lean - consolidate multiple risks
+```
+
+Each simulation step selects an energy (weighted toward Péng) and applies its characteristic mutation. The energy profile is tracked and reported.
+
 ## Future Work
 
 - Add `@energy` field to existing patterns indicating primary engagement mode
 - Explore sigil mapping: emoji = energy mode, hanzi = specific variant
 - Investigate multi-energy sequences for complex pattern navigation
+- Tune energy weights based on policy strategy (exploit → more Àn, explore → more Lǚ)

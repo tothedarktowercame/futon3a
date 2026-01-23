@@ -83,36 +83,153 @@
           (recur (dec i)))
         (vec arr)))))
 
-(defn- apply-mutation
-  "Apply a small mutation to state based on policy.
+;; === Eight Energies (八勁) for Mutation Dynamics ===
 
-   State tracks:
-   - :concepts - active concepts accumulated during simulation
-   - :risks-acknowledged - risks that have been investigated/addressed
-   - :scope-alignment - how well current state matches scope conditions"
-  [state policy rng]
-  (let [mutation-rate (or (:mutation-rate policy) 0.1)
-        concepts (or (:concepts state) #{})
-        policy-concepts (or (:concepts policy) #{})
-        policy-seq (seq (sort policy-concepts))
-        ;; Add some policy concepts
-        added (if (and policy-seq (< (.nextDouble rng) mutation-rate))
-                (set/union concepts (set (take 2 (rng-shuffle rng (vec policy-seq)))))
-                concepts)
-        ;; Maybe acknowledge a risk (investigate/mitigate it)
+(def ^:private energy-weights
+  "Selection weights for each energy. Péng is preferred as the default
+   expansive mode; others activate based on weighted random selection."
+  {:peng 0.30   ; ward off - expand from rooted base (default)
+   :lu   0.15   ; roll back - yield and acknowledge risks
+   :ji   0.10   ; press - focus on single concept
+   :an   0.10   ; push - aggressive forward motion
+   :cai  0.10   ; pluck - ground by connecting risk to concept
+   :lie  0.08   ; split - separate (trade concept for risk awareness)
+   :zhou 0.10   ; elbow - small centered adjustment
+   :kao  0.07}) ; lean - structural consolidation
+
+(defn- select-energy
+  "Select an energy mode based on weights using the RNG."
+  [rng]
+  (let [roll (.nextDouble rng)
+        energies (keys energy-weights)]
+    (loop [remaining energies
+           cumulative 0.0]
+      (if (empty? remaining)
+        :peng ; fallback
+        (let [e (first remaining)
+              threshold (+ cumulative (get energy-weights e))]
+          (if (< roll threshold)
+            e
+            (recur (rest remaining) threshold)))))))
+
+(defn- apply-energy
+  "Apply a specific energy's mutation to state.
+
+   Each energy transforms state differently:
+   - Péng (ward off): expand concepts, slight risk awareness
+   - Lǚ (roll back): high risk acknowledgment, acquire by adherence
+   - Jǐ (press): focus on single concept intensely
+   - Àn (push): aggressive multi-concept addition
+   - Cǎi (pluck): acknowledge risk AND add grounding concept
+   - Liè (split): trade a concept for risk awareness
+   - Zhǒu (elbow): small adjustment, one thing only
+   - Kào (lean): consolidate, acknowledge multiple risks"
+  [state policy energy rng]
+  (let [concepts (or (:concepts state) #{})
+        policy-concepts (vec (sort (or (:concepts policy) #{})))
         risks (vec (or (:unacknowledged-risks state) []))
         acknowledged (or (:risks-acknowledged state) #{})
-        [risks' acknowledged']
-        (if (and (seq risks) (< (.nextDouble rng) (* 0.5 mutation-rate)))
-          (let [shuffled (rng-shuffle rng risks)
-                to-ack (first shuffled)]
-            [(vec (rest shuffled)) (conj acknowledged to-ack)])
-          [risks acknowledged])]
+        mutation-rate (or (:mutation-rate policy) 0.1)
+        should-mutate? (< (.nextDouble rng) mutation-rate)]
+
+    (if-not should-mutate?
+      state ; no mutation this step
+      (case energy
+        ;; Péng 掤 - expand from rooted base
+        :peng
+        (let [added (if (seq policy-concepts)
+                      (set/union concepts (set (take 2 (rng-shuffle rng policy-concepts))))
+                      concepts)
+              [risks' ack'] (if (and (seq risks) (< (.nextDouble rng) 0.3))
+                              [(vec (rest risks)) (conj acknowledged (first risks))]
+                              [risks acknowledged])]
+          (assoc state :concepts added :unacknowledged-risks risks' :risks-acknowledged ack'))
+
+        ;; Lǚ 捋 - yield and acknowledge, acquire by adherence
+        :lu
+        (let [[risks' ack'] (if (seq risks)
+                              (let [to-ack (first (rng-shuffle rng risks))]
+                                [(vec (remove #{to-ack} risks)) (conj acknowledged to-ack)])
+                              [risks acknowledged])
+              ;; Acquire concepts through adherence (from risk text)
+              added (if (and (seq risks) (seq policy-concepts))
+                      (conj concepts (first (rng-shuffle rng policy-concepts)))
+                      concepts)]
+          (assoc state :concepts added :unacknowledged-risks risks' :risks-acknowledged ack'))
+
+        ;; Jǐ 擠 - focus on single concept
+        :ji
+        (let [added (if (seq policy-concepts)
+                      (conj concepts (first (rng-shuffle rng policy-concepts)))
+                      concepts)]
+          (assoc state :concepts added))
+
+        ;; Àn 按 - aggressive forward motion
+        :an
+        (let [added (if (seq policy-concepts)
+                      (set/union concepts (set (take 3 (rng-shuffle rng policy-concepts))))
+                      concepts)]
+          (assoc state :concepts added))
+
+        ;; Cǎi 採 - ground by connecting risk acknowledgment to concept
+        :cai
+        (let [[risks' ack' grounded]
+              (if (seq risks)
+                (let [r (first (rng-shuffle rng risks))]
+                  [(vec (remove #{r} risks)) (conj acknowledged r) r])
+                [risks acknowledged nil])
+              ;; Add a "grounding" concept when we pluck
+              added (if (and grounded (seq policy-concepts))
+                      (conj concepts (first (rng-shuffle rng policy-concepts)))
+                      concepts)]
+          (assoc state :concepts added :unacknowledged-risks risks' :risks-acknowledged ack'))
+
+        ;; Liè 挒 - split: trade concept capacity for risk awareness
+        :lie
+        (let [concepts' (if (> (count concepts) 1)
+                          (disj concepts (first (rng-shuffle rng (vec concepts))))
+                          concepts)
+              [risks' ack'] (if (seq risks)
+                              [(vec (rest risks)) (conj acknowledged (first risks))]
+                              [risks acknowledged])]
+          (assoc state :concepts concepts' :unacknowledged-risks risks' :risks-acknowledged ack'))
+
+        ;; Zhǒu 肘 - small centered adjustment, one thing only
+        :zhou
+        (if (< (.nextDouble rng) 0.5)
+          ;; Add one concept
+          (if (seq policy-concepts)
+            (assoc state :concepts (conj concepts (first (rng-shuffle rng policy-concepts))))
+            state)
+          ;; Or acknowledge one risk
+          (if (seq risks)
+            (assoc state
+                   :unacknowledged-risks (vec (rest risks))
+                   :risks-acknowledged (conj acknowledged (first risks)))
+            state))
+
+        ;; Kào 靠 - structural, consolidate multiple risks
+        :kao
+        (let [to-ack (take 2 (rng-shuffle rng risks))
+              risks' (vec (remove (set to-ack) risks))
+              ack' (set/union acknowledged (set to-ack))]
+          (assoc state :unacknowledged-risks risks' :risks-acknowledged ack'))
+
+        ;; Default fallback to péng
+        (apply-energy state policy :peng rng)))))
+
+(defn- apply-mutation
+  "Apply a mutation to state using eight-energy dynamics.
+
+   Selects an energy mode (weighted toward Péng) and applies its
+   characteristic transformation. See library/eight-gates/ for
+   the semantic meaning of each energy."
+  [state policy rng]
+  (let [energy (select-energy rng)]
     (-> state
-        (assoc :concepts added)
-        (assoc :unacknowledged-risks risks')
-        (assoc :risks-acknowledged acknowledged')
-        (update :steps (fnil inc 0)))))
+        (apply-energy policy energy rng)
+        (update :steps (fnil inc 0))
+        (update :energy-history (fnil conj []) energy))))
 
 (defn simulate-policy
   "Simulate a policy for N steps using exotype-style dynamics.
@@ -287,11 +404,12 @@
      :preference-model (-> prefs
                            (update :concepts #(vec (take 10 %)))
                            (dissoc :source-patterns))
-     :candidate-policies (mapv (fn [{:keys [policy score]}]
+     :candidate-policies (mapv (fn [{:keys [policy score final-state]}]
                                  {:id (:id policy)
                                   :description (:description policy)
                                   :strategy (:strategy policy)
-                                  :score score})
+                                  :score score
+                                  :energy-history (frequencies (:energy-history final-state))})
                                ranked)
      :recommendation {:best-policy (:id (:policy best))
                       :G (get-in best [:score :G])
@@ -304,7 +422,8 @@
              :scope-conditions (count (:scope prefs))
              :risks-identified (count (:risks prefs))
              :simulation-steps sim-steps
-             :seed seed}}))
+             :seed seed
+             :best-energy-profile (frequencies (get-in best [:final-state :energy-history]))}}))
 
 ;; === CLI Entry Point ===
 
@@ -341,6 +460,11 @@
         (println "RECOMMENDATION:")
         (println "  Best policy:" (name (get-in report [:recommendation :best-policy])))
         (println "  Confidence:" (format "%.2f" (get-in report [:recommendation :confidence])))
+        (println "")
+        (println "ENERGY PROFILE (八勁):")
+        (let [profile (get-in report [:audit :best-energy-profile])]
+          (doseq [[energy count] (sort-by val > profile)]
+            (println (format "  %s: %d" (name energy) count))))
         (println "")
         (println "COMPASS:")
         (println "  Direction:" (name (get-in report [:compass :direction])))
