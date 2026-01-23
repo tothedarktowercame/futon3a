@@ -7,9 +7,12 @@
    - Risks to acknowledge → risk investigation proposals
    - Energy profile → dynamics observation proposals
 
+   Also supports policy transition arrows via meme.policy-arrow.
+
    All proposals are created with method :compass/navigation,
    enabling downstream filtering and analysis."
-  (:require [meme.proposal :as proposal]))
+  (:require [meme.proposal :as proposal]
+            [meme.policy-arrow :as policy-arrow]))
 
 (defn- pattern-observation-proposal
   "Create a proposal for an observed pattern retrieval."
@@ -165,3 +168,47 @@
   [ds narrative & {:keys [limit] :or {limit 50}}]
   (->> (compass-proposals ds :limit limit)
        (filter #(= narrative (get-in % [:evidence :narrative])))))
+
+;; Full bridge with policy arrows
+
+(defn compass-full-bridge!
+  "Full pipeline: proposals + policy transition arrows.
+
+   This is the complete bridge from compass to meme layer,
+   including Kolmogorov arrows for policy transitions.
+
+   Options:
+   - :current-policy - assumed current policy (default :balanced)
+   - :include-alternatives - emit arrows for alternative policies
+   - Plus all options from compass->proposals
+
+   Returns:
+   {:proposals [...] :arrows [...] :narrative \"...\"}"
+  [ds report & {:keys [current-policy include-alternatives]
+                :or {current-policy :balanced
+                     include-alternatives false}
+                :as opts}]
+  (let [;; Generate and persist proposals
+        proposals (compass->proposals report
+                                      :include-patterns true
+                                      :include-navigation true
+                                      :include-risks true
+                                      :include-evidence true
+                                      :include-energy true)
+        persisted-proposals (persist-proposals! ds proposals)
+
+        ;; Generate and persist policy arrows
+        arrows (policy-arrow/compass->policy-arrows
+                report
+                :current-policy current-policy
+                :include-alternatives include-alternatives)
+        persisted-arrows (mapv #(policy-arrow/persist-policy-arrow! ds %) arrows)]
+
+    {:proposals persisted-proposals
+     :arrows persisted-arrows
+     :proposal-count (count persisted-proposals)
+     :arrow-count (count persisted-arrows)
+     :narrative (:narrative report)
+     :recommended-policy (get-in report [:recommendation :best-policy])
+     :transition-mode (when (seq arrows)
+                        (get-in (first arrows) [:payload :mode]))}))

@@ -14,6 +14,13 @@
    - :analogy - structural similarity across domains
    - :untyped - arrow asserted without construction
 
+   Policy transition modes (see meme.policy-arrow):
+   - :adaptation - shift strategy based on signals
+   - :escalation - move to more committed policy
+   - :de-escalation - move to more exploratory policy
+   - :maintenance - stay in current policy
+   - :rebalancing - return to balanced from extreme
+
    Arrow status lifecycle:
    - :draft - proposed, unverified
    - :active - verified, in use
