@@ -17,7 +17,12 @@
    - :mmca/emergence - emerged from MMCA evolution
    - :mmca/recurrence - recurred across multiple MMCA runs
    - :human/assertion - human-provided
-   - :agent/inference - agent-inferred"
+   - :agent/inference - agent-inferred
+   - :compass/retrieval - pattern retrieved during compass navigation
+   - :compass/recommendation - navigation policy recommendation
+   - :compass/risk-surface - risk surfaced for investigation
+   - :compass/evidence-gap - evidence suggestion
+   - :compass/dynamics - energy profile observation"
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
             [clojure.data.json :as json]
