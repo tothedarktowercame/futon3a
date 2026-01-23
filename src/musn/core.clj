@@ -6,7 +6,8 @@
 (defonce ^:private state (atom {:sessions {}}))
 
 (defn- now []
-  (java.time.Instant/now))
+  ;; Return java.util.Date which serializes as #inst in EDN
+  (java.util.Date.))
 
 (defn- gen-session-id []
   (str "musn-" (subs (str (java.util.UUID/randomUUID)) 0 8)))
