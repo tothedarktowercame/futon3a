@@ -185,6 +185,9 @@
       {:path path
        :id (parse-field "@flexiarg ")
        :title (parse-field "@title ")
+       :energy (when-let [e (parse-field "@energy ")]
+                 (keyword (str/lower-case e)))
+       :sigils (parse-field "@sigils ")
        :if (parse-field "+ IF:")
        :however (parse-field "+ HOWEVER:")
        :then (parse-field "+ THEN:")
