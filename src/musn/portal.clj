@@ -66,11 +66,22 @@
       (some-> (System/getenv "MUSN_FUTON1_PROFILE") str/trim not-empty)))
 
 (defn- fetch-json [url headers]
-  (let [conn (.openConnection (java.net.URL. url))]
-    (doseq [[k v] headers]
-      (.setRequestProperty conn k v))
-    (with-open [r (io/reader (.getInputStream conn))]
-      (json/read r :key-fn keyword))))
+  (try
+    (let [conn (.openConnection (java.net.URL. url))]
+      (.setConnectTimeout conn 2000)
+      (.setReadTimeout conn 5000)
+      (doseq [[k v] headers]
+        (.setRequestProperty conn k v))
+      (with-open [r (io/reader (.getInputStream conn))]
+        (json/read r :key-fn keyword)))
+    (catch java.net.ConnectException _
+      (binding [*out* *err*]
+        (println "[portal] futon1 unavailable at" url))
+      nil)
+    (catch Exception e
+      (binding [*out* *err*]
+        (println "[portal] fetch failed:" (.getMessage e)))
+      nil)))
 
 (defn- parse-int [value fallback]
   (try
@@ -142,7 +153,7 @@
       value
       (keyword value))))
 
-(defn- parse-double [value fallback]
+(defn- parse-dbl [value fallback]
   (try
     (Double/parseDouble (str value))
     (catch Throwable _ fallback)))
@@ -166,7 +177,7 @@
       (case (first remaining)
         "--kind" (recur (assoc opts :kind (parse-keyword (second remaining))) (nnext remaining))
         "--target" (recur (assoc opts :target (second remaining)) (nnext remaining))
-        "--score" (recur (assoc opts :score (parse-double (second remaining) (:score opts)))
+        "--score" (recur (assoc opts :score (parse-dbl (second remaining) (:score opts)))
                          (nnext remaining))
         "--method" (recur (assoc opts :method (second remaining)) (nnext remaining))
         "--status" (recur (assoc opts :status (parse-keyword (second remaining))) (nnext remaining))
