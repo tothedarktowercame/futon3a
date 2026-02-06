@@ -1,4 +1,14 @@
-# futon3a
+# futon3a — Sidecar & Portal
+
+futon3a is a lightweight sidecar for agents that need pattern guidance without
+running the full futon3 stack. It provides Drawbridge-based queries to futon1's
+pattern registry and structured logging for selections, actions, and evidence.
+Use it when you want MUSN-style audit trails from a minimal footprint.
+
+> **Stack context**: futon3a queries futon1 patterns via Drawbridge and logs to
+> MUSN-compatible sidecars. See `../futon0/README.md` for the full stack diagram.
+
+---
 
 ## Problem this solves
 
