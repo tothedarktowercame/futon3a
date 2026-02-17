@@ -53,6 +53,8 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=8, help="Number of matches to show.")
     parser.add_argument("--model", default="sentence-transformers/all-MiniLM-L6-v2",
                         help="SentenceTransformer model name or path.")
+    parser.add_argument("--json", action="store_true",
+                        help="Output results as JSON array.")
     args = parser.parse_args()
 
     try:
@@ -67,13 +69,24 @@ def main() -> None:
     entries = _load_embeddings(Path(args.embeddings))
     ranked = _rank(query_vec, entries, args.top)
 
-    for idx, (score, entry) in enumerate(ranked, start=1):
-        pid = entry.get("id", "unknown")
-        title = entry.get("title", "")
-        if title:
-            print(f"{idx:2d}. {pid} ({score:.4f}) - {title}")
-        else:
-            print(f"{idx:2d}. {pid} ({score:.4f})")
+    if args.json:
+        results = []
+        for idx, (score, entry) in enumerate(ranked, start=1):
+            results.append({
+                "rank": idx,
+                "id": entry.get("id", "unknown"),
+                "title": entry.get("title", ""),
+                "score": round(score, 4),
+            })
+        print(json.dumps(results))
+    else:
+        for idx, (score, entry) in enumerate(ranked, start=1):
+            pid = entry.get("id", "unknown")
+            title = entry.get("title", "")
+            if title:
+                print(f"{idx:2d}. {pid} ({score:.4f}) - {title}")
+            else:
+                print(f"{idx:2d}. {pid} ({score:.4f})")
 
 
 if __name__ == "__main__":
