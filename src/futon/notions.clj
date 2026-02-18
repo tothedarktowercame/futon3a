@@ -204,6 +204,30 @@
 (def ^:private clause-re
   #"^\s*[+!]\s+([^:]+):\s*(.*)$")
 
+(defn- storage-roots
+  "Canonical roots for storage-only Futon3 artifacts (library + holes).
+   Order matters: prefer explicit env root, then local futon3 checkout,
+   then legacy absolute path. Repo-local fallbacks are appended separately."
+  []
+  (let [env-root (or (System/getenv "FUTON3_STORAGE_ROOT")
+                     (System/getenv "FUTON3_ROOT"))]
+    (->> [env-root
+          "../futon3"
+          "/home/joe/code/futon3"]
+         (remove nil?)
+         (map str/trim)
+         (remove str/blank?)
+         distinct)))
+
+(defn- storage-subdir-roots
+  "Resolve candidate roots for SUBDIR, preferring futon3 storage roots.
+   Falls back to repo-local subdir for compatibility."
+  [subdir]
+  (let [suffix (str subdir "/")
+        storage (map #(str (io/file % subdir) "/") (storage-roots))]
+    (->> (concat storage [suffix])
+         distinct)))
+
 (defn- parse-devmap-block
   [lines]
   (->> lines
@@ -216,10 +240,7 @@
 
 (defn- devmap-paths
   []
-  (let [roots ["holes/"
-               "../futon3/holes/"
-               "/home/joe/code/futon3/holes/"
-               (when-let [r (System/getenv "FUTON3_ROOT")] (str r "/holes/"))]]
+  (let [roots (storage-subdir-roots "holes")]
     (->> roots
          (remove nil?)
          (map #(io/file %))
@@ -264,11 +285,8 @@
   (let [;; Pattern ID like 'agent/evidence-over-assertion' maps to
         ;; 'library/agent/evidence-over-assertion.flexiarg'
         file-path (str pattern-id ".flexiarg")
-        ;; Try common library roots
-        roots ["library/"
-               "../futon3/library/"
-               "/home/joe/code/futon3/library/"
-               (when-let [r (System/getenv "FUTON3_ROOT")] (str r "/library/"))]
+        ;; Prefer futon3 storage roots, then local fallback.
+        roots (storage-subdir-roots "library")
         paths (->> roots
                    (remove nil?)
                    (map #(str % file-path)))]

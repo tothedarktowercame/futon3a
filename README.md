@@ -146,6 +146,7 @@ scripts/musn-end <session-id> "summary note"
 - `PORTAL_FUTON1_PROFILE` / `MUSN_FUTON1_PROFILE`: Futon1 profile header.
 - `MUSN_LOG_ROOT`: log directory (default `log`).
 - `MUSN_PATTERN_LIMIT`: candidate limit (default 4).
+- `FUTON3_STORAGE_ROOT` (or `FUTON3_ROOT`): root path for storage artifacts (`library/`, `holes/`).
 
 ## Files
 
