@@ -25,7 +25,9 @@
   {:lookahead-minutes 10      ; window for novel terms after affect
    :novelty-minutes (* 60 24 30)  ; 30 days - term is "novel" if not seen recently
    :max-pending 100           ; max pending affect events per actor
-   :musn-url "http://localhost:6065"})
+   :musn-url "http://localhost:6065"
+   :futon1-url "http://localhost:8080"  ; futon1 API for NLP entity extraction
+   :use-nlp-entities? true})
 
 (defonce ^:private !config (atom default-config))
 (defonce ^:private !pending (atom {}))  ; actor -> [{:affect :ts :expires-at :terms}]
@@ -35,7 +37,8 @@
   "Update processor configuration."
   [opts]
   (swap! !config merge (select-keys opts [:lookahead-minutes :novelty-minutes
-                                          :max-pending :musn-url])))
+                                          :max-pending :musn-url
+                                          :futon1-url :use-nlp-entities?])))
 
 (defn state
   "Return current processor state for debugging."
@@ -56,17 +59,50 @@
         {:type type
          :conf (double (or conf 0.0))}))))
 
+;; NLP entity extraction via futon1
+
+(defn- fetch-nlp-entities
+  "Call futon1's NLP API to extract entities from text.
+   Returns vector of lowercase entity labels, or nil on failure."
+  [text]
+  (let [{:keys [futon1-url]} @!config
+        url (str futon1-url "/api/alpha/nlp/entities")]
+    (try
+      (let [resp @(http/post url
+                             {:headers {"Content-Type" "application/json"}
+                              :body (json/generate-string {:text text})
+                              :timeout 5000})
+            body (when (:body resp)
+                   (json/parse-string (:body resp) true))]
+        (when (and (= 200 (:status resp))
+                   (seq (:labels body)))
+          (:labels body)))
+      (catch Exception e
+        (println "[futon3a.affect] NLP fetch failed:" (.getMessage e))
+        nil))))
+
 ;; Novelty tracking
 
-(defn- extract-terms
-  "Extract potential affect-related terms from text.
-   Returns vector of lowercase terms (words 4+ chars)."
+(defn- extract-terms-fallback
+  "Fallback term extraction using regex (words 6+ chars)."
   [text]
   (when text
-    (->> (re-seq #"\b[a-zA-Z]{4,}\b" text)
+    (->> (re-seq #"\b[a-zA-Z]{6,}\b" text)
          (map str/lower-case)
          distinct
          vec)))
+
+(defn- extract-terms
+  "Extract potential affect-related terms from text.
+   Uses futon1's NLP API for proper entity extraction when available,
+   falls back to regex-based extraction (6+ char words) otherwise."
+  [text]
+  (when text
+    (let [{:keys [use-nlp-entities?]} @!config]
+      (if use-nlp-entities?
+        (or (fetch-nlp-entities text)
+            (extract-terms-fallback text))
+        (extract-terms-fallback text)))))
 
 (defn- novel-term?
   "Check if term is novel for this actor (not seen in novelty window)."

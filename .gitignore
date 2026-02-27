@@ -2,3 +2,5 @@
 log/
 .admintoken
 .DS_Store
+.venv/
+resources/notions/minilm_pattern_embeddings.json
