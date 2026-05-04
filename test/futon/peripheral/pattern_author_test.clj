@@ -91,11 +91,30 @@
         result (pa/submit-draft! {:author "test" :target-path target :draft-body non-canonical-clause-draft})]
     (is (false? (:landed? result)))
     (let [vs (:violations result)
-          nc (filter #(= :non-canonical-top-level-clause (:kind %)) vs)]
+          nc (filter #(= :non-canonical-clause (:kind %)) vs)]
       (is (seq nc))
       (is (str/includes? (str (first nc)) "INVENTED-CLAUSE")))
     (is (not (.exists (io/file target)))
         "Sokoban: nothing on disk after refusal")))
+
+(def with-substructure-draft
+  "@flexiarg test/with-substructure\n@title With Rulebook Substructure\n
+! conclusion: A draft with rulebook-recognised substructure clauses (CHECK under THEN, etc.) is admitted.
+
+  + context: The parser is flat; substructure parses as siblings.
+
+  + THEN: Operate as the rulebook says.
+    + CHECK: Substructure under THEN per the rulebook is admitted by the Sokoban even though the parser flattens it.
+")
+
+(deftest accepts-rulebook-substructure
+  (let [target (temp-target)
+        result (pa/submit-draft! {:author "test" :target-path target :draft-body with-substructure-draft})]
+    (try
+      (is (true? (:landed? result))
+          (str "Should accept rulebook-recognised substructure (CHECK under THEN); got: " (:violations result)))
+      (finally
+        (when (.exists (io/file target)) (.delete (io/file target)))))))
 
 (deftest sokoban-no-leakage-on-empty-draft
   (let [target (temp-target)

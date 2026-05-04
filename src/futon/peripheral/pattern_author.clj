@@ -24,19 +24,48 @@
   (:require [clojure.java.io :as io]
             [futon.flexiarg.projection :as projection]))
 
-(def canonical-clause-names
-  "Top-level clause name-keys admitted at the peripheral.
+(def admitted-clause-names
+  "Clause name-keys the peripheral admits anywhere in the draft.
 
-   The seven canonical components plus the conclusion-aliases (which are
-   normalised to `:conclusion` by the parser, but we still allow them at
-   the surface so authors can write `! summary:` etc. directly).
+   Three layers per E-clause-vocabulary-reshape.sexp:
 
-   Bespoke clauses are admitted *as substructure* under a canonical
-   parent; they should not appear at top level. The peripheral's job is
-   to refuse top-level non-canonicals so they get reshaped before
-   landing."
-  #{"context" "if" "however" "then" "because" "next-steps"
-    "conclusion" "claim" "summary" "instantiated-by"})
+   1. Canonical seven (top-level structure):
+      context, if, however, then, because, next-steps, conclusion.
+   2. Conclusion-aliases (treated as :conclusion by the parser):
+      claim, summary, instantiated-by.
+   3. Rulebook-recognised substructure (admitted because the canonical
+      parser is flat — it does not yet track indent-as-nesting, so a
+      properly-nested `+ CHECK:` under `+ THEN:` parses as a separate
+      top-level clause; the Sokoban admits it on the understanding that
+      it would render as substructure under a tighter parser):
+        :then > compositions, check, enforcement, lean
+        :however > failure-modes, anti-patterns, absence-signals, signals
+        :because > evidence, evidence-base, because->evidence,
+                   mechanism, counterfactual
+        :if > does-not-apply
+        :next-steps > use
+
+   Bespoke names outside these three layers are refused — the rulebook's
+   long-tail catch-all heuristic should reshape them before submission.
+
+   Future tightening (graduation hook): when the parser tracks
+   indent-as-nesting, the peripheral can refuse substructure names at
+   true top level while still admitting them under their canonical
+   parents."
+  #{;; canonical seven
+    "context" "if" "however" "then" "because" "next-steps" "conclusion"
+    ;; conclusion-aliases
+    "claim" "summary" "instantiated-by"
+    ;; THEN substructure
+    "compositions" "check" "enforcement" "lean"
+    ;; HOWEVER substructure
+    "failure-modes" "anti-patterns" "absence-signals" "signals"
+    ;; BECAUSE substructure
+    "evidence" "evidence-base" "because->evidence" "mechanism" "counterfactual"
+    ;; IF substructure
+    "does-not-apply"
+    ;; NEXT-STEPS substructure
+    "use"})
 
 (defn- violation [kind detail & [where]]
   (cond-> {:kind kind :detail detail}
@@ -63,12 +92,15 @@
 (defn- check-canonical-top-level-clauses [packet]
   (->> (:pattern/clauses packet)
        (keep (fn [c]
-               (when-not (contains? canonical-clause-names (:name-key c))
-                 (violation :non-canonical-top-level-clause
-                            (str "Top-level clause `+ " (:name c) ":` is not canonical. "
-                                 "Move it under one of {context, if, however, then, because, next-steps} "
-                                 "as substructure per E-clause-vocabulary-reshape.sexp; "
-                                 "or use one of the canonical names if that fits the content.")
+               (when-not (contains? admitted-clause-names (:name-key c))
+                 (violation :non-canonical-clause
+                            (str "Clause `+ " (:name c) ":` is not in the admitted set "
+                                 "(canonical seven + conclusion-aliases + rulebook-recognised "
+                                 "substructure under canonical parents). Either rename it to "
+                                 "a canonical name that fits the content, or apply the "
+                                 "long-tail-catch-all heuristic from E-clause-vocabulary-reshape.sexp "
+                                 "to route it as substructure under {context, if, however, then, "
+                                 "because, next-steps}.")
                             {:clause-name (:name c)
                              :clause-name-key (:name-key c)
                              :pattern/id (:pattern/id packet)}))))
