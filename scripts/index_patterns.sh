@@ -19,6 +19,7 @@ EOF
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FUTON3A_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEFAULT_FUTON3_ROOT="$(cd "${SCRIPT_DIR}/../../futon3" && pwd)"
 FUTON3_ROOT="${FUTON3_ROOT:-$DEFAULT_FUTON3_ROOT}"
 OUT_DIR="${OUT_DIR:-${SCRIPT_DIR}/../resources/notions}"
@@ -84,6 +85,15 @@ if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   exit 1
 fi
 
+mkdir -p "$OUT_DIR"
+
+(
+  cd "$FUTON3A_ROOT"
+  "$CLJ_CMD" -M -m futon.flexiarg.projection \
+    --futon3-root "$FUTON3_ROOT" \
+    --out "$OUT_DIR/pattern-projections.edn"
+)
+
 (
   cd "$FUTON3_ROOT"
   "$CLJ_CMD" -M -m scripts.build-pattern-index
@@ -98,7 +108,6 @@ fi
   fi
 )
 
-mkdir -p "$OUT_DIR"
 cp "$FUTON3_ROOT/resources/sigils/patterns-index.tsv" "$OUT_DIR/"
 cp "$FUTON3_ROOT/resources/sigils/rationale-examples.edn" "$OUT_DIR/"
 cp "$FUTON3_ROOT/resources/sigils/index.edn" "$OUT_DIR/sigil-index.edn"

@@ -8,6 +8,7 @@
    This namespace provides the Clojure interface for pattern retrieval
    that the compass demonstrator uses."
   (:require [clojure.data.json :as json]
+            [futon.flexiarg.projection :as projection]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.set :as set]
@@ -153,50 +154,41 @@
 
 ;; --- Pattern details ---
 
+(defn- clause-map
+  [packet]
+  (into {} (map (juxt :name-key :text) (:pattern/clauses packet))))
+
+(defn- parse-next-steps [text]
+  (->> (str/split-lines (or text ""))
+       (map str/trim)
+       (remove str/blank?)
+       (map #(cond
+               (str/starts-with? % "next[") (str/replace % #"^next\[(.*)\]$" "$1")
+               (str/starts-with? % "- ") (subs % 2)
+               :else %))
+       vec))
+
 (defn- load-flexiarg
-  "Load and parse a flexiarg file."
+  "Load and parse a flexiarg file via the canonical projection."
   [path]
   (when (.exists (io/file path))
-    (let [content (slurp path)
-          lines (str/split-lines content)
-          ;; Parse field that may have content on same line or next line
-          parse-field (fn [prefix]
-                        (let [idx (->> lines
-                                       (map-indexed vector)
-                                       (filter #(str/starts-with? (str/trim (second %)) prefix))
-                                       first)]
-                          (when idx
-                            (let [[i line] idx
-                                  trimmed-line (str/trim line)
-                                  ;; Get content after prefix from the trimmed line
-                                  same-line (str/trim (subs trimmed-line (count prefix)))]
-                              (if (str/blank? same-line)
-                                ;; Content on next line(s) - take until next + or ! or @ or blank
-                                (->> lines
-                                     (drop (inc i))
-                                     (take-while #(let [t (str/trim %)]
-                                                    (and (not (str/blank? t))
-                                                         (not (str/starts-with? t "+"))
-                                                         (not (str/starts-with? t "!"))
-                                                         (not (str/starts-with? t "@")))))
-                                     (map str/trim)
-                                     (str/join " "))
-                                same-line)))))]
-      {:path path
-       :id (parse-field "@flexiarg ")
-       :title (parse-field "@title ")
-       :energy (when-let [e (parse-field "@energy ")]
-                 (keyword (str/lower-case e)))
-       :sigils (parse-field "@sigils ")
-       :if (parse-field "+ IF:")
-       :however (parse-field "+ HOWEVER:")
-       :then (parse-field "+ THEN:")
-       :because (parse-field "+ BECAUSE:")
-       :next-steps (->> lines
-                        (drop-while #(not (str/starts-with? (str/trim %) "+ NEXT-STEPS:")))
-                        rest
-                        (take-while #(str/starts-with? (str/trim %) "- "))
-                        (mapv #(str/replace (str/trim %) #"^- " "")))})))
+    (when-let [packet (some #(when (= :ok (:pattern/status %)) %)
+                            (projection/parse-file path {:futon3-root "/home/joe/code/futon3"}))]
+      (let [clauses (clause-map packet)]
+        {:path path
+         :id (:pattern/id packet)
+         :title (:pattern/title packet)
+         :energy (some-> (get-in packet [:pattern/directives :energy])
+                         str/lower-case
+                         keyword)
+         :sigils (str/join " " (:pattern/sigils packet))
+         :if (get clauses "if")
+         :however (get clauses "however")
+         :then (or (get clauses "then")
+                   (get clauses "conclusion")
+                   (get clauses "claim"))
+         :because (get clauses "because")
+         :next-steps (parse-next-steps (get clauses "next-steps"))}))))
 
 (def ^:private devmap-header-re
   #"^!\s+instantiated-by:\s+Prototype\s+(\d+)\s+—\s+(.*)\s+\[(.*)\]\s*$")
