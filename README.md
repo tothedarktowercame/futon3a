@@ -90,6 +90,12 @@ library patterns. Build it with:
 scripts/index_patterns.sh
 ```
 
+To index the canonical mission corpus alongside patterns:
+
+```
+scripts/index_patterns.sh --missions-roots /home/joe/code/futon0,/home/joe/code/futon2,/home/joe/code/futon3,/home/joe/code/futon3b,/home/joe/code/futon3c,/home/joe/code/futon4,/home/joe/code/futon5,/home/joe/code/futon5a,/home/joe/code/futon6,/home/joe/code/futon7,/home/joe/code/npt
+```
+
 See `docs/pattern-indexing.md` for optional GloVe, fastText, and MiniLM embeddings.
 
 ## Usage
@@ -114,6 +120,14 @@ scripts/portal patterns list --limit 8
 scripts/portal patterns list --namespace vsatlas --limit 10
 scripts/portal patterns search "building community" --limit 8
 scripts/portal patterns get vsatlas/some-pattern-id
+```
+
+Query missions:
+
+```
+scripts/mission-search "self documenting stack" --top-k 5
+scripts/mission-search "writer capability" --top-k 8 --format json
+scripts/mission-search "mission lifecycle" --slot phase=identify --slot owner=Joe
 ```
 
 Portal helpers for sidecar logging:
