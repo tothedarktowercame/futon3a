@@ -7,3 +7,13 @@ resources/notions/minilm_pattern_embeddings.json
 .clj-kondo/
 .lsp/
 meme.db
+
+# Added 2026-05-26 by street-sweeper Phase B (allostatic-relief for INV-13 rejects)
+data/
+__pycache__/
+
+# Added 2026-05-26 by street-sweeper Phase C (INV-10 relocations)
+resources/notions/*.json
+
+# Added 2026-05-26 by street-sweeper Phase C (INV-10 relocations)
+resources/notions/*.png
