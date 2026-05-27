@@ -11,18 +11,13 @@
    Futon theory: treat near-future as virtual attractor shaping present action.
    GFE lens: compute alignment signals, not meaning.
 
-   See docs/README-style-guide.md for the semantic mapping of flexiarg fields."
+  See docs/README-style-guide.md for the semantic mapping of flexiarg fields."
   (:require [clojure.string :as str]
             [clojure.set :as set]
-            [futon.notions :as notions]))
+            [futon.notions :as notions]
+            [futon.text :as text]))
 
 ;; === Preference Model Extraction ===
-
-(defn- tokenize [text]
-  (->> (str/split (str/lower-case (or text "")) #"[^a-z0-9]+")
-       (remove str/blank?)
-       (remove #(< (count %) 3))
-       set))
 
 (defn extract-preferences
   "Extract a preference model from retrieved patterns.
@@ -65,7 +60,7 @@
      :risks (vec all-however)
      :rationale (vec (concat all-because all-rationale))
      :concepts (reduce set/union #{}
-                       (map #(or (:hotwords %) (tokenize (:rationale %))) patterns))
+                       (map #(or (:hotwords %) (text/tokenize (:rationale %))) patterns))
      :source-patterns (mapv #(select-keys % [:id :title :score]) patterns)}))
 
 ;; === Exotype-Style Policy Simulator ===

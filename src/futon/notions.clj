@@ -6,13 +6,15 @@
    2. Embedding similarity (requires sentence-transformers, uses MiniLM)
 
    This namespace provides the Clojure interface for pattern retrieval
-   that the compass demonstrator uses."
+  that the compass demonstrator uses."
   (:require [clojure.data.json :as json]
             [futon.flexiarg.projection :as projection]
+            [futon.text :as text]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import (java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter)
+           (java.util UUID)))
 
 ;; --- TSV Index (keyword matching) ---
 
@@ -36,16 +38,10 @@
           (remove nil?)
           vec))))
 
-(defn- tokenize [text]
-  (->> (str/split (str/lower-case (or text "")) #"[^a-z0-9]+")
-       (remove str/blank?)
-       (remove #(< (count %) 3))
-       set))
-
 (defn- score-pattern-keywords [tokens pattern]
   (let [hotwords (:hotwords pattern)
         overlap (count (set/intersection tokens hotwords))
-        rationale-tokens (tokenize (:rationale pattern))
+        rationale-tokens (text/tokenize (:rationale pattern))
         rationale-overlap (count (set/intersection tokens rationale-tokens))]
     (+ (* 2.0 overlap) (* 0.5 rationale-overlap))))
 
@@ -54,7 +50,7 @@
   ([query] (search-keywords query 5))
   ([query top-k]
    (let [index (load-pattern-index)
-         tokens (tokenize query)
+         tokens (text/tokenize query)
          scored (->> index
                      (map (fn [p] (assoc p :score (score-pattern-keywords tokens p))))
                      (filter #(pos? (:score %)))
@@ -64,16 +60,26 @@
 
 ;; --- Embedding search (via Python) ---
 
-(defn- notions-search-path []
-  (or (System/getenv "NOTIONS_SEARCH_PATH")
-      "scripts/notions_search.py"))
+(defonce ^:private embeddings-cache (atom {}))
+(defonce ^:private embed-server (atom nil))
+(defonce ^:private embed-server-lock (Object.))
+
+(defn- env-or-prop
+  [name fallback]
+  (or (System/getProperty name)
+      (System/getenv name)
+      fallback))
+
+(defn- embed-text-path []
+  (env-or-prop "EMBED_TEXT_PATH" "scripts/embed_text.py"))
 
 (defn- embeddings-path []
-  (or (System/getenv "NOTIONS_EMBEDDINGS_PATH")
-      "resources/notions/minilm_pattern_embeddings.json"))
+  (env-or-prop "NOTIONS_EMBEDDINGS_PATH"
+               "resources/notions/minilm_pattern_embeddings.json"))
 
 (defn- venv-python []
-  (let [env-python (System/getenv "NOTIONS_PYTHON")
+  (let [env-python (or (System/getProperty "NOTIONS_PYTHON")
+                       (System/getenv "NOTIONS_PYTHON"))
         venv-rel ".venv/bin/python3"
         start (try
                 (.getCanonicalFile (io/file "."))
@@ -88,28 +94,149 @@
       (some #(.exists %) venv-paths) (->> venv-paths (filter #(.exists %)) first str)
       :else "python3")))
 
+(defn- now []
+  (java.time.Instant/now))
+
+(defn- normalize-vec [vec]
+  (let [values (mapv double vec)
+        norm (Math/sqrt (reduce + (map #(* % %) values)))]
+    (if (zero? norm)
+      values
+      (mapv #(/ % norm) values))))
+
+(defn- dot [a b]
+  (reduce + (map * a b)))
+
+(defn- file-stamp [path]
+  (let [f (io/file path)]
+    {:path path
+     :exists (.exists f)
+     :mtime (when (.exists f) (.lastModified f))
+     :length (when (.exists f) (.length f))}))
+
+(defn- parse-embedding-payload [payload]
+  (cond
+    (map? payload)
+    (->> payload
+         (map (fn [[id vec]]
+                {:id id :vector (normalize-vec vec)}))
+         vec)
+
+    (vector? payload)
+    (->> payload
+         (mapv (fn [entry]
+                 (let [vector (:vector entry)]
+                   (cond-> entry
+                     (vector? vector) (assoc :vector (normalize-vec vector))))))
+         vec)
+
+    :else
+    []))
+
+(defn load-embeddings-file
+  [path]
+  (let [stamp (file-stamp path)
+        cached (get @embeddings-cache path)]
+    (if (= (:stamp cached) stamp)
+      (:entries cached)
+      (let [entries (if-not (:exists stamp)
+                      []
+                      (-> path slurp (json/read-str :key-fn keyword) parse-embedding-payload))]
+        (swap! embeddings-cache assoc path {:stamp stamp
+                                            :loaded-at (now)
+                                            :entries entries})
+        entries))))
+
+(defn- drain-error-stream! [process]
+  (future
+    (with-open [rdr (io/reader (.getErrorStream process))]
+      (doseq [_line (line-seq rdr)]
+        nil))))
+
+(defn- dead-process? [process]
+  (try
+    (.exitValue process)
+    true
+    (catch IllegalThreadStateException _
+      false)))
+
+(defn- start-embed-server! []
+  (let [python (venv-python)
+        script (embed-text-path)
+        builder (ProcessBuilder. ^java.util.List
+                                 [python script "--server" "--model"
+                                  "sentence-transformers/all-MiniLM-L6-v2"])
+        process (.start builder)
+        writer (BufferedWriter. (OutputStreamWriter. (.getOutputStream process)))
+        reader (BufferedReader. (InputStreamReader. (.getInputStream process)))]
+    (drain-error-stream! process)
+    {:process process
+     :writer writer
+     :reader reader}))
+
+(defn- ensure-embed-server! []
+  (locking embed-server-lock
+    (let [server @embed-server]
+      (if (and server (not (dead-process? (:process server))))
+        server
+        (let [fresh (start-embed-server!)]
+          (reset! embed-server fresh)
+          fresh)))))
+
+(defn embed-query
+  [query]
+  (locking embed-server-lock
+    (let [{:keys [writer reader]} (ensure-embed-server!)
+          payload (json/write-str {:id (str "query-" (UUID/randomUUID))
+                                   :text query})]
+      (.write ^BufferedWriter writer payload)
+      (.newLine ^BufferedWriter writer)
+      (.flush ^BufferedWriter writer)
+      (let [line (.readLine ^BufferedReader reader)
+            result (when line (json/read-str line :key-fn keyword))]
+        (when-let [error (:error result)]
+          (throw (ex-info "Embed server error" {:error error})))
+        (some-> (:embedding result) normalize-vec)))))
+
+(defn- rank-embedding-entries [query-vec entries top-k]
+  (->> entries
+       (keep (fn [entry]
+               (when-let [vec (:vector entry)]
+                 (assoc entry :score (double (dot query-vec vec))))))
+       (sort-by :score >)
+       (take top-k)
+       vec))
+
+(defn search-embeddings-file
+  "Search an embeddings file using the Python MiniLM helper.
+
+   Options:
+   - :embeddings-path - JSON embeddings file
+   - :type-filter     - optional \"mission\" or \"pattern\"
+   - :top-k           - number of results (default 5)"
+  [query & {:keys [embeddings-path type-filter top-k]
+            :or {embeddings-path (embeddings-path)
+                 top-k 5}}]
+  (let [entries (load-embeddings-file embeddings-path)
+        filtered (if (seq type-filter)
+                   (filterv #(= type-filter (:type %)) entries)
+                   entries)]
+    (when (seq filtered)
+      (when-let [query-vec (embed-query query)]
+        (->> (rank-embedding-entries query-vec filtered top-k)
+             (map-indexed (fn [idx entry]
+                            (assoc entry :rank (inc idx))))
+             vec)))))
+
 (defn search-embeddings
   "Search patterns using MiniLM embeddings (requires sentence-transformers)."
   ([query] (search-embeddings query 5))
   ([query top-k]
-   (let [script (notions-search-path)
-         embeddings (embeddings-path)
-         python (venv-python)
-         result (shell/sh python script
-                          "--query" query
-                          "--top" (str top-k)
-                          "--embeddings" embeddings)]
-     (if (zero? (:exit result))
-       (->> (str/split-lines (:out result))
-            (map (fn [line]
-                   (when-let [[_ rank id score title]
-                              (re-matches #"\s*(\d+)\.\s+(\S+)\s+\(([0-9.]+)\)(?:\s+-\s+(.*))?" line)]
-                     {:id id
-                      :score (Double/parseDouble score)
-                      :title (or title "")
-                      :rank (Integer/parseInt rank)})))
-            (remove nil?)
-            vec)
+   (let [results (search-embeddings-file query
+                                         :embeddings-path (embeddings-path)
+                                         :top-k top-k)]
+     (if (seq results)
+       results
        ;; Fallback to keywords if embedding search fails
        (do
          (println "[notions] Embedding search failed, falling back to keywords")
@@ -248,7 +375,7 @@
           files (filter #(= target-futon (.getName %)) (devmap-paths))]
       (some (fn [^java.io.File file]
               (let [lines (str/split-lines (slurp file))
-                    sentinel (str "! instantiated-by: Prototype 0 — END [x/y]")]
+                    sentinel "! instantiated-by: Prototype 0 — END [x/y]"]
                 (loop [remaining (concat lines [sentinel])]
                   (when-let [line (first remaining)]
                     (if-let [[_ pnum title _] (re-matches devmap-header-re line)]

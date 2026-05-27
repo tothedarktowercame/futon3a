@@ -3,10 +3,12 @@
 
    The projection preserves ordered clause structure and emits a deterministic
    packet suitable for indexing, retrieval, and downstream derivations."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [clojure.string :as str]))
 
 (def ^:private default-output "resources/notions/pattern-projections.edn")
+(def ^:private default-embed-json-output "resources/notions/pattern-embedding-records.json")
 (def ^:private default-source-roots ["library" "holes"])
 (def ^:private flexiarg-exts #{".flexiarg" ".multiarg"})
 (def ^:private section-header-re #"^\s*[!+]\s+([^:]+):\s*(.*)$")
@@ -304,28 +306,65 @@
     (spit file (str (pr-str packets) "\n"))
     (.getCanonicalPath file)))
 
+(defn- normalize-embedding-text [s]
+  (-> (or s "")
+      (str/replace #"\s+" " ")
+      str/trim))
+
+(defn packet->embedding-record
+  "Project a canonical packet into the JSON input shape consumed by
+   `scripts/embed_text.py --json`."
+  [packet]
+  (when (= :ok (:pattern/status packet))
+    (let [title (or (:pattern/title packet) (:pattern/id packet))
+          clause-texts (->> (:pattern/clauses packet)
+                            (map :text)
+                            (remove str/blank?))
+          text (normalize-embedding-text
+                (str/join " " (cons title clause-texts)))]
+      {:id (:pattern/id packet)
+       :title title
+       :source (:pattern/source-path packet)
+       :text text})))
+
+(defn write-embedding-records!
+  "Write JSON embedding-input records derived from canonical packets."
+  [path packets]
+  (let [file (io/file path)
+        records (->> packets
+                     (keep packet->embedding-record)
+                     vec)]
+    (.mkdirs (.getParentFile file))
+    (spit file (json/write-str records))
+    {:path (.getCanonicalPath file)
+     :count (count records)}))
+
 (defn- usage []
   (str/join
    "\n"
    ["Usage: clj -M -m futon.flexiarg.projection [--futon3-root PATH]"
     "                                            [--source-root ROOT]*"
     "                                            [--out PATH]"
+    "                                            [--embed-json-out PATH]"
     ""
     "Defaults:"
     "  --futon3-root $FUTON3_ROOT or ../futon3"
     "  --source-root library"
     "  --source-root holes"
-    "  --out resources/notions/pattern-projections.edn"]))
+    "  --out resources/notions/pattern-projections.edn"
+    "  --embed-json-out resources/notions/pattern-embedding-records.json"]))
 
 (defn- parse-args [args]
   (loop [opts {:source-roots []
-               :out default-output}
+               :out default-output
+               :embed-json-out default-embed-json-output}
          remaining args]
     (if-let [arg (first remaining)]
       (case arg
         "--futon3-root" (recur (assoc opts :futon3-root (second remaining)) (nnext remaining))
         "--source-root" (recur (update opts :source-roots conj (second remaining)) (nnext remaining))
         "--out" (recur (assoc opts :out (second remaining)) (nnext remaining))
+        "--embed-json-out" (recur (assoc opts :embed-json-out (second remaining)) (nnext remaining))
         "-h" (recur (assoc opts :help? true) (rest remaining))
         "--help" (recur (assoc opts :help? true) (rest remaining))
         (throw (ex-info (str "Unknown argument " arg) {:arg arg})))
@@ -333,11 +372,17 @@
 
 (defn -main
   [& args]
-  (let [{:keys [help? out] :as opts} (parse-args args)]
+  (let [{:keys [help? out embed-json-out] :as opts} (parse-args args)]
     (if help?
       (println (usage))
       (let [packets (parse-roots opts)
-            written (write-projections! out packets)]
+            written (write-projections! out packets)
+            embed-result (when embed-json-out
+                           (write-embedding-records! embed-json-out packets))]
+        (when embed-result
+          (println (format "Wrote %d embedding-input records to %s"
+                           (:count embed-result)
+                           (:path embed-result))))
         (println (format "Wrote %d pattern projections to %s"
                          (count packets)
                          written))))))
