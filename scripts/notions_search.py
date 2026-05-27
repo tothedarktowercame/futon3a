@@ -33,6 +33,13 @@ def _load_embeddings(path: Path) -> List[Dict[str, object]]:
     raise SystemExit(f"Unsupported embeddings format in {path}")
 
 
+def _entry_type(entry: Dict[str, object]) -> str:
+    value = entry.get("type") or entry.get("record_type")
+    if isinstance(value, str):
+        return value
+    return ""
+
+
 def _rank(query_vec: List[float], entries: List[Dict[str, object]], top: int) -> List[Tuple[float, Dict[str, object]]]:
     scored = []
     for entry in entries:
@@ -53,6 +60,8 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=8, help="Number of matches to show.")
     parser.add_argument("--model", default="sentence-transformers/all-MiniLM-L6-v2",
                         help="SentenceTransformer model name or path.")
+    parser.add_argument("--filter-type", choices=["mission", "pattern"],
+                        help="Restrict results to entries carrying a matching type field.")
     parser.add_argument("--json", action="store_true",
                         help="Output results as JSON array.")
     args = parser.parse_args()
@@ -67,17 +76,23 @@ def main() -> None:
     query_vec = [float(x) for x in query_vec]
 
     entries = _load_embeddings(Path(args.embeddings))
+    if args.filter_type:
+        entries = [entry for entry in entries if _entry_type(entry) == args.filter_type]
     ranked = _rank(query_vec, entries, args.top)
 
     if args.json:
         results = []
         for idx, (score, entry) in enumerate(ranked, start=1):
-            results.append({
+            payload = {
                 "rank": idx,
                 "id": entry.get("id", "unknown"),
                 "title": entry.get("title", ""),
                 "score": round(score, 4),
-            })
+            }
+            for key in ("type", "source", "summary", "status", "phase", "path", "home_repo"):
+                if key in entry:
+                    payload[key] = entry.get(key)
+            results.append(payload)
         print(json.dumps(results))
     else:
         for idx, (score, entry) in enumerate(ranked, start=1):

@@ -37,8 +37,13 @@ def main():
                    help="Read one text per line from stdin, write NDJSON "
                         "{line: N, embedding: [...]}.")
     p.add_argument("--json", action="store_true",
-                   help="Read JSON array [{id, text}, ...] from stdin, "
-                        "write JSON array [{id, embedding}, ...].")
+                   help="Read JSON array [{id, text, ...}, ...] from stdin, "
+                        "write JSON array with the original metadata plus "
+                        "vector=[...].")
+    p.add_argument("--server", action="store_true",
+                   help="Run as a long-lived JSON-lines embedding server. "
+                        "Read {\"text\": ...} per line on stdin; write "
+                        "{\"embedding\": [...]} per line on stdout.")
     p.add_argument("--model", default="sentence-transformers/all-MiniLM-L6-v2")
     args = p.parse_args()
 
@@ -49,6 +54,20 @@ def main():
         raise SystemExit(1) from exc
 
     model = SentenceTransformer(args.model)
+
+    if args.server:
+        for raw in sys.stdin:
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                payload = json.loads(raw)
+                text = payload.get("text", "")
+                vec = embed_one(model, text)
+                print(json.dumps({"embedding": vec}), flush=True)
+            except Exception as exc:  # pragma: no cover - best-effort server loop
+                print(json.dumps({"error": str(exc)}), flush=True)
+        return
 
     if args.text is not None:
         vec = embed_one(model, args.text)
@@ -69,8 +88,11 @@ def main():
             raise SystemExit(1)
         texts = [(it.get("text") or "") for it in items]
         vecs = embed_batch(model, texts)
-        out = [{"id": items[i].get("id"), "embedding": vecs[i]}
-               for i in range(len(items))]
+        out = []
+        for i in range(len(items)):
+            payload = dict(items[i])
+            payload["vector"] = vecs[i]
+            out.append(payload)
         print(json.dumps(out))
         return
 
