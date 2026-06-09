@@ -1,5 +1,6 @@
 (ns futon.missions-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon.missions :as missions]))
@@ -9,48 +10,41 @@
   (spit path text)
   path)
 
-(deftest parse-mission-doc-extracts-core-slots
-  (let [root (str (io/file (System/getProperty "java.io.tmpdir")
-                           (str "mission-test-" (random-uuid))))
-        path (str (io/file root "futon7/holes/M-example.md"))]
-    (write-file!
-     path
-     (str "# Mission: M-example\n\n"
-          "**Status:** IDENTIFY (2026-05-21)\n"
-          "**Owner:** Joe\n\n"
-          "## 1. IDENTIFY\n\n"
-          "### Motivation\n\n"
-          "This mission explains how M-related-discovery should work.\n\n"
-          "### Source material\n\n"
-          "- `~/code/futon3a/README.md`\n"
-          "- `futon4/dev/web/webarxana/src/webarxana/client/core.cljs`\n"))
-    (let [mission (missions/parse-mission-doc (io/file path))]
-      (is (= "mission/M-example@futon7" (:id mission)))
-      (is (= "Joe" (:owner mission)))
-      (is (= "IDENTIFY (2026-05-21)" (:status mission)))
-      (is (= "identify" (:phase mission)))
-      (is (= "2026-05-21" (:date mission)))
-      (is (= ["M-related-discovery"] (:cross_refs mission)))
-      (is (= (str (System/getProperty "user.home") "/code/futon3a/README.md")
-             (first (:code_paths mission))))
-      (is (.contains (:summary mission) "M-related-discovery")))))
+(defn- write-records! [path records]
+  (write-file! path (json/write-str records))
+  path)
 
-(deftest load-missions-scans-canonical-paths-only
+(deftest load-missions-uses-records-cache-for-hermetic-path
   (let [root (io/file (System/getProperty "java.io.tmpdir")
-                      (str "mission-scan-" (random-uuid)))
-        canonical-a (io/file root "futon3/holes/missions/M-alpha.md")
-        canonical-b (io/file root "futon4/holes/M-beta.md")
-        ignored (io/file root "futon4/holes/M-beta.journal/M-gamma.md")]
-    (write-file! canonical-a "# Mission: M-alpha\n\n**Status:** MAP\n")
-    (write-file! canonical-b "# Mission: M-beta\n\n**Status:** DERIVE\n")
-    (write-file! ignored "# Mission: M-gamma\n\n**Status:** IDENTIFY\n")
-    (let [missions (missions/load-missions {:roots [(io/file root "futon3")
-                                                    (io/file root "futon4")]
-                                            :use-records? false
-                                            ;; T-9: skip substrate-2 query for hermetic test
+                      (str "mission-records-" (random-uuid)))
+        records-path (str (io/file root "mission_records.json"))
+        records [{:id "mission/M-alpha@futon3"
+                  :basename "M-alpha"
+                  :title "Alpha"
+                  :status "MAP"
+                  :owner "Joe"
+                  :phase "map"
+                  :phase_rank 2
+                  :summary "Search surface for self documenting stack"
+                  :cross_refs ["M-related-discovery"]
+                  :code_paths ["/home/joe/code/futon3a/README.md"]
+                  :date "2026-05-21"}]]
+    (write-records! records-path records)
+    (let [missions (missions/load-missions {:records-path records-path
                                             :prefer-substrate-2? false})]
-      (is (= #{"mission/M-alpha@futon3" "mission/M-beta@futon4"}
-             (set (map :id missions)))))))
+      (is (= records missions))
+      (is (= :records-cache (missions/last-load-source))))))
+
+(deftest load-missions-has-no-filesystem-parser-fallback
+  (let [root (io/file (System/getProperty "java.io.tmpdir")
+                      (str "mission-no-fs-fallback-" (random-uuid)))
+        canonical-a (io/file root "futon3/holes/missions/M-alpha.md")]
+    (write-file! canonical-a "# Mission: M-alpha\n\n**Status:** MAP\n")
+    (let [missions (missions/load-missions {:records-path (str (io/file root "missing_records.json"))
+                                            :prefer-substrate-2? false
+                                            :use-records? true})]
+      (is (= [] missions))
+      (is (= :empty (missions/last-load-source))))))
 
 (deftest structural-search-applies-slot-filters
   (let [missions [{:id "mission/M-alpha@futon3"
@@ -78,36 +72,23 @@
                                                             :phase "identify"}})]
     (is (= ["mission/M-alpha@futon3"] (mapv :id results)))))
 
-(deftest mission-summary-prefers-plain-language-argument
-  (let [root (str (io/file (System/getProperty "java.io.tmpdir")
-                           (str "mission-argue-" (random-uuid))))
-        path (str (io/file root "futon7/holes/M-argue.md"))]
-    (write-file!
-     path
-     (str "# Mission: M-argue\n\n"
-          "**Status:** DOCUMENT (2026-05-21)\n\n"
-          "## 4. ARGUE\n\n"
-          "### Plain-language argument (no jargon)\n\n"
-          "This plain language summary should be preferred.\n\n"
-          "## 1. IDENTIFY\n\n"
-          "### Motivation\n\n"
-          "This motivation should not win.\n"))
-    (let [mission (missions/parse-mission-doc (io/file path))]
+(deftest records-cache-preserves-parser-owned-summary-fields
+  (let [root (io/file (System/getProperty "java.io.tmpdir")
+                      (str "mission-summary-record-" (random-uuid)))
+        records-path (str (io/file root "mission_records.json"))
+        records [{:id "mission/M-argue@futon7"
+                  :title "M-argue"
+                  :status "DOCUMENT (2026-05-21)"
+                  :phase "document"
+                  :phase_rank 7
+                  :summary "This plain language summary should be preferred."
+                  :cross_refs []
+                  :code_paths []}]]
+    (write-records! records-path records)
+    (let [mission (first (missions/load-missions {:records-path records-path
+                                                  :prefer-substrate-2? false}))]
       (is (= "document" (:phase mission)))
       (is (= "This plain language summary should be preferred."
-             (:summary mission))))))
-
-(deftest mission-summary-falls-back-after-status-line
-  (let [root (str (io/file (System/getProperty "java.io.tmpdir")
-                           (str "mission-status-fallback-" (random-uuid))))
-        path (str (io/file root "futon7/holes/M-status-fallback.md"))]
-    (write-file!
-     path
-     (str "# Mission: M-status-fallback\n\n"
-          "**Status:** OPEN (2026-05-21)\n\n"
-          "This summary should be found after the status line.\n\n"))
-    (let [mission (missions/parse-mission-doc (io/file path))]
-      (is (= "This summary should be found after the status line."
              (:summary mission))))))
 
 (deftest record-consumer-event-returns-normalized-payload
