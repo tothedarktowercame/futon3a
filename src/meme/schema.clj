@@ -10,7 +10,8 @@
    - Similarity results never write to facts directly; they seed proposals
    - Promotion to facts is explicit, not a side effect of search
    - Every proposal is attributable to a method and evidence payload"
-  (:require [next.jdbc :as jdbc]))
+  (:require [next.jdbc :as jdbc]
+            [next.jdbc.result-set :as rs]))
 
 (def ^:private tables
   "Table creation DDL in dependency order."
@@ -82,6 +83,7 @@
       mode TEXT NOT NULL,
       payload TEXT,
       scope_tags TEXT,
+      advances_cap TEXT,
       confidence REAL DEFAULT 0.5,
       status TEXT NOT NULL DEFAULT 'draft',
       rationale TEXT,
@@ -145,12 +147,32 @@
    "CREATE INDEX IF NOT EXISTS idx_bridges_object ON bridges(object_id)"
    "CREATE INDEX IF NOT EXISTS idx_bridges_predicate ON bridges(predicate)"])
 
+(def ^:private migrations
+  [{:table "arrows"
+    :column "advances_cap"
+    :ddl "ALTER TABLE arrows ADD COLUMN advances_cap TEXT"}])
+
+(def ^:private post-migration-indexes
+  ["CREATE INDEX IF NOT EXISTS idx_arrows_advances_cap ON arrows(advances_cap)"])
+
+(defn- table-columns [tx table-name]
+  (set (map :name (jdbc/execute! tx [(str "PRAGMA table_info(" table-name ")")]
+                                  {:builder-fn rs/as-unqualified-maps}))))
+
+(defn- apply-migrations! [tx]
+  (doseq [{:keys [table column ddl]} migrations]
+    (when-not (contains? (table-columns tx table) column)
+      (jdbc/execute! tx [ddl])))
+  (doseq [ddl post-migration-indexes]
+    (jdbc/execute! tx [ddl])))
+
 (defn init-db!
   "Initialize the SQLite database with all tables."
   [ds]
   (jdbc/with-transaction [tx ds]
     (doseq [ddl tables]
-      (jdbc/execute! tx [ddl]))))
+      (jdbc/execute! tx [ddl]))
+    (apply-migrations! tx)))
 
 (defn db-path
   "Return the default database path."

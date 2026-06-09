@@ -64,17 +64,18 @@
    - :confidence - 0.0 to 1.0
    - :status - :draft, :active, :retired (default :draft)
    - :rationale - why this arrow exists
-   - :created-by - who/what created this"
-  [ds {:keys [source-id target-id mode payload scope-tags confidence status rationale created-by]}]
+   - :created-by - who/what created this
+   - :advances-cap - optional capability id advanced when constructed"
+  [ds {:keys [source-id target-id mode payload scope-tags advances-cap confidence status rationale created-by]}]
   (let [id (gen-id)
         now (now-iso)]
     (jdbc/execute-one! ds
-      ["INSERT INTO arrows (id, source_id, target_id, mode, payload, scope_tags, confidence, status, rationale, created_by, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-       id source-id target-id (name mode) (->json payload) (->json scope-tags)
+      ["INSERT INTO arrows (id, source_id, target_id, mode, payload, scope_tags, advances_cap, confidence, status, rationale, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+       id source-id target-id (name mode) (->json payload) (->json scope-tags) advances-cap
        (or confidence 0.5) (name (or status :draft)) rationale created-by now now]
       query-opts)
-    {:id id :source-id source-id :target-id target-id :mode mode}))
+    {:id id :source-id source-id :target-id target-id :mode mode :advances-cap advances-cap}))
 
 (defn get-arrow
   "Retrieve an arrow by id."
@@ -218,7 +219,7 @@
    This is the 'draw arrows freely' operation for the meme layer.
    The arrow starts as :draft with confidence based on whether
    a construction is provided."
-  [ds source-name target-name mode & {:keys [payload rationale scope-tags created-by]}]
+  [ds source-name target-name mode & {:keys [payload rationale scope-tags advances-cap created-by]}]
   (let [source (core/ensure-entity! ds source-name)
         target (core/ensure-entity! ds target-name)
         confidence (if payload 0.7 0.3)]  ; Higher if construction provided
@@ -228,6 +229,7 @@
        :mode mode
        :payload payload
        :scope-tags scope-tags
+       :advances-cap advances-cap
        :confidence confidence
        :status :draft
        :rationale rationale
