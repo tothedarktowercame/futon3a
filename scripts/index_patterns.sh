@@ -99,11 +99,88 @@ else
   exit 1
 fi
 
-PYTHON_BIN="${PYTHON_BIN:-python3}"
-if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
-  echo "Missing $PYTHON_BIN on PATH." >&2
+find_venv_python() {
+  local dir="$FUTON3A_ROOT"
+  local depth=0
+  while [[ "$depth" -le 6 && -n "$dir" && "$dir" != "/" ]]; do
+    if [[ -x "$dir/.venv/bin/python3" ]]; then
+      echo "$dir/.venv/bin/python3"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+    depth=$((depth + 1))
+  done
+  return 1
+}
+
+if [[ -n "${NOTIONS_PYTHON:-}" ]]; then
+  PYTHON_BIN="$NOTIONS_PYTHON"
+elif [[ -n "${PYTHON_BIN:-}" ]]; then
+  PYTHON_BIN="$PYTHON_BIN"
+else
+  PYTHON_BIN="$(find_venv_python || true)"
+  PYTHON_BIN="${PYTHON_BIN:-python3}"
+fi
+
+if [[ ! -x "$PYTHON_BIN" ]] && ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  echo "Missing Python executable: $PYTHON_BIN" >&2
   exit 1
 fi
+
+require_minilm_python() {
+  "$PYTHON_BIN" - <<'PY'
+try:
+    import sentence_transformers
+except Exception as exc:
+    raise SystemExit(f"sentence-transformers unavailable for MiniLM generation: {exc}")
+print(f"sentence-transformers {sentence_transformers.__version__}")
+PY
+}
+
+json_array_count() {
+  "$PYTHON_BIN" - <<'PY' "$1"
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = json.loads(path.read_text())
+if not isinstance(payload, list):
+    raise SystemExit(f"{path} is not a JSON array")
+print(len(payload))
+PY
+}
+
+assert_nonempty_json_array() {
+  local path="$1"
+  local label="$2"
+  if [[ ! -s "$path" ]]; then
+    echo "$label is empty or missing: $path" >&2
+    exit 1
+  fi
+  local count
+  count="$(json_array_count "$path")"
+  if [[ "$count" -le 0 ]]; then
+    echo "$label has zero JSON entries: $path" >&2
+    exit 1
+  fi
+  echo "$label count: $count"
+}
+
+assert_embedding_parity() {
+  local records="$1"
+  local embeddings="$2"
+  local label="$3"
+  assert_nonempty_json_array "$records" "$label records"
+  assert_nonempty_json_array "$embeddings" "$label embeddings"
+  local record_count embedding_count
+  record_count="$(json_array_count "$records")"
+  embedding_count="$(json_array_count "$embeddings")"
+  if [[ "$record_count" -ne "$embedding_count" ]]; then
+    echo "$label count mismatch: records=$record_count embeddings=$embedding_count" >&2
+    exit 1
+  fi
+}
 
 copy_if_distinct() {
   local src="$1"
@@ -165,24 +242,31 @@ if [[ -f "$FUTON3_ROOT/resources/embeddings/fasttext_pattern_embeddings.json" ]]
 fi
 
 if [[ -n "$MINILM_MODEL" ]]; then
+  require_minilm_python
+  minilm_pattern_tmp="$(mktemp "$OUT_DIR/.minilm_pattern_embeddings.XXXXXX.json")"
   (
     cd "$FUTON3A_ROOT"
     "$PYTHON_BIN" scripts/embed_text.py --json --model "$MINILM_MODEL" \
       < "$OUT_DIR/pattern-embedding-records.json" \
-      > "$OUT_DIR/minilm_pattern_embeddings.json"
+      > "$minilm_pattern_tmp"
   )
+  assert_embedding_parity "$OUT_DIR/pattern-embedding-records.json" "$minilm_pattern_tmp" "MiniLM pattern"
+  mv "$minilm_pattern_tmp" "$OUT_DIR/minilm_pattern_embeddings.json"
   mkdir -p "$FUTON3_ROOT/resources/embeddings"
   copy_if_distinct "$OUT_DIR/minilm_pattern_embeddings.json" \
     "$FUTON3_ROOT/resources/embeddings/minilm_pattern_embeddings.json"
 fi
 
 if [[ "$INCLUDE_MISSIONS" -eq 1 && -n "$MINILM_MODEL" && -f "$OUT_DIR/mission_records.json" ]]; then
+  minilm_mission_tmp="$(mktemp "$OUT_DIR/.minilm_mission_embeddings.XXXXXX.json")"
   (
     cd "$FUTON3A_ROOT"
     "$PYTHON_BIN" scripts/embed_text.py --json --model "$MINILM_MODEL" \
       < "$OUT_DIR/mission_records.json" \
-      > "$OUT_DIR/minilm_mission_embeddings.json"
+      > "$minilm_mission_tmp"
   )
+  assert_embedding_parity "$OUT_DIR/mission_records.json" "$minilm_mission_tmp" "MiniLM mission"
+  mv "$minilm_mission_tmp" "$OUT_DIR/minilm_mission_embeddings.json"
 fi
 
 if [[ -f "$OUT_DIR/minilm_pattern_embeddings.json" || -f "$OUT_DIR/minilm_mission_embeddings.json" ]]; then
@@ -206,8 +290,12 @@ def load(path, default_type):
 load(out_dir / "minilm_pattern_embeddings.json", "pattern")
 load(out_dir / "minilm_mission_embeddings.json", "mission")
 
+if not entries:
+    raise SystemExit("refusing to write empty minilm_corpus_embeddings.json")
+
 (out_dir / "minilm_corpus_embeddings.json").write_text(json.dumps(entries))
 PY
+  assert_nonempty_json_array "$OUT_DIR/minilm_corpus_embeddings.json" "MiniLM corpus embeddings"
 fi
 
 echo "Notions index written to $OUT_DIR"
