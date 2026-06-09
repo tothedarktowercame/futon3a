@@ -1,7 +1,8 @@
 (ns meme.cap-ascent
   "WM policy ascent seam for arrows that advance capability ids."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [meme.step :as step])
   (:import [java.net URI URLEncoder]
            [java.net.http HttpClient HttpRequest HttpRequest$BodyPublishers HttpResponse$BodyHandlers]))
 
@@ -47,11 +48,6 @@
                         :status (.statusCode resp)
                         :body body}))))))
 
-(defn- target-status [cap-entity]
-  (if (true? (get-in cap-entity [:props :capability/frontier?]))
-    :claimed
-    :satisfied))
-
 (defn- proposed-flip-event [endpoint-key cap-id cap-entity target]
   {:event :capability/proposed-flip
    :cap-id (name cap-id)
@@ -65,9 +61,20 @@
   "Validate a capability and produce the status/event writes needed for ascent."
   [cap-id endpoint-key opts]
   (let [cap-entity (fetch-capability cap-id opts)
-        target (target-status cap-entity)
+        sim-state {:arrows {endpoint-key {:have (first endpoint-key)
+                                          :want (second endpoint-key)
+                                          :status :open
+                                          :advances-cap (name cap-id)}}
+                   :cap-overlay {(name cap-id) cap-entity}
+                   :reachable #{(first endpoint-key)}}
+        stepped (step/step sim-state {:have (first endpoint-key)
+                                      :want (second endpoint-key)
+                                      :advances-cap (name cap-id)
+                                      :to-state :constructed})
+        stepped-cap (get-in stepped [:cap-overlay (name cap-id)])
+        target (get-in stepped-cap [:props :capability/status])
         current (get-in cap-entity [:props :capability/status])
-        frontier? (true? (get-in cap-entity [:props :capability/frontier?]))
+        frontier? (step/cap-frontier? cap-entity)
         event (when frontier?
                 (proposed-flip-event endpoint-key cap-id cap-entity target))
         already-target? (= target current)]
