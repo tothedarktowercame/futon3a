@@ -141,13 +141,23 @@
 (defn- emit-ch2-if-needed! [ds arrow-row endpoint ch2-opts]
   (let [{:keys [emit? sink]} (normalize-ch2-opts ch2-opts)]
     (when emit?
-      (let [have (:have endpoint)
-            want (:want endpoint)
-            event (ch2/discharge-event
-                   (str have "->" want)
-                   (arrow-sorry-ref! ds arrow-row)
-                   (str (java.time.Instant/now)))]
-        (ch2/emit-discharge-event! event :sink sink)))))
+      (try
+        (let [have (:have endpoint)
+              want (:want endpoint)
+              event (ch2/discharge-event
+                     (str have "->" want)
+                     (arrow-sorry-ref! ds arrow-row)
+                     (str (java.time.Instant/now)))]
+          (ch2/emit-discharge-event! event :sink sink))
+        (catch Exception e
+          ;; A CH2 emission failure must NOT break an already-committed
+          ;; promotion (the arrow update has landed by now, and the retry would
+          ;; hit the idempotent noop branch). Surface it loudly — never silently
+          ;; swallow — and return nil so the promote! result simply omits the event.
+          (binding [*out* *err*]
+            (println "WARN: CH2 discharge-event emission failed for"
+                     (str (:have endpoint) "->" (:want endpoint)) "-" (.getMessage e)))
+          nil)))))
 
 (defn promote!
   "Promote an existing endpoint-keyed arrow in place."
