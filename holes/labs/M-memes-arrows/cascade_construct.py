@@ -29,6 +29,8 @@ ROOT = Path("/home/joe/code/futon3a")
 EMB = {r["id"]: r["vector"] for r in json.load(open(ROOT/"resources/notions/minilm_pattern_embeddings.json"))}
 DEFAULT_POSTERIORS = ROOT/"resources/notions/pattern_posteriors.self_graded.json"
 DEFAULT_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-edges.json")
+DEFAULT_LEARNED_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-learned.json")
+DEFAULT_GROUNDED_POSTERIORS = Path("/home/joe/code/futon6/data/pattern_posteriors.grounded.json")
 
 def cos(a, b):
     d = sum(x*y for x, y in zip(a, b)); na = math.sqrt(sum(x*x for x in a)); nb = math.sqrt(sum(y*y for y in b))
@@ -43,14 +45,18 @@ def _embed(text):
     return [float(x) for x in _MODEL.encode([text], normalize_embeddings=True)[0]]
 
 def load_posteriors(path=DEFAULT_POSTERIORS):
-    """Load self-graded pattern posteriors. Missing file = no posterior signal."""
-    p = Path(path)
+    """Load grounded posteriors when present; otherwise fall back to self-graded."""
+    p = DEFAULT_GROUNDED_POSTERIORS if path == DEFAULT_POSTERIORS and DEFAULT_GROUNDED_POSTERIORS.exists() else Path(path)
     if not p.exists():
         return {"label": "self-graded", "patterns": {}}
-    return json.load(open(p))
+    data = json.load(open(p))
+    if "patterns" in data:
+        return data
+    return {"label": "grounded-closure-folds", "patterns": data}
 
 def posterior_mean(pid, posterior_table):
-    row = (posterior_table or {}).get("patterns", {}).get(pid)
+    patterns = (posterior_table or {}).get("patterns", {})
+    row = patterns.get(pid) or patterns.get(pattern_stem(pid))
     return float(row.get("mean", 0.5)) if row else 0.5
 
 def posterior_multiplier(pid, posterior_table, posterior_weight):
@@ -64,19 +70,31 @@ def pattern_stem(pid):
     """Match library ids like lib/stem to phylogeny ids keyed by stem."""
     return str(pid).split("/")[-1]
 
-def load_phylogeny(path=DEFAULT_PHYLOGENY):
+def load_phylogeny(path=DEFAULT_PHYLOGENY, learned_path=DEFAULT_LEARNED_PHYLOGENY, include_learned=True):
     p = Path(path)
     if not p.exists():
-        return {"patterns": set(), "descent": set(), "co_app": {}, "max_co": 1.0}
+        return {"patterns": set(), "descent": set(), "co_app": {}}
     raw = json.load(open(p))
     co_app = {}
     for a, b, w in raw.get("co_app", []):
         w = float(w)
         co_app[(a, b)] = w
         co_app[(b, a)] = w
+    descent = {tuple(edge[:2]) for edge in raw.get("descent", [])}
+    if include_learned and Path(learned_path).exists():
+        learned = json.load(open(learned_path))
+        for edge in learned.get("descent", []):
+            if len(edge) >= 2:
+                descent.add(tuple(edge[:2]))
+        for edge in learned.get("co_app", []):
+            if len(edge) >= 3:
+                a, b, w = edge[:3]
+                w = float(w)
+                co_app[(a, b)] = w
+                co_app[(b, a)] = w
     return {
         "patterns": set(raw.get("patterns", [])),
-        "descent": {tuple(edge) for edge in raw.get("descent", [])},
+        "descent": descent,
         "co_app": co_app,
     }
 
@@ -191,6 +209,22 @@ def print_cascade(name, query):
     print(f"    non-phylogeny: {json.dumps(r['non-phylogeny'])}")
     print()
 
+def print_learned_comparison():
+    query = "model recompute schedule prototype maturity lifecycle cadence hook forward model beta posterior"
+    computed = construct_cascade(query, epsilon=0.15, phylogeny=load_phylogeny(include_learned=False))
+    learned = construct_cascade(query, epsilon=0.15)
+    print("\n=== learned-overlay downstream comparison ===\n")
+    print("[kit-cadence query]")
+    print("computed-only:")
+    print(f"  size={computed['size']} C={computed['C']} edges={computed['phylogeny']['edge_count']}")
+    print(f"  cascade={[pid for _, pid, _ in computed['trajectory']]}")
+    print(f"  semi-lattice={json.dumps(computed['semi-lattice'], sort_keys=True)}")
+    print("computed+learned:")
+    print(f"  size={learned['size']} C={learned['C']} edges={learned['phylogeny']['edge_count']}")
+    print(f"  cascade={[pid for _, pid, _ in learned['trajectory']]}")
+    print(f"  semi-lattice={json.dumps(learned['semi-lattice'], sort_keys=True)}")
+    print()
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "demo":
         DEMOS = {
@@ -202,6 +236,9 @@ if __name__ == "__main__":
         print("\n=== phylogeny-grounded cascades demo (epsilon=0.15; alpha=0.3) ===\n")
         for name, q in DEMOS.items():
             print_cascade(name, q)
+        raise SystemExit(0)
+    if len(sys.argv) > 1 and sys.argv[1] == "learned-demo":
+        print_learned_comparison()
         raise SystemExit(0)
 
     # A couple of REAL missions of differing character — so claude-1 can eyeball coverage-saturation sizes.
