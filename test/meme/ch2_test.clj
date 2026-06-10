@@ -98,3 +98,23 @@
      :ch2 {:emit? false
            :sink sink})
     (is (empty? (ch2/read-events sink)))))
+
+(deftest promote-without-payload-surfaces-skip-not-silence
+  ;; constructed-without-construction: the anti-laundering gate refuses it (no :payload
+  ;; = no construction evidence), and the skip is now VISIBLE in the result instead of
+  ;; silently swallowed. (fable-1 / E-mission-head §8.5 — three real discharges went
+  ;; invisible to the value channel before this.)
+  (let [ds (temp-ds)
+        sink (temp-sink)
+        ep {:have "ch2/nopayload/have"
+            :want "ch2/nopayload/want"}
+        _ (mint-open! ds ep)
+        result (identity/promote!
+                ds ep :constructed
+                :mode :construction               ; deliberately NO :payload
+                :cap-ascent {:write? false}
+                :ch2 {:sink sink})]
+    (is (nil? (:ch2/discharge-event result)))                                  ; no event
+    (is (= :constructed-without-construction (get-in result [:ch2/emit-skipped :reason]))) ; visible skip
+    (is (= "ch2/nopayload/have->ch2/nopayload/want" (get-in result [:ch2/emit-skipped :move/id])))
+    (is (empty? (ch2/read-events sink)))))                                     ; nothing laundered

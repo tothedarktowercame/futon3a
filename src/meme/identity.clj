@@ -150,14 +150,25 @@
                      (str (java.time.Instant/now)))]
           (ch2/emit-discharge-event! event :sink sink))
         (catch Exception e
-          ;; A CH2 emission failure must NOT break an already-committed
-          ;; promotion (the arrow update has landed by now, and the retry would
-          ;; hit the idempotent noop branch). Surface it loudly — never silently
-          ;; swallow — and return nil so the promote! result simply omits the event.
-          (binding [*out* *err*]
-            (println "WARN: CH2 discharge-event emission failed for"
-                     (str (:have endpoint) "->" (:want endpoint)) "-" (.getMessage e)))
-          nil)))))
+          ;; A CH2 emission failure must NOT break an already-committed promotion
+          ;; (the arrow update has landed; a retry hits the idempotent noop). But it
+          ;; must NOT be silent either — returning nil + a *err*-only log let three
+          ;; real discharges go invisible to the value channel (fable-1, E-mission-head
+          ;; §8.5; the §9 logging-without-propagating trap). Return a VISIBLE skip
+          ;; marker the promote! result carries, and NAME the load-bearing case: a
+          ;; :constructed arrow with no :payload is constructed-without-construction —
+          ;; the anti-laundering gate correctly refuses it (do NOT weaken the gate);
+          ;; surfacing the skip is how that violation gets noticed instead of dropped.
+          (let [reason (if (nil? (:payload arrow-row))
+                         :constructed-without-construction
+                         :emit-error)]
+            (binding [*out* *err*]
+              (println "WARN: CH2 discharge SKIPPED for"
+                       (str (:have endpoint) "->" (:want endpoint))
+                       "- reason:" (name reason) "-" (.getMessage e)))
+            {:ch2/skipped {:reason reason
+                           :move/id (str (:have endpoint) "->" (:want endpoint))
+                           :error (.getMessage e)}}))))))
 
 (defn promote!
   "Promote an existing endpoint-keyed arrow in place."
@@ -196,8 +207,8 @@
             updated (absorb-token! ds (arrow/get-arrow ds (:id existing)) token-id)
             cap-result (when (= :constructed to-state)
                          (cap-ascent-if-needed! updated endpoint cap-ascent))
-            ch2-event (when (= :constructed to-state)
-                        (emit-ch2-if-needed! ds updated endpoint ch2))]
+            ch2-result (when (= :constructed to-state)
+                         (emit-ch2-if-needed! ds updated endpoint ch2))]
         (cond-> {:arrow updated
                  :cap-ascent cap-result
                  :op {:op :promote
@@ -206,7 +217,8 @@
                       :to to-state
                       :have (:have endpoint)
                       :want (:want endpoint)}}
-          ch2-event (assoc :ch2/discharge-event ch2-event))))))
+          (:ch2/discharge-event ch2-result) (assoc :ch2/discharge-event ch2-result)
+          (:ch2/skipped ch2-result)         (assoc :ch2/emit-skipped (:ch2/skipped ch2-result)))))))
 
 (defn- entity-names [ds]
   (set (map :name (core/list-entities ds))))
