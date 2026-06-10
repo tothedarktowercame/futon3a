@@ -194,3 +194,14 @@ evidence, so the WM-style cascade surfaces mostly hit `n=0` → posterior inert 
 layer works; it needs more evidence to move the WM** — grounded peradams (the escrowed car) and/or more PURs
 (the scope-out "PUR-authoring discipline" follow-on). Recorded honestly; falsifiable stance held. Mergeable
 on operator/coordinator call.
+
+**Role-fork resolved (Joe via claude-3, 2026-06-10 — `:O-peradam-role` → CALIBRATION, not training):** the
+grounded peradam *calibrates* the posterior (does a pattern's PUR-learned trust correspond to real
+discharges?) — an **audit**, not a second training signal. This sharpens the v0 null into **two distinct
+axes**, not one: **(1) coverage** — only 12/1071 patterns have *any* PUR, so most of the library is
+*untrained*; more PURs extend coverage (that is training). **(2) calibration** — even the trained 12 are
+*self-graded* until peradams audit them. So the earlier "needs more evidence to move the WM — grounded
+peradams *and/or* more PURs" resolves precisely: **more PURs train (coverage); the grounded peradam
+calibrates (audit)** — different roles, not interchangeable. The machinery isn't starved-*for-training*
+(PURs train it); it's *un-calibrated* until the car's peradams audit it. The ≤1.0-conservation credit rule
+(co-designed on [[M-peradam-grounding]]) still applies on the calibration path; escrow stays `:held`.
