@@ -1,0 +1,120 @@
+;; reference-case-one-arrow-three-stages.edn  (v2 — revised after claude-5's adversarial review)
+;;
+;; Canonical worked example for M-memes-arrows-patterns-diagrams ARGUE (§10.7–10.9):
+;; cascade / sorry / construction are ONE arrow-TYPE keyed by its (have, want) endpoints,
+;; in three states (correlated -> open -> constructed). Tokens minted by mining unify onto
+;; the type by endpoint-match — so the store's primary key is the endpoint pair, and that is
+;; *why* the three states share one home (mechanism, not aesthetic).
+;;
+;; v1 (the EFE-ingredient thread) was refuted by claude-5 on two counts:
+;;  (1) its "cascade" was an undirected clique among method-INGREDIENTS, not a have->want
+;;      proto-arrow (the `want` wasn't even a node);
+;;  (2) the live miner MINTS fresh sorry-ids from WM gap-signals — it does not mature a
+;;      cascade — so "one TOKEN maturing" is false in practice.
+;; The repair (claude-5, adopted): key by endpoints, re-scope to TYPE-with-three-states,
+;; make promotion a unify-by-endpoint op. v2 is built on that, and leads with the exemplar
+;; that has real token-level closure (r3a), per claude-5's own pointer.
+
+{:reference-case/id :one-arrow-three-states
+ :reference-case/title "Belief-mass -> support-coverage — one arrow-type, three states, real token closure"
+ :reference-case/version 2
+ :reference-case/date "2026-06-09"
+ :reference-case/author "claude-4, revised after claude-5 (M-a-sorry-enterprise) review"
+
+ :thesis
+ (str "A cascade, a sorry, and a construction are not three kinds of thing — they are one "
+      "ARROW-TYPE, identified by its (have, want) endpoint pair, in three STATES: "
+      ":correlated (have & want observed to co-occur, no method) -> :open (goal committed, "
+      "type fixed by surrounding construction, method absent) -> :constructed (a runnable "
+      "method = a BHK arrow = a wiring diagram). Tokens (e.g. a freshly-minted mined sorry) "
+      "UNIFY onto the type by endpoint-match. They share one home BECAUSE they are keyed by "
+      "the same endpoints — that is the mechanism, not a filing preference.")
+
+ ;; THE MECHANISM the thesis now rests on (claude-5's repair).
+ :mechanism
+ {:primary-key :endpoint-pair          ; (have, want), each an existing node (R1 taken to its end)
+  :not-key :mint-time-record-id        ; a minted sorry-id is NOT identity
+  :states [:correlated :open :constructed]
+  :promotion "find the arrow with these endpoints; advance its state; absorb any token sharing them (unify-or-transition, NOT create)"
+  :why-one-home "three states of one endpoint-keyed entity cannot live in three tables without losing the entity"}
+
+ ;; The single arrow, invariant across the three states.
+ :arrow {:have "belief mass on the supports-tagged entity cohort"
+         :want "the :support-coverage channel value in [0,1]"
+         :endpoint-key [:belief-mass-supports-cohort :support-coverage-channel]}
+
+ ;; PRIMARY exemplar — one TOKEN with real :open -> :constructed closure in code.
+ ;; (claude-5: r3a is the better full-maturation example; v1 had it buried in a footnote.)
+ :token-maturation
+ {:sorry-id :sorry/r3a-likelihood-support-coverage
+  :states
+  [{:state :correlated
+    :plain "a hunch"
+    :evidence "the sorry's own rationale: support-coverage [0,1] 'COULD derive from belief mass on entities tagged as supporting evidence' — have & want noticed to relate, method absent"
+    :construction nil
+    :honesty "attested by rationale prose, NOT by hard co-occurrence counts; turning this into recorded :correlated->:open is exactly what Contract C (miner unify-by-endpoint) would deliver"}
+   {:state :open
+    :plain "a gap with a known shape"
+    :raised-at "2026-05-18"
+    :goal "a predictor mapping the supports-tagged belief cohort -> coverage in [0,1]"
+    :type-fixed-by "the R3a channel contract: output must be [0,1] support-coverage; input is belief mass over the supports cohort"
+    :method-absent "needs entity-tag classification in the bootstrap (the prerequisite the sorry names)"
+    :construction nil}
+   {:state :constructed
+    :plain "the machine / the proof"
+    :addressed-at "2026-05-26"
+    :construction {:method "futon2.aif.belief/predict-support-coverage"
+                   :prerequisite "futon2.aif.belief/classify-entity-tags-from-stack-annotations"
+                   :cg-chain ["cg-17bbaa01-33fc-4a31-bcc6-568cc047f093"
+                              "cg-a5d2e756-b28b-44c3-8b8d-dc2548034f48"]
+                   :excursion "futon3c/holes/missions/E-support-coverage.md"}
+    :same-token? true}]
+  :token-identity-proof
+  (str "It is ONE record: :sorry/r3a-likelihood-support-coverage transitioned :status "
+       ":open -> :addressed, with :addressed-by-cg-chain citing the construction that filled "
+       "the hole. The (have, want) endpoints are unchanged across the transition — the arrow "
+       "matured, it was not re-minted. This is the token-level maturation v1 lacked.")
+  :provenance "futon2/resources/sorrys.edn :sorry/r3a-likelihood-support-coverage"}
+
+ ;; SECONDARY (demoted + relabelled) — the EFE thread is NOT a maturation arrow.
+ ;; It shows what a :constructed arrow looks like INSIDE: its ingredients wired. That is
+ ;; construction-internal *composition / feasibility* structure, a different relationship
+ ;; from the have->want maturation. Kept because the ingredient->component map is real and
+ ;; useful, but explicitly NOT a cascade->sorry->construction example.
+ :construction-internal-composition
+ {:note "feasibility/composition view, NOT the maturation arrow (per claude-5's refutation of v1)"
+  :construction "futon5/data/missions/aif2-exotype.edn"
+  :ingredients-wired
+  {:I-observation "structured-observation-vector"
+   :C-propose     "candidate-pattern-action-space"
+   :C-rank        "expected-free-energy-scorecard"
+   :C-select      "policy-precision-commitment-temperature"}
+  :co-app-among-ingredients   ; real, but it is ingredient-clique co-occurrence, not have<->want
+  [{:a "candidate-pattern-action-space" :b "expected-free-energy-scorecard" :co-app 5}
+   {:a "expected-free-energy-scorecard" :b "structured-observation-vector"  :co-app 5}]}
+
+ ;; What v2 does NOT yet demonstrate — stated explicitly (claude-5 re-review: leave these
+ ;; implicit and a hard reader downgrades the thesis back to "one row, not a mechanism").
+ :unwitnessed
+ {:cross-source-endpoint-unification
+  (str "NOT demonstrated. r3a matured as ONE hand-edited registry row; it never passed through "
+       "the miner. So r3a proves token-maturation is POSSIBLE — it does NOT witness the "
+       "cross-source unify-by-endpoint MECHANISM (a mined token unifying onto a pre-existing "
+       "arrow). The mechanism is a design claim awaiting endpoint-extraction + Contract C.")
+  :correlated->open-transition
+  (str "CIRCULAR as evidence. r3a's :correlated stage is read off the sorry's OWN "
+       "post-commitment rationale, written at/after :raised-at. Witnessing :correlated->:open "
+       "needs a co-occurrence record timestamped BEFORE :raised-at — which does not exist yet.")}
+
+ :residual-gap-and-contract
+ (str "CONTRACT C (ratified by claude-5, AMENDED): unify-by-endpoint lives on the PROMOTION step "
+      "(E-cheesemonger), NOT the miner — the miner mints, promotion unifies. HARD PRECONDITION: "
+      "endpoint-extraction — derive the (have, want) pair from the typed AIF head — which the "
+      "miner does not do today. Without it, C degrades to synthetic-id-proxy unification, which "
+      "won't catch same-endpoint/different-id collisions. "
+      "HIGHEST-LEVERAGE BUILD ITEM (claude-5): endpoint-extraction on the `missing-head` class — "
+      "it is the precondition for C, it is what turns r3a-style maturation into the RECORDED "
+      "normal case rather than a hand-edited exception, and it is implementable precisely "
+      "because AIF heads are typed.")
+
+ :credit "Refutation + endpoint-identity repair + r3a-as-better-exemplar + C-amendment + the unwitnessed caveats: claude-5 (M-a-sorry-enterprise), 2026-06-09 (two adversarial review rounds)."}

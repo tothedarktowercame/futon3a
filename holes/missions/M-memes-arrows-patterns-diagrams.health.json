@@ -1,0 +1,16 @@
+{
+  "mission": "M-memes-arrows-patterns-diagrams",
+  "generated-at": "2026-06-10T18:16:37.122435+00:00",
+  "generator": "head_exotype_probe.py",
+  "sigil": {
+    "exotype": "00001000",
+    "xenotype-32": null,
+    "per-section": null
+  },
+  "health": {
+    "bit-confidence": 0.42,
+    "xenotype-completeness": 0.0,
+    "anchor-proximity": null,
+    "reading": "No IF/HOWEVER/THEN/BECAUSE recast block found; only the whole-HEAD exotype was computed, so xenotype health is degraded."
+  }
+}

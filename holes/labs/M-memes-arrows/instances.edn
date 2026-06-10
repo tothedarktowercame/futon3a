@@ -1,0 +1,108 @@
+;; instances.edn — three REAL, implementation-neutral instances for
+;; M-memes-arrows-patterns-diagrams §9.2/§9.4 (Joe: "build real instances; focus
+;; on the implementation-neutral objects; we won't know the store until we hold
+;; a real cascade, a real BHK arrow, and a real sorry").
+;;
+;; IMPLEMENTATION-NEUTRAL: each object is an abstract `lhs -> rhs` arrow + facets.
+;; It commits to NO store — not meme.arrow rows, not a triple store, not graph
+;; embeddings. The store options (i) revive meme / (ii) real triple store for
+;; speed / (iii) graph embeddings are judged AGAINST this bench, not baked in.
+;;
+;; The object family is ONE arrow `lhs -> rhs` at three completion levels (§7/§9.3):
+;;   :correlated  (cascade)        rhs reached empirically, NO construction
+;;   :open        (sorry)          rhs's TYPE fixed by context, construction ABSENT
+;;   :constructed (wiring diagram) rhs reached BY a construction (BHK arrow)
+;; Discriminator for :open vs the rest = "what closes it?" -> supply-a-construction
+;; (internal, type-checked) vs observe / already-done.
+
+{:bench/id :m-memes-arrows-instances
+ :bench/date "2026-06-09"
+ :bench/note "Real artifacts, not invented. Sources cited per object."
+
+ :object-schema
+ ;; the implementation-neutral shape every instance conforms to
+ {:object/id        "stable id"
+  :object/kind      ":cascade | :sorry | :wiring-diagram"
+  :status           ":correlated | :open | :constructed"
+  :lhs              "reference to an EXISTING node (R1: never re-mint)"
+  :rhs              "codomain / goal (a node, possibly aspirational for :open)"
+  :construction     "the term/method; nil unless :constructed"
+  :type-fixed-by    "what determines the rhs type (for :sorry: the surrounding edges)"
+  :closes-by        ":supply-construction | :observe | :n/a"
+  :bhk-clause       "H3(->) | H5(forall) | H6(exists) | n/a — the sorry 'flavour'"
+  :facets           "{:mode .. :confidence ..} — meme.arrow-COMPATIBLE but not committed"
+  :attestation      "where observed: count + source"
+  :provenance       "the real artifact this is lifted from"}
+
+ :instances
+ [;; ----------------------------------------------------------------
+  ;; 1. CASCADE  (:correlated) — a correlation, explicitly NOT a BHK arrow.
+  ;; ----------------------------------------------------------------
+  {:object/id   :cascade/witness-reduce
+   :object/kind :cascade
+   :status      :correlated
+   :lhs         {:pattern "construct-an-explicit-witness"}
+   :rhs         {:pattern "reduce-to-known-result"}
+   :construction nil
+   :type-fixed-by nil           ; both endpoints are OBSERVED nodes; rhs is empirical, not a goal
+   :closes-by   :n/a            ; not a problem to close — an observed co-occurrence
+   :bhk-clause  :n/a
+   :facets      {:mode :co-application :confidence 0.60}  ; conf from attestation, not hand-set
+   :attestation {:co-application-count 8 :source "futon6 pattern_phylogeny (mission co-occurrence)"}
+   :provenance  "top co-application pair across mission docs, 2026-06-09"}
+
+  ;; ----------------------------------------------------------------
+  ;; 2. SORRY  (:open, ->-flavour, CONSTRUCTION-content — not wishlist).
+  ;; The AIF inference is DEFINED but has never run (step-count = 0).
+  ;; Closes by SUPPLYING A CONSTRUCTION (run the loop, type-checked), not a
+  ;; world-action — passes the proof-hole discriminator (§9.3).
+  ;; ----------------------------------------------------------------
+  {:object/id   :sorry/aif-loop-unstepped
+   :object/kind :sorry
+   :status      :open
+   :lhs         {:node "mission-control@futon3c"
+                 :content "cross-repo observation layer / canonical mission inventory (the inputs)"}
+   :rhs         {:node "portfolio-inference@futon3c"
+                 :content "EFE selects next mission from sensory channels (the inference OUTPUT type)"}
+   :construction nil            ; :gap "AIF loop step-count = 0" — method defined, never executed
+   :type-fixed-by ["n5 :supports n6 (input)"
+                   "n6 :generalises-shape-to n7 (output must be shape-portable)"
+                   "n15 :attacks n6: 'built and not used does not know whether it works'"]
+   :closes-by   :supply-construction   ; run the loop -> produce a step -> witness it type-checks
+   :bhk-clause  :H3                     ; an implication/method is what's missing
+   :facets      {:mode :construction-shaped :confidence 0.30}
+   :attestation {:source "leaf-6-4-4.aif.edn n6 :gap; conflict n15 bites it"}
+   :provenance  "futon5a/holes/stories/leaf-6-4-4.aif.edn :nodes n6 (an :inference node)"}
+
+  ;; ----------------------------------------------------------------
+  ;; 3. WIRING DIAGRAM / BHK ARROW  (:constructed) — the construction itself.
+  ;; SAME construction as instance 2 (the AIF loop), but fully wired + validated.
+  ;; instance-2 :open is THIS diagram with the run-box empty (Kolmogorov problem
+  ;; = this solution-diagram-with-a-gap).
+  ;; ----------------------------------------------------------------
+  {:object/id   :wiring/aif2-exotype
+   :object/kind :wiring-diagram
+   :status      :constructed
+   :lhs         {:ports [:I-observation :I-manifold :I-substrate]
+                 :content "the live world the WM senses (inputs)"}
+   :rhs         {:ports [:O-action]
+                 :content "selected / installed action (output)"}
+   :construction {:diagram "observe -> propose -> rank -> select -> act (3 nested loops over one extensible-registry)"
+                  :checkable-by "futon5.ct.mission/validate"
+                  :invariants [:I3 :I4 :I6]}
+   :type-fixed-by "the diagram's typed ports + edges (it IS the construction)"
+   :closes-by   :n/a            ; already constructed
+   :bhk-clause  :n/a
+   :facets      {:mode :construction :confidence 0.90}
+   :attestation {:source "validated AIF+ exotype"}
+   :provenance  "futon5/data/missions/aif2-exotype.edn"}]
+
+ :the-unity
+ "Instances 2 and 3 are the SAME construction (the AIF loop) at two completion
+  levels: the sorry (2) is the inference defined-but-unstepped; the wiring diagram
+  (3) is it fully wired + validated. A sorry = a wiring diagram with one node whose
+  TYPE is fixed by the wiring but whose CONSTRUCTION is absent. This is the concrete
+  realisation of 'a sorry has the same shape as a wiring diagram' (§7) and of
+  Kolmogorov's problem=solution. The cascade (1) is a DIFFERENT thing — a correlation
+  with no construction; a high-attestation cascade with no construction is what SEEDS
+  a sorry (demand = attestation x no-construction)."}
