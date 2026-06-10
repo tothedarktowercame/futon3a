@@ -205,3 +205,45 @@ peradams *and/or* more PURs" resolves precisely: **more PURs train (coverage); t
 calibrates (audit)** — different roles, not interchangeable. The machinery isn't starved-*for-training*
 (PURs train it); it's *un-calibrated* until the car's peradams audit it. The ≤1.0-conservation credit rule
 (co-designed on [[M-peradam-grounding]]) still applies on the calibration path; escrow stays `:held`.
+
+## Grounded-learning convergence — grounding-source = FOLDS, escrow RELEASABLE (2026-06-10, claude-1/3/4)
+
+Spec: `futon3c/holes/campaigns/grounded-learning-spec.md`. Three contracts agreed (3/3). **The grounding
+source moved from the peradam (the car) to FOLD-USAGE** — and that supersedes the line just above: the
+posterior is **grounded by real closures** (`futon6/holes/closure-folds.edn` `:used`-subsets →
+`cascade_learn.py` → `futon6/data/pattern_posteriors.grounded.json`, Beta(1,1)), **not** by peradams. The
+peradam is now strictly the **out-of-loop AUDITOR** (Goodhart/drift-check), which keeps the
+calibration-not-training resolution intact while relocating the *grounding* to the live fold loop. **So this
+mission's grounded path no longer waits on the car** — escrow is **RELEASABLE on the closure signal**, gated
+only on Joe's STANDARD-VERIFY.
+
+**My surface (confirmed): the pattern-NODE posteriors + the A/B credit term.** claude-3 holds the co-app
+EDGE surface (phylogeny upvote/seed). One closure projects onto vertices (my α/β) and edges (claude-3's
+overlay) **orthogonally → non-double-counting by construction.**
+
+**Q2 (credit assignment) — resolved.** Verified in code: `closure-folds.edn` records `:used` (the subset the
+fold structurally rested on, e.g. `kit-outbox :used [mission-anchored-scan mission-unlocks-eoi]`, not the
+27-pattern cascade), and `cascade_learn` credits **only `:used`** (`α+=1` per used stem). So used-subset
+Bernoulli is *already the implementation* — the 6 stems in `grounded.json` ARE the used-subsets across 5
+closures, not the ~135 cascade patterns. The cross-stage **non-double-count invariant** vs R2: no
+closure-derived scalar enters both a move-weight and a pattern-posterior that are later *summed* in one
+score — satisfied because R2 acts at move-ranking, the posterior at within-cascade construction. **Open
+unlock (claude-3 owns):** `cascade_learn` currently skips `success:false` folds, so β never bumps and the
+table can't discriminate; recording failed folds (`β+=1` on the used subset) makes discrimination appear.
+
+**Q4 (composition — the cursor-bug risk) — resolved.** Three load-bearing invariants make composition
+provably non-greedy: (I) **trust-neutral at prior** (unclosed pattern → Beta(1,1) mean 0.5 → multiplier
+1.0); (II) **multiplicative on positive margin only** (trust re-weights `m'(p)=rel·connectivity`, already
+wholeness-coherent; can't rescue a non-coherent candidate); (III) **bounded + saturation-external**
+(multiplier in `[1−0.5w, 1+0.5w]`; never alters the coverage-saturation stop). EXPLORE coupling: my surface
+exposes **variance** (α,β) so the star-map's explore term (Q3) gets Thompson-compatible epistemic boost —
+mean=exploit, variance=explore.
+
+**Grounded A/B — composition demonstrated (Completion #3, grounded).** Reduced A/B (precomputed embeddings,
+query = `mission-anchored-scan`): all 6 grounded used-stems move **up** (+77 to +101 ranks) under the
+grounded term, **277/1070 patterns re-rank** (vs 0 at weight 0) → construction changes. Bounded/on-margin
+shown empirically: `typed-kolmogorov-arrows` (rel 0.107) is boosted yet stays #899 — trust nudges within the
+relevance order, never manufactures a place. **No intra-used discrimination yet** (all at mean 0.667 → uniform
+1.10× boost) — that awaits claude-3's failed-fold β refinement. Full free-text coherence-greedy render
+deferred until β-discrimination exists (else a trivial uniform shift) + the embedding env is available.
+Artifact: `holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md`.
