@@ -1,7 +1,7 @@
 (ns futon.flexiarg.projection-test
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [futon.flexiarg.projection :as projection]))
 
 (def futon3-root "/home/joe/code/futon3")
@@ -58,6 +58,20 @@
       (is (= :error (:pattern/status packet)))
       (is (= "missing" (:pattern/projection-version packet)))
       (is (= :missing-header (get-in packet [:pattern/error :kind]))))))
+
+(deftest indented-block-headers-produce-visible-errors
+  (let [dir (temp-dir)
+        file (io/file dir "nested.multiarg")]
+    (spit file (str "@arg demo/one\n"
+                    "! conclusion:\n"
+                    "  one\n"
+                    "  @arg demo/two\n"
+                    "  ! conclusion:\n"
+                    "    two\n"))
+    (let [packet (first (projection/parse-file file {:futon3-root (.getPath dir)}))]
+      (is (= :error (:pattern/status packet)))
+      (is (= "missing" (:pattern/projection-version packet)))
+      (is (= :indented-header (get-in packet [:pattern/error :kind]))))))
 
 (deftest projection-output-is-deterministic
   (let [dir (temp-dir)

@@ -12,6 +12,7 @@
 (def ^:private default-source-roots ["library" "holes"])
 (def ^:private flexiarg-exts #{".flexiarg" ".multiarg"})
 (def ^:private section-header-re #"^\s*[!+]\s+([^:]+):\s*(.*)$")
+(def ^:private indented-block-header-re #"(?m)^\s+@(arg|flexiarg|multiarg)\s+\S+")
 (def ^:private sigil-block-re #"\[[^\]]+\]")
 (def ^:private sigil-token-re #"[^\s\[\]]+/[^\s\[\]]+")
 
@@ -166,12 +167,6 @@
                :pattern/source-path (relative-path file futon3-root)
                :pattern/status :error))
 
-(defn- first-by-key [components k]
-  (some (fn [component]
-          (when (= k (:name-key component))
-            (:text component)))
-        components))
-
 (def conclusion-aliases
   "Clause name-keys recognised as syntactic sugar for the canonical
    `! conclusion:` slot. The pattern's *required* top-level claim may
@@ -195,9 +190,16 @@
          pattern-id (or (extract-meta block "arg")
                         (extract-meta block "flexiarg")
                         (extract-meta block "multiarg"))]
-     (if-not pattern-id
+     (cond
+       (re-find indented-block-header-re block)
+       (error-packet file futon3-root :indented-header
+                     "Pattern block headers must start at column zero")
+
+       (not pattern-id)
        (error-packet file futon3-root :missing-header
                      "Block is missing @arg/@flexiarg/@multiarg header")
+
+       :else
        (let [components (parse-components block)
              direct-sigils (parse-list-directive (extract-meta block "sigils"))
              all-sigils (vec (distinct (concat direct-sigils
@@ -289,7 +291,7 @@
 
 (defn parse-roots
   "Project all flexiarg files under the configured roots."
-  [{:keys [futon3-root source-roots] :as opts}]
+  [{:keys [source-roots] :as opts}]
   (let [root (resolve-futon3-root opts)]
     (->> (source-files root source-roots)
          (mapcat #(parse-file % {:futon3-root root}))
