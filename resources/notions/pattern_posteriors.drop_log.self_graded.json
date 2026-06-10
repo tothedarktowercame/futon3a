@@ -1,0 +1,300 @@
+{
+  "accepted_purs": 21,
+  "drop_reasons": {
+    "pattern-not-in-library": 23,
+    "pur-heading-without-pattern": 5
+  },
+  "dropped_purs": 28,
+  "drops": [
+    {
+      "actions": null,
+      "anchor": "Pattern source roots:",
+      "line": 653,
+      "mission": "M-futonzero-mvp",
+      "outcome_raw": "/reflection + continuity), not ad hoc logs. 6. Because first-proof data is irregular at P4, adapter design must treat variant runs as first-class historical streams rather than forcing a fake 1:1 prompt/result pairing.",
+      "path": "/home/joe/code/futon0/holes/missions/M-futonzero-mvp.md",
+      "prediction_error": null,
+      "raw_pattern": "source roots:",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "anchor": "# Mission: Reflective Discipline (PSR / PUR / PAR as tangent vectors)",
+      "line": 1,
+      "mission": "M-reflective-discipline",
+      "path": "/home/joe/code/futon2/holes/missions/M-reflective-discipline.md",
+      "reason": "pur-heading-without-pattern"
+    },
+    {
+      "anchor": "# Mission: Reflective Discipline (PSR / PUR / PAR as tangent vectors)",
+      "line": 1,
+      "mission": "M-reflective-discipline",
+      "path": "/home/joe/code/futon2-arguing-worlds/holes/missions/M-reflective-discipline.md",
+      "reason": "pur-heading-without-pattern"
+    },
+    {
+      "anchor": "### 0.3 Verify Agent PSR/PUR Emission",
+      "line": 84,
+      "mission": "M-futon1a-workplan",
+      "path": "/home/joe/code/futon3/holes/missions/M-futon1a-workplan.md",
+      "reason": "pur-heading-without-pattern"
+    },
+    {
+      "actions": null,
+      "anchor": "Pattern success rates are drawn from a subject-level distribution:",
+      "line": 420,
+      "mission": "M-diagramprover",
+      "outcome_raw": ".",
+      "path": "/home/joe/code/futon3c/holes/missions/M-diagramprover.md",
+      "prediction_error": null,
+      "raw_pattern": "success rates are drawn from a subject-level distribution:",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "pattern \u00d7 blocker-type \u00d7 outcome, replacing \"institution support factors\"",
+      "line": 703,
+      "mission": "M-diagramprover",
+      "outcome_raw": ", replacing \"institution support factors\" with \"Mathlib coverage factors.\" The assumptions.edn format can encode our pattern priors. Adaptation is Phase 2a work.",
+      "path": "/home/joe/code/futon3c/holes/missions/M-diagramprover.md",
+      "prediction_error": null,
+      "raw_pattern": "\u00d7 blocker-type \u00d7 outcome, replacing \"institution support factors\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "Pattern refinement follows this protocol:",
+      "line": 792,
+      "mission": "M-peripheral-gauntlet",
+      "outcome_raw": "(confirmed, pivoted, rejected, or deferred) 2. PURs accumulate as evidence in futon1a 3. Human reviews PUR evidence periodically (glacial timescale) 4. Human decides whether to refine the pattern in futon3a's catalog 5. Refined pattern becomes available to agents via corpus-check",
+      "path": "/home/joe/code/futon3c/holes/missions/M-peripheral-gauntlet.md",
+      "prediction_error": null,
+      "raw_pattern": "refinement follows this protocol:",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "anchor": "# Mission: PSR/PUR Mesh Peripheral (futon3a + futon3b)",
+      "line": 1,
+      "mission": "M-psr-pur-mesh-peripheral",
+      "path": "/home/joe/code/futon3c/holes/missions/M-psr-pur-mesh-peripheral.md",
+      "reason": "pur-heading-without-pattern"
+    },
+    {
+      "actions": null,
+      "anchor": "- Pattern thread entry count: 2",
+      "line": 551,
+      "mission": "alleycat-scorecard",
+      "outcome_raw": "1, :pattern-selection 2, :reflection 4}`",
+      "path": "/home/joe/code/futon3c/holes/missions/alleycat-scorecard.md",
+      "prediction_error": null,
+      "raw_pattern": "thread entry count: 2",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "Pattern success rates are drawn from a subject-level distribution:",
+      "line": 420,
+      "mission": "M-diagramprover",
+      "outcome_raw": ".",
+      "path": "/home/joe/code/futon3c-auto-bellback/holes/missions/M-diagramprover.md",
+      "prediction_error": null,
+      "raw_pattern": "success rates are drawn from a subject-level distribution:",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "pattern \u00d7 blocker-type \u00d7 outcome, replacing \"institution support factors\"",
+      "line": 703,
+      "mission": "M-diagramprover",
+      "outcome_raw": ", replacing \"institution support factors\" with \"Mathlib coverage factors.\" The assumptions.edn format can encode our pattern priors. Adaptation is Phase 2a work.",
+      "path": "/home/joe/code/futon3c-auto-bellback/holes/missions/M-diagramprover.md",
+      "prediction_error": null,
+      "raw_pattern": "\u00d7 blocker-type \u00d7 outcome, replacing \"institution support factors\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "Pattern refinement follows this protocol:",
+      "line": 792,
+      "mission": "M-peripheral-gauntlet",
+      "outcome_raw": "(confirmed, pivoted, rejected, or deferred) 2. PURs accumulate as evidence in futon1a 3. Human reviews PUR evidence periodically (glacial timescale) 4. Human decides whether to refine the pattern in futon3a's catalog 5. Refined pattern becomes available to agents via corpus-check",
+      "path": "/home/joe/code/futon3c-auto-bellback/holes/missions/M-peripheral-gauntlet.md",
+      "prediction_error": null,
+      "raw_pattern": "refinement follows this protocol:",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "anchor": "# Mission: PSR/PUR Mesh Peripheral (futon3a + futon3b)",
+      "line": 1,
+      "mission": "M-psr-pur-mesh-peripheral",
+      "path": "/home/joe/code/futon3c-auto-bellback/holes/missions/M-psr-pur-mesh-peripheral.md",
+      "reason": "pur-heading-without-pattern"
+    },
+    {
+      "actions": null,
+      "anchor": "- Pattern thread entry count: 2",
+      "line": 551,
+      "mission": "alleycat-scorecard",
+      "outcome_raw": "1, :pattern-selection 2, :reflection 4}`",
+      "path": "/home/joe/code/futon3c-auto-bellback/holes/missions/alleycat-scorecard.md",
+      "prediction_error": null,
+      "raw_pattern": "thread entry count: 2",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "are explicitly bounded \u2014 the action space is the cross product of `WriterActionClass` \u00d7 candidate targets in that class (e.g., per-mission-doc \u00d7 per-checkpoint). NOT \"any edit at any time.\" D6's registry encodes the \"explicit reasons for inclusion and exclusion\" \u2014 autopen rules name *exactly which* `(class, match-type)` pairs are eligible.",
+      "anchor": "- *Pattern claim*: \"Treat action selection as choosing from a bounded candidate set of pattern IDs ... constructed candidate set ... produced by retrieval plus gating rules, with b",
+      "line": 530,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "confirms D5 + D6. The pattern's \"explicit reasons for inclusion and exclusion\" is precisely D6's per-pair registry shape.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": null,
+      "raw_pattern": "claim*: \"Treat action selection as choosing from a bounded candidate set of pattern IDs ... constructed candidate set ... produced by retrieval plus gating rules, with bounded size and explicit reasons for inclusion and exclusion.\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "that share consumable resources, resolve conflicts at multiple budget hierarchy levels: aggregate setup-budget conservation across all agents per tick; per-instance forward projection of each action's downstream resource consumption.\"",
+      "anchor": "- *Pattern claim*: \"When multiple agents operating over shared state can independently choose actions that share consumable resources, resolve conflicts at multiple budget hierarch",
+      "line": 537,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "DERIVE revision R-A1 (below)**. Adds aggregate-attention-budget invariant + per-mission-trust-budget EFE term.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": null,
+      "raw_pattern": "claim*: \"When multiple agents operating over shared state can independently choose actions that share consumable resources, resolve conflicts at multiple budget hierarchy levels: aggregate setup-budget conservation across all agents per tick; per-instance forward projection of each action's downstream resource consumption.\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "- *Pattern claim*: \"Maintain a commitment temperature \u03c4 that modulates softmax over -G/\u03c4, coupled to diagnostic signals ... abstain semantics are part of R6 ... an implementation t",
+      "line": 546,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "DERIVE revision R-A2 (below)**. Specifies abstain-when-low-discriminability as the second abstain trigger; matches the HO-05 reference implementation.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": "against forward-model + risk of operator-rejection (historical reject-rate for this class/match-type)",
+      "raw_pattern": "claim*: \"Maintain a commitment temperature \u03c4 that modulates softmax over -G/\u03c4, coupled to diagnostic signals ... abstain semantics are part of R6 ... an implementation that has softmax without abstain is operationally incomplete.\" HO-05's concrete implementation: \"Computes G-spread across top-K candidates, divides by \u03c4, abstains if resulting discriminability \u2264 floor (default 0.5, configurable).\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "touch the same mission-doc (avoid burst-syncing one mission while ignoring others)",
+      "anchor": "- *Pattern claim*: \"Compute G(a) as a weighted sum of named terms (risk, ambiguity, information gain, constraint violation, cost, coordination pressure), and store the term breakdo",
+      "line": 553,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "DERIVE revision R-A3 (below)**. Replaces the implicit 3-term G with explicit 6-term decomposition, mirroring HO-05's four-term scorecard pattern at writer-scope.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": "against forward-model + risk of operator-rejection (historical reject-rate for this class/match-type)",
+      "raw_pattern": "claim*: \"Compute G(a) as a weighted sum of named terms (risk, ambiguity, information gain, constraint violation, cost, coordination pressure), and store the term breakdown for each candidate ... a single opaque score encourages post-hoc rationalization.\"",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken: arxana-vsatarcs-consent.el implements (consent-gate request source) \u2192 response; 3 source implementations (:operator, :autopen, :cached-policy); autopen registry with 1 opt-in pair.",
+      "anchor": "pattern (re-confirmed): candidate-pattern-action-space + hierarchical-budget-aware-action-selection (PSR-A1's grounding patterns)",
+      "line": 882,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "success \u2014 `cycle-scope-creep-without-autopen-falls-through' test confirms registry opt-in works (non-eligible pairs return nil from :autopen, fall through to operator); `cycle-clean-autopen-confirms' confirms eligible pairs auto-confirm.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": "s: minor \u2014 the :cached-policy source returned an unused stub (placeholder for L5); didn't break the substitutability promise but signals the L3 spec was already over-broad on source enumeration.",
+      "raw_pattern": "(re-confirmed): candidate-pattern-action-space + hierarchical-budget-aware-action-selection (PSR-A1's grounding patterns)",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken: L3 scope = `:mission-doc-sync` only; autopen-eligibility opt-in via `arxana-vsatarcs-consent-autopen-rules` defcustom (single rule: mission-doc-sync + clean + trivial-reversibility).",
+      "anchor": "pattern (re-confirmed): candidate-pattern-action-space (P1)",
+      "line": 894,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "success \u2014 4 cycle tests verify the bounded surface behaves as specified.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": "s: none.",
+      "raw_pattern": "(re-confirmed): candidate-pattern-action-space (P1)",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken: NONE in this L3 INSTANTIATE iteration. The 6-term breakdown was specified in VERIFY 5.a's R-A3 integration but not implemented because L3 single-candidate path bypasses ranking.",
+      "anchor": "pattern (re-confirmed): expected-free-energy-scorecard (P4)",
+      "line": 906,
+      "mission": "M-vsatarcs-writer",
+      "outcome_raw": "DEFERRED to L2/L4 INSTANTIATE iteration. Trace schema reserves `:G-breakdown` field (currently nil) for the eventual landing.",
+      "path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+      "prediction_error": "s: PSR-A3 over-committed; the design is sound but the L3 implementation didn't need it. Honest scope correction: PSR-A3 should re-issue as PSR-A3' when L2 INSTANTIATE starts, with patterns re-confirmed against the actually-applied surface (G-risk + G-info + G-ambiguity were the minimum; G-cost / G-coordination-pressure / G-constraint-violation are deferred).",
+      "raw_pattern": "(re-confirmed): expected-free-energy-scorecard (P4)",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "- **Pattern library:** `/home/joe/code/futon3/library/writing-coherence/` \u2014 13 patterns; `plain-language-thesis` and `floating-formalism` new from this run.",
+      "line": 1021,
+      "mission": "M-writing-ethics",
+      "outcome_raw": "was almost pre-determined by `plain-language-thesis` + Bootstrap sequence context; might have been scaffold-augmentable under a tighter question. The boundary between `tacit-required` and `scaffold-augmentable` may be sharper than DERIVE's criteria suggest.",
+      "path": "/home/joe/code/futon4/holes/missions/M-writing-ethics.md",
+      "prediction_error": null,
+      "raw_pattern": "library:** `/home/joe/code/futon3/library/writing-coherence/` \u2014 13 patterns; `plain-language-thesis` and `floating-formalism` new from this run.",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": null,
+      "anchor": "pattern generalises to phase-specific uses, not just",
+      "line": 1263,
+      "mission": "hinge-log",
+      "outcome_raw": "**VERIFY complete as GF check.** The CPM is grounded, the tripwires are writable or waiting for data, the latent-dependency probe detected no fidelity violations, and three DRs are on record. The B\u2192A model's shape is explicitly preserved as a structurally-void sorry until use-data arrives. Empirical validation path handed to ongoing mission work (M-daily-scan adoption). Ready for INSTANTIATE if Joe chooses to land the mission-doc VERIFY section now, or to pause and let the empirical phase unfold",
+      "path": "/home/joe/code/futon5a/holes/missions/M-trip-journal.journal/hinge-log.md",
+      "prediction_error": null,
+      "raw_pattern": "generalises to phase-specific uses, not just",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken**: Stated: torsion-free case gives M = X/Gamma aspherical. With torsion, X/Gamma is orbifold. The gap between orbifold and manifold is the problem.",
+      "anchor": "- **Pattern**: `math-informal/identify-the-obstruction`",
+      "line": 319,
+      "mission": "M-P7-rational-reconstruction",
+      "outcome_raw": "success \u2014 obstruction clearly named",
+      "path": "/home/joe/code/futon6/holes/missions/M-P7-rational-reconstruction.md",
+      "prediction_error": "none",
+      "raw_pattern": "`math-informal/identify-the-obstruction`",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken**: - Approach I (Wall surgery): 3 sequential obstacles identified \u2192 deprioritized - Approach II (equivariant surgery): BLOCKED (codim-2 gap fails for codim-1) \u2192 killed - Approach III (orbifold resolution): no known technique \u2192 unexplored - Approach IV (rotation route): dissolves parity tension \u2192 MOST PROMISING",
+      "anchor": "- **Pattern**: `route-exploration-and-pivot` + `constraint-tension-resolution`",
+      "line": 431,
+      "mission": "M-P7-rational-reconstruction",
+      "outcome_raw": "partial** \u2014 pivot identified but S obligation remains open",
+      "path": "/home/joe/code/futon6/holes/missions/M-P7-rational-reconstruction.md",
+      "prediction_error": "moderate.** `route-exploration-and-pivot` correctly predicts that the \"obvious\" approach (Approach I, continuing with reflections) is not the best one. The pattern's triage step would have killed Approaches II and III faster. But the pattern does",
+      "raw_pattern": "`route-exploration-and-pivot` + `constraint-tension-resolution`",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken**: Constructed V1 = span(e1,e3), V2 = span(e2,e4). Showed omega is block diagonal in (e1,e3,e2,e4) basis. Asserted {e1,...,e4} spans R^4.",
+      "anchor": "- **Pattern**: `construct-auxiliary-object` + `convention-bridge`",
+      "line": 372,
+      "mission": "M-P8-rational-reconstruction",
+      "outcome_raw": "partial** \u2014 decomposition is correct IF spanning holds",
+      "path": "/home/joe/code/futon6/holes/missions/M-P8-rational-reconstruction.md",
+      "prediction_error": "significant.** The `convention-bridge` pattern's HOWEVER clause warns: \"what looks like 'the same thing' may hide a genuine mathematical difference.\" Here, \"topological submanifold\" and \"edge vectors span R^4\" are genuinely different properties. A 2-manifold embedded in R^4 need not have edge directions spanning all 4 dimensions.",
+      "raw_pattern": "`construct-auxiliary-object` + `convention-bridge`",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken**: Applied generating function interpolation for edge crease smoothing. Also invoked Polterovich/Lalonde-Sikorav for the surgery/smoothing context.",
+      "anchor": "- **Pattern**: `reduce-to-known-result` + `hypothesis-category-check`",
+      "line": 474,
+      "mission": "M-P8-rational-reconstruction",
+      "outcome_raw": "partial** \u2014 the generating function argument is self-contained and correct, but the citation of smooth surgery results is problematic",
+      "path": "/home/joe/code/futon6/holes/missions/M-P8-rational-reconstruction.md",
+      "prediction_error": "significant.** The `hypothesis-category-check`",
+      "raw_pattern": "`reduce-to-known-result` + `hypothesis-category-check`",
+      "reason": "pattern-not-in-library"
+    },
+    {
+      "actions": "taken**: Stated: vertex smoothings in disjoint balls (commute). Edge smoothings in disjoint tubular neighborhoods (commute with each other and with vertex balls). Composition is Hamiltonian (McDuff-Salamon Prop 3.17).",
+      "anchor": "- **Pattern**: `local-to-global` + `compose-independent-lemmas`",
+      "line": 522,
+      "mission": "M-P8-rational-reconstruction",
+      "outcome_raw": "partial** \u2014 the disjoint-support argument is sketched but not fully verified in v1",
+      "path": "/home/joe/code/futon6/holes/missions/M-P8-rational-reconstruction.md",
+      "prediction_error": "moderate.** The `local-to-global` pattern's",
+      "raw_pattern": "`local-to-global` + `compose-independent-lemmas`",
+      "reason": "pattern-not-in-library"
+    }
+  ],
+  "label": "self-graded",
+  "schema": "futon.pattern-posteriors.drop-log.v0"
+}
