@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """cascade_construct.py — the cascade-construction CALLABLE (claude-4, post-verify, 2026-06-09).
 
-Locked design (M-wm-policies, after claude-3's monotone-C verify):
-  construction = COHERENCE-GREEDY ordering + COVERAGE-SATURATION stop (the too-little floor).
+Locked design (M-wm-policies, after claude-3's monotone-C verify; phylogeny-grounded 2026-06-10):
+  construction = PHYLOGENY-GREEDY ordering + COVERAGE-SATURATION stop (the too-little floor).
   C (claude-3) ranks wholeness, monotone, does NOT bound size. The too-MUCH ceiling is a
   parsimony/BUDGET on the live-judge side — NOT applied here (claude-1 sets it from data).
 
@@ -14,20 +14,21 @@ construct_cascade(psi_query, epsilon) -> {
   :trajectory   the marginal-coverage curve (so you can SEE where saturation bites)
 }
 
-ORDER: greedy pick p maximizing marginal coverage  m(p) = rel(p|psi) · (1 - max_sim(p, chosen)) —
-  prefers relevant + coherently-distinct members (the coherence-greedy choice).
+ORDER: greedy pick p maximizing marginal coverage  m'(p) = rel(p|psi) · (alpha + connectivity(p, chosen)) —
+  prefers relevant members that grow along descent/co-application roads in the pattern phylogeny.
 STOP:  when m(best) < epsilon  ("the argument is now expressed" — coverage saturated).
 NO budget ceiling here by design.
 
 Run (examples on real missions):  cd ~/code/futon3a &&
   .venv/bin/python3 holes/labs/M-memes-arrows/cascade_construct.py
 """
-import json, math
+import json, math, sys
 from pathlib import Path
 
 ROOT = Path("/home/joe/code/futon3a")
 EMB = {r["id"]: r["vector"] for r in json.load(open(ROOT/"resources/notions/minilm_pattern_embeddings.json"))}
 DEFAULT_POSTERIORS = ROOT/"resources/notions/pattern_posteriors.self_graded.json"
+DEFAULT_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-edges.json")
 
 def cos(a, b):
     d = sum(x*y for x, y in zip(a, b)); na = math.sqrt(sum(x*x for x in a)); nb = math.sqrt(sum(y*y for y in b))
@@ -59,6 +60,52 @@ def posterior_multiplier(pid, posterior_table, posterior_weight):
     centered = posterior_mean(pid, posterior_table) - 0.5
     return max(0.0, 1.0 + float(posterior_weight) * centered)
 
+def pattern_stem(pid):
+    """Match library ids like lib/stem to phylogeny ids keyed by stem."""
+    return str(pid).split("/")[-1]
+
+def load_phylogeny(path=DEFAULT_PHYLOGENY):
+    p = Path(path)
+    if not p.exists():
+        return {"patterns": set(), "descent": set(), "co_app": {}, "max_co": 1.0}
+    raw = json.load(open(p))
+    co_app = {}
+    for a, b, w in raw.get("co_app", []):
+        w = float(w)
+        co_app[(a, b)] = w
+        co_app[(b, a)] = w
+    return {
+        "patterns": set(raw.get("patterns", [])),
+        "descent": {tuple(edge) for edge in raw.get("descent", [])},
+        "co_app": co_app,
+    }
+
+def phylogeny_connectivity(pid, chosen, phylogeny):
+    """Connectivity from candidate p to already chosen c, normalized for co-application."""
+    p = pattern_stem(pid)
+    score = 0.0
+    for cid, _ in chosen:
+        c = pattern_stem(cid)
+        if (p, c) in phylogeny["descent"]:
+            score += 1.0
+        score += min(phylogeny["co_app"].get((p, c), 0.0), 5.0) / 5.0
+    return score
+
+def chosen_semi_lattice(ids, phylogeny):
+    stems = {pattern_stem(pid): pid for pid in ids}
+    descent = []
+    co_app = []
+    for a in sorted(stems):
+        for b in sorted(stems):
+            if a != b and (a, b) in phylogeny["descent"]:
+                descent.append([stems[a], stems[b]])
+    for i, a in enumerate(sorted(stems)):
+        for b in sorted(stems)[i+1:]:
+            w = phylogeny["co_app"].get((a, b), 0.0)
+            if w:
+                co_app.append([stems[a], stems[b], int(w)])
+    return {"descent": descent, "co_app": co_app}
+
 def ranked_candidates(psi_query, pool=40, posterior_table=None):
     """Embedding-ranked pool plus posterior rank; used for the A/B disagreement surface."""
     qv = _embed(psi_query)
@@ -82,17 +129,28 @@ def ranked_candidates(psi_query, pool=40, posterior_table=None):
         row["posterior_rank"] = posterior_order[row["pattern_id"]]
     return rows
 
-def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, posterior_table=None):
-    """|psi> = a mission/scope (query text). Returns the coverage-saturated coherence-greedy cascade."""
+def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, posterior_table=None,
+                      phylogeny=None, alpha=0.3):
+    """|psi> = a mission/scope (query text). Returns the coverage-saturated phylogeny-greedy cascade."""
     posterior_table = posterior_table or {"label": "self-graded", "patterns": {}}
-    cand = [(row["pattern_id"], row["relevance"]) for row in ranked_candidates(psi_query, pool, posterior_table)]
+    phylogeny = phylogeny or load_phylogeny()
+    rows = ranked_candidates(psi_query, pool, posterior_table)
+    coverage_candidates = [
+        {"pattern_id": row["pattern_id"], "stem": pattern_stem(row["pattern_id"]), "relevance": round(row["relevance"], 3)}
+        for row in rows
+        if pattern_stem(row["pattern_id"]) not in phylogeny["patterns"]
+    ]
+    cand = [
+        (row["pattern_id"], row["relevance"])
+        for row in rows
+        if pattern_stem(row["pattern_id"]) in phylogeny["patterns"]
+    ]
     chosen, traj = [], []
     while cand:
-        # coherence-greedy: marginal coverage = rel * (1 - max similarity to already-chosen)
+        # phylogeny-greedy: marginal coverage = rel * (alpha + connectivity to already-chosen)
         def marg(pr):
             pid, rel = pr
-            mx = max([cos(EMB[pid], EMB[c]) for c, _ in chosen] or [0.0])
-            base = rel * (1.0 - mx)
+            base = rel * (float(alpha) + phylogeny_connectivity(pid, chosen, phylogeny))
             return base * posterior_multiplier(pid, posterior_table, posterior_weight)
         best = max(cand, key=marg); m = marg(best)
         if chosen and m < epsilon:          # coverage saturated -> stop (too-little floor)
@@ -102,13 +160,50 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
     T = sum(rel for _, rel in chosen)                                   # intensity
     pairs = [(i, j) for i in range(len(ids)) for j in range(i+1, len(ids))]
     H = (sum(4*cos(EMB[ids[i]], EMB[ids[j]])*(1-cos(EMB[ids[i]], EMB[ids[j]])) for i, j in pairs)/len(pairs)) if pairs else 1.0
+    semi_lattice = chosen_semi_lattice(ids, phylogeny)
+    edge_count = len(semi_lattice["descent"]) + len(semi_lattice["co_app"])
+    possible_edges = (len(ids) * (len(ids) - 1)) / 2
+    edge_density = (edge_count / possible_edges) if possible_edges else 0.0
+    coverage_gap = len(coverage_candidates) > len(ids)
+    low_connectivity = edge_count == 0 or (coverage_gap and edge_density < 0.45)
     return {"cascade": [(c, round(r, 3), mc) for (c, r), (_, _, mc) in zip(chosen, traj)],
             "size": len(chosen), "C": round(T*H, 3), "H": round(H, 3), "T": round(T, 3),
             "trajectory": traj,
             "posterior_weight": float(posterior_weight),
-            "posterior_label": posterior_table.get("label", "self-graded")}
+            "posterior_label": posterior_table.get("label", "self-graded"),
+            "semi-lattice": semi_lattice,
+            "non-phylogeny": sorted({c["stem"] for c in coverage_candidates}),
+            "coverage-candidates": coverage_candidates,
+            "phylogeny": {"alpha": float(alpha), "edge_count": edge_count,
+                          "edge_density": round(edge_density, 3),
+                          "coverage_gap": coverage_gap,
+                          "low_connectivity": low_connectivity}}
+
+def print_cascade(name, query):
+    r = construct_cascade(query, epsilon=0.15)
+    print(f"[{name}]  size={r['size']}  C={r['C']} (T={r['T']} x H={r['H']})  phylo-edges={r['phylogeny']['edge_count']}  edge-density={r['phylogeny']['edge_density']}")
+    if r["phylogeny"]["low_connectivity"]:
+        print("    LOW-CONNECTIVITY/COVERAGE-GAP: sparse selected graph or more embedding hits outside the phylogeny than inside it")
+    print("    cascade:")
+    for k, pid, mc in r["trajectory"]:
+        print(f"      {k}. {pid:<46} marginal-coverage={mc}")
+    print(f"    semi-lattice: {json.dumps(r['semi-lattice'], sort_keys=True)}")
+    print(f"    non-phylogeny: {json.dumps(r['non-phylogeny'])}")
+    print()
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "demo":
+        DEMOS = {
+            "kit-outbox":
+                "staged outbox pipeline: daily-scan to interest-network match to cold EOI draft",
+            "inv-tripwire":
+                "map each aif2 INV invariant to its tripwire detector",
+        }
+        print("\n=== phylogeny-grounded cascades demo (epsilon=0.15; alpha=0.3) ===\n")
+        for name, q in DEMOS.items():
+            print_cascade(name, q)
+        raise SystemExit(0)
+
     # A couple of REAL missions of differing character — so claude-1 can eyeball coverage-saturation sizes.
     MISSIONS = {
         "BROAD: interim-director proxy-metrics":
@@ -118,12 +213,8 @@ if __name__ == "__main__":
         "TECHNICAL: substrate ground-metric":
             "ground metric ollivier ricci curvature wasserstein fisher rao latent distance substrate tension field differentiable",
     }
-    print("\n=== coverage-saturated coherence-greedy cascades (epsilon=0.15; NO budget ceiling) ===\n")
+    print("\n=== coverage-saturated phylogeny-greedy cascades (epsilon=0.15; NO budget ceiling) ===\n")
     for name, q in MISSIONS.items():
-        r = construct_cascade(q, epsilon=0.15)
-        print(f"[{name}]  size={r['size']}  C={r['C']} (T={r['T']} × H={r['H']})")
-        for k, pid, mc in r["trajectory"]:
-            print(f"    {k}. {pid:<46} marginal-coverage={mc}")
-        print()
+        print_cascade(name, q)
     print("NOTE: size is set by coverage-saturation alone (the too-little floor). The too-much")
     print("ceiling (parsimony budget) is claude-1's live-judge layer, set from these observed sizes.")
