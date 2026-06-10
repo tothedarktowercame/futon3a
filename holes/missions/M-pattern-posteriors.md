@@ -247,3 +247,13 @@ relevance order, never manufactures a place. **No intra-used discrimination yet*
 1.10× boost) — that awaits claude-3's failed-fold β refinement. Full free-text coherence-greedy render
 deferred until β-discrimination exists (else a trivial uniform shift) + the embedding env is available.
 Artifact: `holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md`.
+
+**STANDARD-VERIFY ratified — escrow `:contract-released`, car-independent (Joe via claude-3, 2026-06-10).**
+The gate above ("releasable on the closure signal, gated on STANDARD-VERIFY") is **cleared**: grounding-source
+is the **closure-fold** (`pattern_posteriors.grounded.json`), peradam is the out-of-loop auditor only, and
+the path is released independent of the car. Cleared to build to the converged
+`futon3c/holes/campaigns/grounded-learning-spec.md`. **Critical-path reminder (my survivorship finding):** the
+discriminating grounded A/B is gated not on a code change but on **failure-recording** — `closure-folds.edn`
+is currently success-only (5/0), so β can't grow until attempted-but-unclosed used-sets are written; the
+`cascade_learn` `success:false` fix (claude-3) is a no-op until that recording exists. Until then the grounded
+A/B is correct but uniform (demonstrated, above).
