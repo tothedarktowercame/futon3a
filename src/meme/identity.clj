@@ -2,6 +2,7 @@
   "Endpoint-keyed arrow identity and Contract-C promotion."
   (:require [meme.arrow :as arrow]
             [meme.cap-ascent :as cap-ascent]
+            [meme.ch2 :as ch2]
             [meme.core :as core]
             [meme.endpoints :as endpoints]))
 
@@ -127,9 +128,30 @@
   (when-let [cap-id (advances-cap arrow-row)]
     (cap-ascent/advance! cap-id (endpoint-key endpoint) cap-ascent-opts)))
 
+(defn- normalize-ch2-opts [opts]
+  (merge {:emit? true
+          :sink ch2/default-sink}
+         (or opts {})))
+
+(defn- arrow-sorry-ref! [ds arrow-row]
+  (let [arrow->sorry-doc (requiring-resolve 'meme.substrate2/arrow->sorry-doc)
+        doc (arrow->sorry-doc ds arrow-row)]
+    (get-in doc [:props "sorry/endpoint"])))
+
+(defn- emit-ch2-if-needed! [ds arrow-row endpoint ch2-opts]
+  (let [{:keys [emit? sink]} (normalize-ch2-opts ch2-opts)]
+    (when emit?
+      (let [have (:have endpoint)
+            want (:want endpoint)
+            event (ch2/discharge-event
+                   (str have "->" want)
+                   (arrow-sorry-ref! ds arrow-row)
+                   (str (java.time.Instant/now)))]
+        (ch2/emit-discharge-event! event :sink sink)))))
+
 (defn promote!
   "Promote an existing endpoint-keyed arrow in place."
-  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent]
+  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent ch2]
                            :or {cap-ascent {:write? true}}}]
   (let [endpoint (normalize-endpoints endpoint)
         existing (or (find-by-endpoint ds endpoint)
@@ -161,16 +183,20 @@
                       rationale (assoc :rationale rationale)
                       created-by (assoc :created-by created-by))
             _ (arrow/update-arrow! ds (:id existing) updates)
-            updated (absorb-token! ds (arrow/get-arrow ds (:id existing)) token-id)]
-        {:arrow updated
-         :cap-ascent (when (= :constructed to-state)
-                       (cap-ascent-if-needed! updated endpoint cap-ascent))
-         :op {:op :promote
-              :id (:id updated)
-              :from from-state
-              :to to-state
-              :have (:have endpoint)
-              :want (:want endpoint)}}))))
+            updated (absorb-token! ds (arrow/get-arrow ds (:id existing)) token-id)
+            cap-result (when (= :constructed to-state)
+                         (cap-ascent-if-needed! updated endpoint cap-ascent))
+            ch2-event (when (= :constructed to-state)
+                        (emit-ch2-if-needed! ds updated endpoint ch2))]
+        (cond-> {:arrow updated
+                 :cap-ascent cap-result
+                 :op {:op :promote
+                      :id (:id updated)
+                      :from from-state
+                      :to to-state
+                      :have (:have endpoint)
+                      :want (:want endpoint)}}
+          ch2-event (assoc :ch2/discharge-event ch2-event))))))
 
 (defn- entity-names [ds]
   (set (map :name (core/list-entities ds))))
