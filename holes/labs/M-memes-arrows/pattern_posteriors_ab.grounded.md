@@ -40,6 +40,31 @@ Completion-criterion #3 (the term *changes* construction) — **demonstrated on 
    coherence-greedy A/B render is deliberately deferred: with uniform data it would be a trivial uniform
    shift.*
 
+## UPDATE — the survivorship ceiling BROKE: first real β (2026-06-10)
+
+claude-3's loop produced **real failed folds** (closure-folds now 10 closures / 7 success / **3 fail**),
+and `cascade_learn` regenerated the table. **The first real discrimination has landed** — no longer
+all-success-uniform:
+
+| stem | α | β | mean | mult @ w=0.6 |
+|---|---:|---:|---:|---:|
+| **continuous-linear-map-composition** | 0 | **2** | **0.250** | **0.850 (PENALIZED)** |
+| evidence-situated-log, logic-model-before-code, mission-anchored-scan, mission-interface-signature, mission-unlocks-eoi, model-recompute-schedule, prototype-maturity-lifecycle, typed-kolmogorov-arrows | 1 | 0 | 0.667 | 1.100 (boosted) |
+
+**Real-data A/B** (query = `continuous-linear-map-composition`'s own neighborhood — the most adversarial,
+high baseline relevance): the 8 closing used-stems all rise under the grounded term (+5 to +73 ranks);
+**283/1070 patterns re-rank**; and the β'd pattern is pushed **down** wherever it appears in a pool
+(multiplier 0.850 < 1.0). So the consumer discriminates on **real** failure data, not just the earlier
+synthetic dry-run — closers boosted, the genuine failer penalized, monotone by mean, bounded (the failer
+is demoted-not-excluded — Q4 invariant holds under penalty).
+
+**Honest scope of this milestone:** the β is real but **not yet *competitive*** — `continuous-linear-map-composition`
+is the sole match on its holes, so down-weighting it changes the *ranking* but not yet a *selection*
+(nothing else competes for its slot). The non-trivial **selection** delta awaits a **competitive β** (a
+β'd pattern that loses its slot to a higher-trust rival on the same hole); claude-3 bells when one lands.
+Pipeline status: **proven end-to-end on real data** (feeder discriminates → consumer ranks on it);
+selection-impact demonstration pending a competitive β + the `posterior_weight` switch on.
+
 ## Caveat (method honesty)
 This is a **reduced** A/B: precomputed pattern embeddings + cosine relevance + a single pattern-as-query,
 **not** the full coherence-greedy `construct_cascade` over real free-text `|ψ⟩` queries (blocked locally —
