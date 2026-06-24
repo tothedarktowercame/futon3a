@@ -9,8 +9,11 @@ Locked design (M-wm-policies, after claude-3's monotone-C verify; phylogeny-grou
 construct_cascade(psi_query, epsilon) -> {
   :cascade  ordered [(pattern-id, relevance, marginal-coverage), ...]   (coverage-saturated)
   :size     k
-  :C        real-Salingaros C = T (intensity = sum rel) × H (coherent-harmony, mean 4·s·(1-s))
-  :H, :T
+  :wholeness  T (intensity = sum rel) × H (coherence, mean 4·s·(1-s)) = Alexander WHOLENESS
+              (= Salingaros life L). NB this is NOT Salingaros disorder C = T·(10−H); the old key
+              "C" was a misnomer (it returned T·H = L). Renamed 2026-06-24 (C/L are the same
+              quantity under two bad names → one descriptive name).
+  :H-coherence, :T-intensity, :accuracy, :complexity, :F-free-energy   (F = accuracy − λ·complexity)
   :trajectory   the marginal-coverage curve (so you can SEE where saturation bites)
 }
 
@@ -31,6 +34,14 @@ DEFAULT_POSTERIORS = ROOT/"resources/notions/pattern_posteriors.self_graded.json
 DEFAULT_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-edges.json")
 DEFAULT_LEARNED_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-learned.json")
 DEFAULT_GROUNDED_POSTERIORS = Path("/home/joe/code/futon6/data/pattern_posteriors.grounded.json")
+
+# F-score (M-wm-policies omission 2, AIF grounding 2026-06-24): grain-2 cascade quality as a
+# real marginal-likelihood F = accuracy - lambda*complexity (Bayesian Occam), replacing the
+# Salingaros C analogy. accuracy = total ψ-coverage; complexity = sum of -log(base-rate prior)
+# of the selected patterns (the report's open-Q3 map: (10-H) "architectural entropy" -> KL of
+# the ψ-conditioned selection from the co-application base-rate prior). lambda set from data
+# (the rich/thin F-knee), NOT hand-guessed; this default is provisional pending the sweep.
+DEFAULT_LAMBDA = 0.25   # data-set rich/thin F=0 knee (canon crosses 0.216, capability 0.287); re-confirm on full live distribution
 
 def cos(a, b):
     d = sum(x*y for x, y in zip(a, b)); na = math.sqrt(sum(x*x for x in a)); nb = math.sqrt(sum(y*y for y in b))
@@ -98,6 +109,27 @@ def load_phylogeny(path=DEFAULT_PHYLOGENY, learned_path=DEFAULT_LEARNED_PHYLOGEN
         "co_app": co_app,
     }
 
+def base_rate_prior(phylogeny, floor_frac=0.1):
+    """Per-pattern INCLUSION prior P(include p) from co-application mass — how EXPECTED p is
+    (its unconditional usage). A Bernoulli inclusion probability in (0,1), NOT a categorical
+    over all patterns: a categorical (mass/total) makes every -log P ≈ log N bits, swamping
+    accuracy and collapsing F to size-1 (the degenerate 'no knee' failure). Here
+    prior = (mass+f)/(mass+f+K), K = the median positive co-app mass (the typical scale),
+    f = floor_frac·K (so unseen patterns are surprising-but-finite). Common patterns → ~1
+    (cheap to include); rare/unseen → small (costly). complexity(p) = -log P(include p) = the
+    bits to justify including p against the base rate, O(1) and commensurate with coverage.
+    Returns (prior-by-stem, default-for-unseen)."""
+    mass = {}
+    for (a, _b), w in phylogeny.get("co_app", {}).items():
+        mass[a] = mass.get(a, 0.0) + float(w)
+    for p in phylogeny.get("patterns", set()):
+        mass.setdefault(p, 0.0)
+    pos = sorted(m for m in mass.values() if m > 0)
+    K = pos[len(pos) // 2] if pos else 1.0          # median positive mass = the typical scale
+    f = floor_frac * K
+    prior = {p: (m + f) / (m + f + K) for p, m in mass.items()}
+    return prior, (f / (f + K))
+
 def phylogeny_connectivity(pid, chosen, phylogeny):
     """Connectivity from candidate p to already chosen c, normalized for co-application."""
     p = pattern_stem(pid)
@@ -148,7 +180,7 @@ def ranked_candidates(psi_query, pool=40, posterior_table=None):
     return rows
 
 def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, posterior_table=None,
-                      phylogeny=None, alpha=0.3):
+                      phylogeny=None, alpha=0.3, lam=DEFAULT_LAMBDA):
     """|psi> = a mission/scope (query text). Returns the coverage-saturated phylogeny-greedy cascade."""
     posterior_table = posterior_table or {"label": "self-graded", "patterns": {}}
     phylogeny = phylogeny or load_phylogeny()
@@ -175,9 +207,14 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
             break
         chosen.append(best); cand.remove(best); traj.append((len(chosen), best[0], round(m, 3)))
     ids = [c for c, _ in chosen]
-    T = sum(rel for _, rel in chosen)                                   # intensity
+    # --- F = accuracy - lambda*complexity (real marginal-likelihood; replaces C-as-analogy)
+    prior, default_prior = base_rate_prior(phylogeny)
+    accuracy = sum(m for _, _, m in traj)                               # total ψ-coverage
+    complexity = sum(-math.log(prior.get(pattern_stem(c), default_prior)) for c, _ in chosen)
+    free_energy = accuracy - lam * complexity                           # Bayesian Occam; >0 = accept
+    intensity = sum(rel for _, rel in chosen)                           # Salingaros T
     pairs = [(i, j) for i in range(len(ids)) for j in range(i+1, len(ids))]
-    H = (sum(4*cos(EMB[ids[i]], EMB[ids[j]])*(1-cos(EMB[ids[i]], EMB[ids[j]])) for i, j in pairs)/len(pairs)) if pairs else 1.0
+    coherence = (sum(4*cos(EMB[ids[i]], EMB[ids[j]])*(1-cos(EMB[ids[i]], EMB[ids[j]])) for i, j in pairs)/len(pairs)) if pairs else 1.0
     semi_lattice = chosen_semi_lattice(ids, phylogeny)
     edge_count = len(semi_lattice["descent"]) + len(semi_lattice["co_app"])
     possible_edges = (len(ids) * (len(ids) - 1)) / 2
@@ -185,7 +222,10 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
     coverage_gap = len(coverage_candidates) > len(ids)
     low_connectivity = edge_count == 0 or (coverage_gap and edge_density < 0.45)
     return {"cascade": [(c, round(r, 3), mc) for (c, r), (_, _, mc) in zip(chosen, traj)],
-            "size": len(chosen), "C": round(T*H, 3), "H": round(H, 3), "T": round(T, 3),
+            "size": len(chosen), "wholeness": round(intensity*coherence, 3),
+            "H-coherence": round(coherence, 3), "T-intensity": round(intensity, 3),
+            "accuracy": round(accuracy, 3), "complexity": round(complexity, 3),
+            "F-free-energy": round(free_energy, 3), "lambda": float(lam),
             "trajectory": traj,
             "posterior_weight": float(posterior_weight),
             "posterior_label": posterior_table.get("label", "self-graded"),
@@ -199,7 +239,7 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
 
 def print_cascade(name, query):
     r = construct_cascade(query, epsilon=0.15)
-    print(f"[{name}]  size={r['size']}  C={r['C']} (T={r['T']} x H={r['H']})  phylo-edges={r['phylogeny']['edge_count']}  edge-density={r['phylogeny']['edge_density']}")
+    print(f"[{name}]  size={r['size']}  wholeness={r['wholeness']} (intensity={r['T-intensity']} x coherence={r['H-coherence']})  phylo-edges={r['phylogeny']['edge_count']}  edge-density={r['phylogeny']['edge_density']}")
     if r["phylogeny"]["low_connectivity"]:
         print("    LOW-CONNECTIVITY/COVERAGE-GAP: sparse selected graph or more embedding hits outside the phylogeny than inside it")
     print("    cascade:")
