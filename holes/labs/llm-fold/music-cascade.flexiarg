@@ -1,0 +1,52 @@
+; music-cascade — a 7-pattern cascade for the toy LLM-fold (E-llm-fold).
+; Plain NL patterns (IF / HOWEVER / THEN / BECAUSE), deliberately OUTSIDE the futon stack.
+; The circumstance |ψ⟩ = "compose a 3-voice fugue exposition in C major."
+; An LLM TURN folds these into a construction (the fugue) — see E-llm-fold.md / compose_fugue.py.
+
+@flexiarg music/fugue-subject
+  + IF: you are beginning a fugue and have no thematic material yet.
+  + HOWEVER: the piece needs one memorable idea that every voice can carry.
+  + THEN: state a SUBJECT — a short, singable line (≈1–2 bars) in the TONIC, in a single voice, unaccompanied.
+  + BECAUSE: the subject is the genetic material every later entry, episode, and stretto is derived from.
+
+@flexiarg music/subject-answer
+  + IF: the subject has been stated in the tonic and a second voice must enter.
+  + HOWEVER: a literal repeat would not move; a free transposition could tip the ear into a new key.
+  + THEN: bring the second voice in with the ANSWER — the subject transposed to the DOMINANT (a real answer
+    transposes exactly up a 5th; a TONAL answer adjusts a leading scale-degree-5→1 leap so the home key holds).
+  + BECAUSE: tonic-then-dominant statement is what makes the texture read as a fugue and frames the key.
+
+@flexiarg music/countersubject
+  + IF: the answer is entering in a second voice and the first voice has finished the subject.
+  + HOWEVER: the first voice must keep saying something that fits the answer, not fall silent or clash.
+  + THEN: give the first voice a COUNTERSUBJECT against the answer — ideally in invertible counterpoint
+    (it must still work if the two lines later swap which is on top).
+  + BECAUSE: invertibility lets the same pair of lines be reused, top-or-bottom, at every future entry.
+
+@flexiarg music/exposition-entries
+  + IF: some voices have not yet stated the subject.
+  + HOWEVER: an exposition is only complete when EVERY voice has carried the subject once.
+  + THEN: bring each remaining voice in with the subject, alternating TONIC / DOMINANT entries until all
+    voices have entered.
+  + BECAUSE: the exposition's job is to introduce all the voices through the one shared idea.
+
+@flexiarg music/episode-by-sequence
+  + IF: you are between subject entries and the texture would stall if you just stacked entries.
+  + HOWEVER: you need motion and a way to relink keys without stating the whole subject again.
+  + THEN: spin a short EPISODE by taking a fragment of the subject or countersubject and SEQUENCING it
+    (repeat it a step or a fifth lower/higher) to travel.
+  + BECAUSE: episodes develop the material and carry the music between the tonal pillars of the entries.
+
+@flexiarg music/voice-leading
+  + IF: more than one voice is sounding and you must choose the next chord.
+  + HOWEVER: parallel fifths and octaves collapse the independence of the voices.
+  + THEN: move each voice by the SMALLEST interval available, favour contrary motion, keep strong beats
+    consonant, and resolve tendency tones (leading-tone up, chordal 7th down).
+  + BECAUSE: independent, smooth voices are what counterpoint IS; parallels make it sound like one voice.
+
+@flexiarg music/authentic-cadence
+  + IF: a section (here, the exposition) is reaching its end.
+  + HOWEVER: it needs an unambiguous sense of arrival and closure.
+  + THEN: approach the final tonic with a strong DOMINANT→TONIC (V→I) cadence, the leading tone rising to
+    the tonic and any dominant 7th falling to the third.
+  + BECAUSE: the authentic cadence is the strongest signal of "we have arrived home."
