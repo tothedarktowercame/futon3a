@@ -34,7 +34,18 @@
    "devmap-coherence/prototype-alignment-role"      {:box :emit      :order 5 :does "emit wiring + policy-holes"}
    "devmap-coherence/prototype-alignment-tension"   {:box :emit      :order 5 :does "emit wiring + policy-holes"}
    "devmap-coherence/prototype-alignment-bridge"    {:discipline "bridge: cascade (correlation) → wiring (construction)"}
-   "devmap-coherence/devmap-scope-discipline"       {:scope true :discipline "scope the terminals to the want-signature"}})
+   "devmap-coherence/devmap-scope-discipline"       {:scope true :discipline "scope the terminals to the want-signature"}
+   ;; ---- 2026-07-03 reach extension (claude-11): honest NL→rule extraction from the
+   ;; live-lane patterns' THEN clauses (each :does derived from the flexiarg's own THEN;
+   ;; E-aif-post-mission-mining #1 — the sweep's rule-candidates were REJECTED, see the
+   ;; ledger; these six are read-from-source). Grows the executor's reach so live passes
+   ;; produce DIVERSE realized-G — the R14-variance channel (contract v0.22).
+   "f6/pattern-as-strategy"                         {:box :selector  :order 1 :does "pattern → agent-operational rule (asker/answerer/critic)"}
+   "f6/learning-event-detection"                    {:box :match     :order 2 :does "detect learning/treatment events over the corpus (first-use trajectories)"}
+   "sidecar/artifact-entity-mention-grounding"      {:box :fold-step :order 3 :does "ground mentions → deterministic artifact/entity/alias records"}
+   "f6/proof-as-social-process"                     {:box :fixpoint  :order 4 :does "map patterns → thesis categories; surface coverage gaps"}
+   "stack-coherence/futon-bridge-health"            {:box :emit      :order 5 :does "verify each declared bridge; emit per-bridge health report"}
+   "futon-theory/mission-interface-signature"       {:scope true :discipline "type the mission's ports (interface signature = the want-signature discipline)"}})
 
 ;; ---- the fold: cascade + want-signature → wiring ----
 (defn fold [cascade want-signature]
