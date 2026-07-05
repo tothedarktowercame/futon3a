@@ -34,6 +34,7 @@ DEFAULT_POSTERIORS = ROOT/"resources/notions/pattern_posteriors.self_graded.json
 DEFAULT_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-edges.json")
 DEFAULT_LEARNED_PHYLOGENY = Path("/home/joe/code/futon6/data/pattern-phylogeny-learned.json")
 DEFAULT_GROUNDED_POSTERIORS = Path("/home/joe/code/futon6/data/pattern_posteriors.grounded.json")
+DEFAULT_SEEDS = Path("/home/joe/code/futon6/data/pattern-seeds.json")
 
 # F-score (M-wm-policies omission 2, AIF grounding 2026-06-24): grain-2 cascade quality as a
 # real marginal-likelihood F = accuracy - lambda*complexity (Bayesian Occam), replacing the
@@ -109,7 +110,20 @@ def load_phylogeny(path=DEFAULT_PHYLOGENY, learned_path=DEFAULT_LEARNED_PHYLOGEN
         "co_app": co_app,
     }
 
-def base_rate_prior(phylogeny, floor_frac=0.1):
+def load_seed_stems(path=DEFAULT_SEEDS):
+    """Operator-designated seed patterns (E-live-loop-2 2c). Returns the set of
+    pattern STEMS. Missing file => no seeds (empty set). A present-but-malformed
+    registry raises: silently running unfloored would re-fine the seeds."""
+    p = Path(path)
+    if not p.exists():
+        return frozenset()
+    data = json.load(open(p))
+    seeds = data["seeds"]
+    ids = [s["id"] for s in seeds]
+    assert ids and all(isinstance(i, str) and "/" in i for i in ids), f"malformed seed registry {p}: {seeds}"
+    return frozenset(pattern_stem(i) for i in ids)
+
+def base_rate_prior(phylogeny, floor_frac=0.1, seed_stems=frozenset()):
     """Per-pattern INCLUSION prior P(include p) from co-application mass — how EXPECTED p is
     (its unconditional usage). A Bernoulli inclusion probability in (0,1), NOT a categorical
     over all patterns: a categorical (mass/total) makes every -log P ≈ log N bits, swamping
@@ -128,6 +142,15 @@ def base_rate_prior(phylogeny, floor_frac=0.1):
     K = pos[len(pos) // 2] if pos else 1.0          # median positive mass = the typical scale
     f = floor_frac * K
     prior = {p: (m + f) / (m + f + K) for p, m in mass.items()}
+    if seed_stems:
+        # Operator designation IS a prior statement (E-live-loop-2 2c): registered seeds
+        # are floored at the MEDIAN pattern's inclusion prior (mass=K), not the unseen
+        # default — "starts nearly every cascade" entered as the prior it claims to be.
+        # max() makes the floor self-retiring: once learned co-app mass lifts the seed
+        # above the median, the designation is inert. Non-seeds are untouched.
+        seed_floor = (K + f) / (K + f + K)
+        for s in seed_stems:
+            prior[s] = max(prior.get(s, f / (f + K)), seed_floor)
     return prior, (f / (f + K))
 
 def phylogeny_connectivity(pid, chosen, phylogeny):
@@ -208,7 +231,7 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
         chosen.append(best); cand.remove(best); traj.append((len(chosen), best[0], round(m, 3)))
     ids = [c for c, _ in chosen]
     # --- F = accuracy - lambda*complexity (real marginal-likelihood; replaces C-as-analogy)
-    prior, default_prior = base_rate_prior(phylogeny)
+    prior, default_prior = base_rate_prior(phylogeny, seed_stems=load_seed_stems())
     accuracy = sum(m for _, _, m in traj)                               # total ψ-coverage
     complexity = sum(-math.log(prior.get(pattern_stem(c), default_prior)) for c, _ in chosen)
     free_energy = accuracy - lam * complexity                           # Bayesian Occam; >0 = accept
