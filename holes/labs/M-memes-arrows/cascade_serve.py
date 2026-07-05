@@ -18,7 +18,9 @@ def main():
         print(json.dumps({"error": "usage: cascade_serve.py '<psi>' [budget] [epsilon]"}))
         return
     psi = sys.argv[1]
-    budget = int(sys.argv[2]) if len(sys.argv) > 2 else 6
+    # default 6->20, operator ruling 2026-07-05 (invariant-grade arrivals at
+    # ranks 10-16 sat outside the budget-6 window; E-live-loop-2 deposit-002)
+    budget = int(sys.argv[2]) if len(sys.argv) > 2 else 20
     eps = float(sys.argv[3]) if len(sys.argv) > 3 else 0.15
     r = construct_cascade(psi, epsilon=eps)
     full = [{"pattern": p, "rel": rel, "mc": mc} for (p, rel, mc) in r["cascade"]]
