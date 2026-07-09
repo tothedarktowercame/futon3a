@@ -10,7 +10,7 @@ Emits:  {"psi","size","wholeness","H-coherence","T-intensity","accuracy","comple
 """
 import sys
 import json
-from cascade_construct import construct_cascade
+from cascade_construct import chosen_semi_lattice, construct_cascade, load_phylogeny
 
 
 def main():
@@ -25,6 +25,9 @@ def main():
     r = construct_cascade(psi, epsilon=eps)
     full = [{"pattern": p, "rel": rel, "mc": mc} for (p, rel, mc) in r["cascade"]]
     shown = full[:budget]
+    shown_ids = [row["pattern"] for row in shown]
+    phylogeny = load_phylogeny()
+    semilattice = chosen_semi_lattice(shown_ids, phylogeny)
     print(json.dumps({
         "psi": psi,
         "size": r["size"],            # full coverage-saturated size
@@ -35,6 +38,7 @@ def main():
         "F-free-energy": r["F-free-energy"], "lambda": r["lambda"],
         "budget": budget,
         "shown": shown,               # the top-budget strong centres (what the WM displays)
+        "semilattice": semilattice,
         "truncated": r["size"] > budget,
     }))
 
