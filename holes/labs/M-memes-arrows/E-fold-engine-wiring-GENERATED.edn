@@ -1,0 +1,50 @@
+{:boxes
+ [{:id :selector,
+   :order 1,
+   :does "pattern → rule",
+   :warrant "devmap-coherence/prototype-structure-checklist"}
+  {:id :match,
+   :order 2,
+   :does "rule × topology → applicable",
+   :warrant
+   "math-formalization/tactic-algebra-interference + math-strategy/constraint-tension-resolution"}
+  {:id :fold-step,
+   :order 3,
+   :does "rewrite (tension-resolution); pivot",
+   :warrant
+   "math-informal/parametric-tension-dissolution + math-strategy/route-exploration-and-pivot"}
+  {:id :fixpoint,
+   :order 4,
+   :does "iterate to coverage-saturation",
+   :warrant "devmap-coherence/next-steps-to-done"}
+  {:id :emit,
+   :order 5,
+   :does "emit wiring + policy-holes",
+   :warrant
+   "devmap-coherence/prototype-alignment-role + devmap-coherence/prototype-alignment-tension"}],
+ :terminals
+ {:in [{:port "cascade-dict"}],
+  :out
+  [{:port "wiring-diagram", :type "Wiring"}
+   {:port "policy-holes", :type "[PolicyHole]"}]},
+ :for-sorry :sorry/fold-engine-cascade-to-wiring,
+ :discipline
+ ["bridge: cascade (correlation) → wiring (construction)"
+  "scope the terminals to the want-signature"],
+ :id :wiring/fold-engine-generated,
+ :policy-holes [],
+ :generated-by
+ "fold_engine.clj v1 (rule-table fold; THEN→rule encoded, NL-extraction = v2)",
+ :want-signature "fold : cascade-dict -> (Wiring, [PolicyHole])",
+ :wires
+ [{:from "cascade-dict", :to :selector, :type :wire/sequencing}
+  {:from :selector, :to :match, :type :wire/sequencing}
+  {:from :match, :to :fold-step, :type :wire/sequencing}
+  {:from :fold-step, :to :fixpoint, :type :wire/sequencing}
+  {:from :fixpoint, :to :emit, :type :wire/sequencing}
+  {:from :fixpoint,
+   :to :fold-step,
+   :type :wire/causal,
+   :note "rewrite loop"}
+  {:from :emit, :to "wiring-diagram", :type :wire/consequential}
+  {:from :emit, :to "policy-holes", :type :wire/consequential}]}

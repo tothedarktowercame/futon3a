@@ -1,5 +1,7 @@
 # What the BHK Interpretation Really Is
 
+Status: archived
+
 *A research note for sharpening the informal phrase "a BHK arrow is a proof step."*
 
 **Short answer, up front.** A BHK "arrow" `A → B` is not a relation that *holds* between `A` and `B`, nor an *assertion* that `B` follows; it is a **construction** — an effective method/function — that, applied to *any* construction proving `A`, *produces* a construction proving `B`. The load-bearing words are **construction**, **method/function**, and **transform**, not "step." See the synthesis in §7.

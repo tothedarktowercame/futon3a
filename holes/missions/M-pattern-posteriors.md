@@ -1,5 +1,7 @@
 # Mission: M-pattern-posteriors
 
+Status: IDENTIFY
+
 *Keep score on which patterns actually help, and let that score — auditable,
 per-pattern — inform which patterns get picked next time. This is the mission that
 makes the AIF learning loop **pattern-based**: learning lifted from move grain

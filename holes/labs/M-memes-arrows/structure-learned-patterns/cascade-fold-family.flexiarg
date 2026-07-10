@@ -1,0 +1,46 @@
+@flexiarg cascade-fold/cascade-to-wiring-strategies
+@title Cascade-to-Wiring Strategies (the fold family)
+@keywords cascade, fold, wiring, strategy, family, compile, search, construction, tailor, circumstance, terminals, policy-holes, compose, select, order, terminate, surface
+@audience fold engineers, pattern-language authors
+@tone architectural
+@factor Wisdom (panna)
+@style construction-strategy
+@references [cascade-fold/compile-when-path-is-clear cascade-fold/search-when-path-is-unclear]
+
+! conclusion:
+  Folding a cascade into a wiring is a FAMILY of two strategies — compile (when the
+  construction is evident) and search (when it is not) — chosen by how evident the
+  construction is; both meet the same spec but look and feel qualitatively different.
+
+  + context: You must turn a cascade of patterns into a runnable wiring that meets a
+    sorry's spec — composing the contributions, selecting which apply, ordering them,
+    terminating, and surfacing undecidables — with terminals = the sorry's have->want.
+
+  + IF: You must turn a cascade of patterns into a runnable wiring that meets a
+    sorry's spec — composing, selecting, ordering, terminating, and surfacing
+    undecidables — with terminals = the sorry's have->want.
+
+  + HOWEVER: There is no single fold. The right strategy depends on circumstance —
+    whether the construction is already evident or must be discovered — and choosing
+    wrong (compiling an unclear path, or searching a clear one) wastes the cascade.
+    + FAILURE-MODES:
+        - Forcing one strategy for every sorry (the pipeline-only or search-only trap).
+
+  + THEN:
+      1. Assess construction-evidence for this sorry.
+      2. If evident -> apply compile-when-path-is-clear (a deterministic pipeline).
+      3. If not -> apply search-when-path-is-unclear (a tension-resolving search).
+      4. In both: terminals = the sorry's (have, want); warrant every box by a cascade pattern; surface undecidables as policy-holes.
+
+  + BECAUSE: Both strategies meet the same spec but look and feel qualitatively
+    different, and choosing wrong (compiling an unclear path, or searching a clear one)
+    wastes the cascade; so the choice must be governed by how evident the construction is.
+
+  + NEXT-STEPS:
+      - Assess construction-evidence for the sorry at hand.
+      - If evident, apply compile-when-path-is-clear; if not, apply search-when-path-is-unclear.
+      - In both, set terminals = the sorry's (have, want), warrant every box by a cascade pattern, and surface undecidables as policy-holes.
+
+  + QUALITY-CRITERIA:
+      Well-applied: the strategy fits the circumstance; the spec is met either way; the choice is justified by construction-evidence.
+      Badly-applied: one strategy imposed regardless of circumstance.

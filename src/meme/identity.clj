@@ -4,7 +4,8 @@
             [meme.cap-ascent :as cap-ascent]
             [meme.ch2 :as ch2]
             [meme.core :as core]
-            [meme.endpoints :as endpoints]))
+            [meme.endpoints :as endpoints]
+            [meme.gates :as gates]))
 
 (def state-order
   [:correlated :open :constructed])
@@ -172,7 +173,8 @@
 
 (defn promote!
   "Promote an existing endpoint-keyed arrow in place."
-  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent ch2]
+  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent ch2
+                                  endpoints want-signature wiring cascade grounding-oracle]
                            :or {cap-ascent {:write? true}}}]
   (let [endpoint (normalize-endpoints endpoint)
         existing (or (find-by-endpoint ds endpoint)
@@ -189,6 +191,20 @@
                       {:id (:id existing)
                        :from from-state
                        :to to-state})))
+    ;; Structural transition gates (meme.gates) — the cascade→sorry→wiring inter-step
+    ;; process. Fire ONLY when the caller supplies the structured data, so legacy
+    ;; promotions (no endpoints/wiring/cascade) are unaffected. They run before any
+    ;; mutation, so a gate failure leaves the arrow untouched.
+    (when (and (= :open to-state) (seq endpoints))
+      (gates/gate! "GROUNDING"
+                   (gates/grounded? endpoints (or grounding-oracle (constantly true)))
+                   {:id (:id existing) :endpoint endpoint}))
+    (when (= :constructed to-state)
+      (let [w (or wiring payload)]
+        (when (and want-signature w)
+          (gates/gate! "TERMINALS-MATCH" (gates/terminals-match? want-signature w) {:id (:id existing)}))
+        (when (and (seq cascade) w)
+          (gates/gate! "CASCADE-WARRANT" (gates/cascade-warrant-ok? cascade w) {:id (:id existing)}))))
     (if (= from-state to-state)
       {:arrow existing
        :cap-ascent (when (= :constructed to-state)

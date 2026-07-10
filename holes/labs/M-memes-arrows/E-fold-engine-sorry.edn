@@ -1,0 +1,46 @@
+;; E-fold-engine-sorry.edn — the Stage-2 sorry as a HYPERGRAPH over real substrate-2 endpoints.
+;; Machine-readable twin of the runbook diagram (E-fold-engine-runbook.html #hyper). Keep in sync.
+;;
+;; substrate-2 isn't special — it's the map of the whole FUTON stack (Joe, 2026-06-22). A sorry is a
+;; hyperedge in that map; its endpoints must be real substrate-2 entities. Query the map via
+;; /api/alpha/hyperedges (the :hx/type read path) — NOT entities/latest (vertices only).
+;;
+;; STATE: candidate / :correlated. To reach :open it must be GROUNDED: post it as a code/v05/sorry
+;; (or add to a watched sorry-registry the multi-watcher ingests). Gated on operator go.
+
+{:id :sorry/fold-engine-cascade-to-wiring
+ :hx-type "code/v05/sorry"
+ :state :correlated
+ :derivation :agent-supplied
+ :want-signature "fold : cascade-dict -> (Wiring, [PolicyHole])"
+ :hungry-for "Wiring"                 ; the want type (futon5/wiring); codomain to pin
+
+ ;; ENDPOINTS — real substrate-2 entities. :in-map  true | false | :unconfirmed
+ :endpoints
+ [{:role :have :ref "the 10 THEN-clause cascade patterns"
+   :type "pattern/library" :in-map true}
+  {:role :have :ref "M-value-creation-loop (Ck2 hand-fold = the proxy)"
+   :type "mission (M-*.md sync)" :in-map true}
+  {:role :have :ref "futon3a/holes/labs/M-memes-arrows/cascade_construct.py (construct_cascade -> cascade-dict)"
+   :type "code/v05/namespace" :in-map true
+   :hx-id "hx:code/v05/namespace:futon3a-d/cascade_construct"
+   :note "CONFIRMED present via targeted source-file query, post JVM-restart 2026-06-22"}
+  {:role :have :ref "~/code/data/notions/* + futon6/data/pattern-phylogeny-edges.json"
+   :type "(data inputs)" :in-map false
+   :note "not in map; the cascade's data deps; secondary"}
+  {:role :want :ref "futon5/wiring/* (pin the Wiring codomain type)"
+   :type "code/v05/namespace (.clj)" :in-map false
+   :note "futon5 IS watched (14 roots) but the wiring namespace isn't in the map; + the codomain type still needs pinning"}]
+
+ ;; KIND — DERIVED from the hole typology (reconstructed from history), not a concocted enum:
+ :kind {:predecessor-shape :proxy->real
+        :whats-new         :pure-function-over-existing
+        :target-territory  :mostly-known       ; small sub-hole: pin the Wiring codomain
+        :fill-mechanism    :write-function}
+ :rating 1.0
+ :title "cascade->wiring fold engine — dynamics-layer hole (hand-fold proxy exists, engine absent)"
+ :provenance {:excursion "futon3a/holes/missions/E-fold-engine.md"
+              :runbook-diagram "E-fold-engine-runbook.html #hyper — this .edn is its machine-readable twin"
+              :stage "2 — sorry as hypergraph over real substrate-2 endpoints"
+              :corrected "2026-06-22: substrate-2 well-populated (watcher live for docs); earlier empty-map claim was a wrong-endpoint artifact (entities/latest vs hyperedges)"
+              :minted-at "2026-06-22" :minted-by "claude-2"}}
