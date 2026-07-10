@@ -1,0 +1,48 @@
+; blues-cascade — a 7-pattern cascade for the toy LLM-fold, 2nd data point (E-llm-fold).
+; Plain NL patterns (IF / HOWEVER / THEN / BECAUSE), a DIFFERENT genre from the fugue.
+; The circumstance |ψ⟩ = "compose one 12-bar blues chorus in A."
+; Folded by an LLM turn into a construction — see compose_blues.py / blues-A.mp3.
+
+@flexiarg blues/twelve-bar-form
+  + IF: you are starting a blues chorus and need its harmonic skeleton.
+  + HOWEVER: a blues is defined by a specific 12-bar cycle, not free harmony.
+  + THEN: lay out 12 bars as I–IV–I–I / IV–IV–I–I / V–IV–I–V, one chorus.
+  + BECAUSE: that I-IV-V cycle over 12 bars is precisely what makes a progression "a blues."
+
+@flexiarg blues/dominant-sevenths
+  + IF: you are choosing the quality of the I, IV and V chords.
+  + HOWEVER: plain major triads sound like a hymn, not a blues.
+  + THEN: make ALL THREE chords DOMINANT 7ths (I7, IV7, V7) — the "wrong" functional theory that is right here.
+  + BECAUSE: the pervasive flat-7 on every chord is the harmonic signature of the blues.
+
+@flexiarg blues/quick-change
+  + IF: you are in bar 2 of the chorus.
+  + HOWEVER: sitting on I for four bars can feel static.
+  + THEN: go to IV in bar 2 (the "quick four") before returning to I in bars 3–4.
+  + BECAUSE: the quick-change is the standard idiomatic variant that adds early motion.
+
+@flexiarg blues/blues-scale-melody
+  + IF: you are writing the head / melody.
+  + HOWEVER: the major scale over these chords sounds too sweet.
+  + THEN: draw the melody from the BLUES SCALE (minor pentatonic + b5: in A → A C D Eb E G), leaning on the
+    blue notes (b3, b5, b7) against the dominant chords.
+  + BECAUSE: the friction of the blue notes rubbing against the major-leaning chords is the expressive core.
+
+@flexiarg blues/call-and-response
+  + IF: you are phrasing the melody across the 12 bars.
+  + HOWEVER: one continuous line is unbluesy; the form wants conversation and space.
+  + THEN: phrase as CALL-AND-RESPONSE in an AAB shape — a call in the first 4 bars, the SAME call again over
+    the second 4 (the IV), and a different answering line (B) over the last 4; leave air between calls.
+  + BECAUSE: blues phrasing is conversational (field-holler → response); the space is part of the statement.
+
+@flexiarg blues/shuffle-feel
+  + IF: you are setting the rhythmic feel.
+  + HOWEVER: straight eighth-notes sound stiff and square.
+  + THEN: SHUFFLE — subdivide the beat as a long–short triplet (swung eighths) in the melody, bass boogie, and ride.
+  + BECAUSE: the shuffle groove is the rhythmic identity of the blues.
+
+@flexiarg blues/turnaround
+  + IF: you are in bars 11–12 and the chorus must loop.
+  + HOWEVER: a flat ending on I kills the momentum to start another chorus.
+  + THEN: play a TURNAROUND in bars 11–12 that lands on V, pulling the ear back to I for the next chorus.
+  + BECAUSE: the turnaround is the cyclic hook that makes a blues go round again.

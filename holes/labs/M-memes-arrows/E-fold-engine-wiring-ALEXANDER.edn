@@ -1,0 +1,55 @@
+;; E-fold-engine-wiring-ALEXANDER.edn — the FORWARD (Alexandrian) solution to the fold sorry.
+;;
+;; Derived by Alexander's method, NOT by working backward: the sorry was restated as IF/HOWEVER
+;; tensions, those were matched against each pattern's real context+HOWEVER (alexander_match.py,
+;; MiniLM), and the THEN lines of the matched patterns were composed. The patterns that actually
+;; resolve this sorry's tensions are the math-strategy TENSION family (route-exploration-and-pivot,
+;; constraint-tension-resolution, parametric-tension-dissolution) + next-steps-to-done — NOT the
+;; devmap-coherence/prototype-* family the backward solution (E-fold-engine-wiring.edn) was built from.
+;;
+;; SAME spec (cascade-dict → wiring + policy-holes); QUALITATIVELY DIFFERENT solution: a SEARCH that
+;; dissolves tensions by re-choosing the construction, with BACK-EDGES (pivot / re-choose / drift),
+;; not a linear dataflow pipeline.
+
+{:id :wiring/fold-engine-alexander
+ :for-sorry :sorry/fold-engine-cascade-to-wiring
+ :derived-by "forward Alexander method (sorry-tensions → pattern IF/HOWEVER match → composed THENs)"
+ :stance "the fold is a SEARCH that DISSOLVES tensions by re-choosing the construction — not a fixed pipeline"
+ :terminals {:in [{:port "cascade-dict"}] :out [{:port "wiring-diagram"} {:port "policy-holes"}]}
+
+ :boxes
+ [{:id :explore      :does "sketch candidate constructions; mark nodes solid/open/blocked"
+   :warrant "math-strategy/route-exploration-and-pivot"
+   :then "1. sketch each candidate approach as a lightweight architecture with explicit node status"}
+  {:id :triage       :does "kill blocked candidates; prefer fewest-open / most-parallel; record failures"
+   :warrant "math-strategy/route-exploration-and-pivot"
+   :then "2-4. triage immediately; deprioritize serial-open; record abandoned approaches + failure points"}
+  {:id :name-tension :does "state the conflicting obligations (expressiveness ↔ parsimony — the C knee)"
+   :warrant "math-strategy/constraint-tension-resolution"
+   :then "1. state the tension precisely: both obligations, the shared parameter, the conflict"}
+  {:id :dissolve     :does "re-choose the construction so both obligations agree (tension = theorem about the approach)"
+   :warrant "math-strategy/constraint-tension-resolution + math-informal/parametric-tension-dissolution"
+   :then "3. search for C' where both obligations are compatible; the tension is about the approach, not the problem"}
+  {:id :track-done   :does "next-steps ledger; flag drift; stop when done"
+   :warrant "devmap-coherence/next-steps-to-done"
+   :then "each obligation tracks next[...] or explicit done; flag :drift when no next step"}]
+
+ ;; WIRES — note the BACK-EDGES. This is the qualitative tell: a search, not a pipeline.
+ :wires
+ [{:from "cascade-dict" :to :explore :type :wire/sequencing}
+  {:from :explore :to :triage :type :wire/fan-in :note "many candidates → triage"}
+  {:from :triage :to :explore :type :wire/pivot :note "BACK-EDGE: all-blocked → re-explore"}
+  {:from :triage :to :name-tension :type :wire/sequencing}
+  {:from :name-tension :to :dissolve :type :wire/sequencing}
+  {:from :dissolve :to :explore :type :wire/pivot :note "BACK-EDGE: re-choose construction = a new candidate"}
+  {:from :dissolve :to :track-done :type :wire/sequencing}
+  {:from :track-done :to :name-tension :type :wire/pivot :note "BACK-EDGE: drift → re-open the tension"}
+  {:from :track-done :to "wiring-diagram" :type :wire/consequential}
+  {:from :triage :to "policy-holes" :type :wire/consequential :note "abandoned approaches + undissolved tensions = surfaced holes"}]
+
+ :qualitative-shape
+ {:topology "search graph with 3 back-edges (pivot/re-choose/drift) + a fan-in over candidates"
+  :vs-backward "the backward wiring is a linear 5-stage dataflow pipeline with a single fixpoint self-loop"
+  :driver "tension (conflicting obligations to dissolve)  vs  structure (pure functions to pipe)"
+  :feel "proof-strategy / research search  vs  software-engineering pipeline"
+  :coherence "re-connects the fold to route-exploration = a policy-search → consistent with M-wm-policies' G(π) rollout; the backward pipeline severed that"}}

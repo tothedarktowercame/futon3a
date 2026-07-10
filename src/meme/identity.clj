@@ -2,8 +2,10 @@
   "Endpoint-keyed arrow identity and Contract-C promotion."
   (:require [meme.arrow :as arrow]
             [meme.cap-ascent :as cap-ascent]
+            [meme.ch2 :as ch2]
             [meme.core :as core]
-            [meme.endpoints :as endpoints]))
+            [meme.endpoints :as endpoints]
+            [meme.gates :as gates]))
 
 (def state-order
   [:correlated :open :constructed])
@@ -127,9 +129,52 @@
   (when-let [cap-id (advances-cap arrow-row)]
     (cap-ascent/advance! cap-id (endpoint-key endpoint) cap-ascent-opts)))
 
+(defn- normalize-ch2-opts [opts]
+  (merge {:emit? true
+          :sink ch2/default-sink}
+         (or opts {})))
+
+(defn- arrow-sorry-ref! [ds arrow-row]
+  (let [arrow->sorry-doc (requiring-resolve 'meme.substrate2/arrow->sorry-doc)
+        doc (arrow->sorry-doc ds arrow-row)]
+    (get-in doc [:props "sorry/endpoint"])))
+
+(defn- emit-ch2-if-needed! [ds arrow-row endpoint ch2-opts]
+  (let [{:keys [emit? sink]} (normalize-ch2-opts ch2-opts)]
+    (when emit?
+      (try
+        (let [have (:have endpoint)
+              want (:want endpoint)
+              event (ch2/discharge-event
+                     (str have "->" want)
+                     (arrow-sorry-ref! ds arrow-row)
+                     (str (java.time.Instant/now)))]
+          (ch2/emit-discharge-event! event :sink sink))
+        (catch Exception e
+          ;; A CH2 emission failure must NOT break an already-committed promotion
+          ;; (the arrow update has landed; a retry hits the idempotent noop). But it
+          ;; must NOT be silent either — returning nil + a *err*-only log let three
+          ;; real discharges go invisible to the value channel (fable-1, E-mission-head
+          ;; §8.5; the §9 logging-without-propagating trap). Return a VISIBLE skip
+          ;; marker the promote! result carries, and NAME the load-bearing case: a
+          ;; :constructed arrow with no :payload is constructed-without-construction —
+          ;; the anti-laundering gate correctly refuses it (do NOT weaken the gate);
+          ;; surfacing the skip is how that violation gets noticed instead of dropped.
+          (let [reason (if (nil? (:payload arrow-row))
+                         :constructed-without-construction
+                         :emit-error)]
+            (binding [*out* *err*]
+              (println "WARN: CH2 discharge SKIPPED for"
+                       (str (:have endpoint) "->" (:want endpoint))
+                       "- reason:" (name reason) "-" (.getMessage e)))
+            {:ch2/skipped {:reason reason
+                           :move/id (str (:have endpoint) "->" (:want endpoint))
+                           :error (.getMessage e)}}))))))
+
 (defn promote!
   "Promote an existing endpoint-keyed arrow in place."
-  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent]
+  [ds endpoint to-state & {:keys [mode payload rationale created-by token-id cap-ascent ch2
+                                  endpoints want-signature wiring cascade grounding-oracle]
                            :or {cap-ascent {:write? true}}}]
   (let [endpoint (normalize-endpoints endpoint)
         existing (or (find-by-endpoint ds endpoint)
@@ -146,6 +191,20 @@
                       {:id (:id existing)
                        :from from-state
                        :to to-state})))
+    ;; Structural transition gates (meme.gates) — the cascade→sorry→wiring inter-step
+    ;; process. Fire ONLY when the caller supplies the structured data, so legacy
+    ;; promotions (no endpoints/wiring/cascade) are unaffected. They run before any
+    ;; mutation, so a gate failure leaves the arrow untouched.
+    (when (and (= :open to-state) (seq endpoints))
+      (gates/gate! "GROUNDING"
+                   (gates/grounded? endpoints (or grounding-oracle (constantly true)))
+                   {:id (:id existing) :endpoint endpoint}))
+    (when (= :constructed to-state)
+      (let [w (or wiring payload)]
+        (when (and want-signature w)
+          (gates/gate! "TERMINALS-MATCH" (gates/terminals-match? want-signature w) {:id (:id existing)}))
+        (when (and (seq cascade) w)
+          (gates/gate! "CASCADE-WARRANT" (gates/cascade-warrant-ok? cascade w) {:id (:id existing)}))))
     (if (= from-state to-state)
       {:arrow existing
        :cap-ascent (when (= :constructed to-state)
@@ -161,16 +220,21 @@
                       rationale (assoc :rationale rationale)
                       created-by (assoc :created-by created-by))
             _ (arrow/update-arrow! ds (:id existing) updates)
-            updated (absorb-token! ds (arrow/get-arrow ds (:id existing)) token-id)]
-        {:arrow updated
-         :cap-ascent (when (= :constructed to-state)
-                       (cap-ascent-if-needed! updated endpoint cap-ascent))
-         :op {:op :promote
-              :id (:id updated)
-              :from from-state
-              :to to-state
-              :have (:have endpoint)
-              :want (:want endpoint)}}))))
+            updated (absorb-token! ds (arrow/get-arrow ds (:id existing)) token-id)
+            cap-result (when (= :constructed to-state)
+                         (cap-ascent-if-needed! updated endpoint cap-ascent))
+            ch2-result (when (= :constructed to-state)
+                         (emit-ch2-if-needed! ds updated endpoint ch2))]
+        (cond-> {:arrow updated
+                 :cap-ascent cap-result
+                 :op {:op :promote
+                      :id (:id updated)
+                      :from from-state
+                      :to to-state
+                      :have (:have endpoint)
+                      :want (:want endpoint)}}
+          (:ch2/discharge-event ch2-result) (assoc :ch2/discharge-event ch2-result)
+          (:ch2/skipped ch2-result)         (assoc :ch2/emit-skipped (:ch2/skipped ch2-result)))))))
 
 (defn- entity-names [ds]
   (set (map :name (core/list-entities ds))))

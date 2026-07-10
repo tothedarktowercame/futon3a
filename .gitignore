@@ -17,3 +17,7 @@ resources/notions/*.json
 
 # Added 2026-05-26 by street-sweeper Phase C (INV-10 relocations)
 resources/notions/*.png
+
+# Generated notions data (embeddings/projections/indexes) lives externally —
+# resources/notions is a symlink to ~/code/data/notions. See README-data.md.
+/resources/notions

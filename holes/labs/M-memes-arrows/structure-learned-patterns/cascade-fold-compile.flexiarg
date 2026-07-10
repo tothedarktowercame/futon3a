@@ -1,0 +1,46 @@
+@flexiarg cascade-fold/compile-when-path-is-clear
+@title Compile the Cascade (when the construction is already evident)
+@keywords cascade, fold, wiring, pipeline, compile, pure-function, dataflow, deterministic, construction, stage, selector, emit, terminals
+@audience fold engineers, pattern composers
+@tone constructive
+@factor Equanimity (upekkha)
+@style construction-strategy
+
+! conclusion:
+  When the construction for filling a hole is already evident, compile the cascade
+  into a fixed pure-function pipeline (select rules -> match -> fold to fixpoint ->
+  emit) and run it deterministically; surface undecidable obligations as policy-holes.
+
+  + context: You hold a cascade of patterns that expresses how to fill a hole, and
+    the construction path is ALREADY EVIDENT — you can see the decomposition into
+    pure functions and the order in which they compose.
+
+  + IF: You hold a cascade of patterns expressing how to fill a hole, and the
+    construction path is already evident — you can see the decomposition into pure
+    functions and the order in which they compose.
+
+  + HOWEVER: The cascade is only correlation; until you commit to a decomposition and
+    wire it, it stays inert prose. The danger is hard-coding one path when the path
+    was not actually clear.
+    + FAILURE-MODES:
+        - The path only LOOKED clear because you were working backward from an answer
+          you had already guessed; a pipeline then bakes in a confabulation.
+
+  + THEN:
+      1. Define the pure functions before the bang-verbs: selector, match, fold-step, emit.
+      2. Assign each cascade contribution to a stage; warrant each stage by its pattern.
+      3. Wire them as a linear dataflow; set the fixpoint / coverage-saturation stop.
+      4. Emit the wiring with terminals = the sorry's (have, want); split undecidables out as policy-holes.
+
+  + BECAUSE: When the construction is genuinely evident, the decomposition into pure
+    functions and their composition order are already known, so a fixed deterministic
+    pipeline meets the spec without the cost of searching a path you can already see.
+
+  + NEXT-STEPS:
+      - Define the pure functions (selector, match, fold-step, emit) before wiring the bang-verbs.
+      - Warrant each stage by its cascade pattern and set the fixpoint / coverage-saturation stop.
+      - Emit the wiring with terminals = the sorry's (have, want); split undecidables out as policy-holes.
+
+  + QUALITY-CRITERIA:
+      Well-applied: the construction was genuinely evident; every stage is warranted; terminals match the sorry.
+      Badly-applied: used on an unclear path (should have searched); stages tagged post-hoc onto a pre-built answer.

@@ -87,3 +87,4 @@ Posterior term composes with coherence-greedy marginal coverage as a multiplier;
 | `or2/ukrn-horizon-bridge` | 10 | 10 | 0.500 | 0 |
 | `structure/unresolved-tensions-at-closure` | 11 | 11 | 0.500 | 0 |
 | `math-formalization/complex-polynomial-bound` | 12 | 12 | 0.500 | 0 |
+

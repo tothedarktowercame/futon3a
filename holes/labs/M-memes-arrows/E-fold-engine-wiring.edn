@@ -1,0 +1,65 @@
+;; E-fold-engine-wiring.edn — Stage-3 WIRING diagram spec for the fold engine (VERIFY / the construction).
+;; The :constructed arrow = "a runnable method that produces `want` from `have` — a wiring diagram / BHK
+;; arrow" (futon3a/README-memes-and-arrows.md). PATTERN-WARRANTED: every box cites the cascade pattern that
+;; warrants it. This is the fold of the fold-engine's OWN cascade (self-application) — the engine, once
+;; built, must reproduce this from this cascade.
+;;
+;; ACCEPTANCE (Joe, 2026-06-22): the diagram's TERMINALS = the sorry's mapped (have, want) endpoints.
+;; If that doesn't hold, reconsider.
+
+{:id :wiring/fold-engine
+ :for-sorry :sorry/fold-engine-cascade-to-wiring
+ :state :spec            ; a VERIFY-stage construction SPEC; not yet a runnable :constructed arrow
+ :produces "want from have — the BHK arrow / runnable method"
+
+ ;; TERMINALS — = the sorry's (have, want). THE acceptance check.
+ :terminals
+ {:in  [{:port "cascade-dict" :type "cascade_construct.py output (semi-lattice + trajectory + C)"
+         :from-sorry-endpoint "cascade_construct.py — code/v05/namespace [in-map ✓]"}]
+  :out [{:port "wiring-diagram" :type "Wiring (futon5/wiring)"
+         :to-sorry-endpoint "futon5/wiring/* [want; codomain to pin]"}
+        {:port "policy-holes" :type "[PolicyHole] — the undecidables, surfaced honestly"}]}
+
+ ;; BOXES — the fold engine's components; each cites its cascade-pattern warrant.
+ :boxes
+ [{:id :selector  :in ["pattern"]                  :out ["rewrite-rule"]
+   :does "read a cascade pattern's THEN-clause as a rewrite rule"
+   :warrant "devmap-coherence/prototype-structure-checklist (pure functions before bang-verbs)"}
+  {:id :match     :in ["rewrite-rule" "cascade-dict"] :out ["applicable-rewrite"]
+   :does "match rules against the have->want topology (the semi-lattice)"
+   :warrant "math-strategy/constraint-tension-resolution + math-formalization/tactic-algebra-interference"}
+  {:id :fold-step :in ["state" "applicable-rewrite"] :out ["state'"]
+   :does "apply one rewrite (rewrite-as-tension-resolution); pivot if a rule can't fire"
+   :warrant "math-informal/parametric-tension-dissolution + math-strategy/route-exploration-and-pivot"}
+  {:id :fixpoint  :in ["state'"]                    :out ["saturated-state"]
+   :does "iterate fold-step until coverage-saturated (the stop)"
+   :warrant "devmap-coherence/next-steps-to-done"}
+  {:id :emit      :in ["saturated-state"]           :out ["wiring-diagram" "policy-holes"]
+   :does "emit the wiring; split the undecidables out as policy-holes (don't launder them in)"
+   :warrant "devmap-coherence/prototype-alignment-role + devmap-coherence/prototype-alignment-tension"}]
+
+ ;; WIRES — sequencing; fold-step/fixpoint form the rewrite loop.
+ :wires
+ [{:from "cascade-dict" :to :selector :type :wire/sequencing}
+  {:from :selector :to :match :type :wire/sequencing}
+  {:from :match :to :fold-step :type :wire/sequencing}
+  {:from :fold-step :to :fixpoint :type :wire/sequencing}
+  {:from :fixpoint :to :fold-step :type :wire/causal :note "the rewrite loop"}
+  {:from :fixpoint :to :emit :type :wire/sequencing}
+  {:from :emit :to "wiring-diagram" :type :wire/consequential}
+  {:from :emit :to "policy-holes" :type :wire/consequential}]
+
+ ;; DISCIPLINE (prototype-alignment-tension): keep orthogonal — no laundering.
+ :discipline ["selector ⟂ fold  (rule-derivation vs rule-application)"
+              "cascade (correlation) ⟂ wiring (construction)"
+              "policy-holes are SURFACED, not folded into the wiring (Ck2: numeric thresholds stayed operator-policy)"]
+
+ :acceptance
+ {:terminals-match-sorry? true
+  :note (str "in = cascade-dict (sorry have, in-map); out = (Wiring, [PolicyHole]) (sorry want). "
+             "The other sorry have-endpoints — the 10 patterns and the M-value-creation-loop proxy — appear "
+             "INSIDE as box-warrants / reference, not as terminals. That is correct: they WARRANT the "
+             "construction, they are not runtime inputs.")}
+ :provenance {:excursion "futon3a/holes/missions/E-fold-engine.md" :stage "3 — wiring (VERIFY)"
+              :self-application "fold of the fold-engine's OWN cascade; the built engine must reproduce this"
+              :made-at "2026-06-22" :made-by "claude-2"}}

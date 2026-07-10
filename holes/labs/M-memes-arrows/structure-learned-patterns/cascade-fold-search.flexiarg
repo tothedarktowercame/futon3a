@@ -1,0 +1,51 @@
+@flexiarg cascade-fold/search-when-path-is-unclear
+@title Search the Fold (when no single construction is evident)
+@keywords cascade, fold, wiring, search, tension, pivot, triage, dissolve, candidate, backtrack, explore, obligation, construction, compose, select
+@audience fold engineers, proof architects, research agents
+@tone strategic
+@factor Keen investigation (dhammavicaya)
+@style construction-strategy
+
+! conclusion:
+  When no single construction is evident, treat folding the cascade as a tension-
+  resolving SEARCH: explore candidate constructions, triage and pivot, name the
+  governing tension, dissolve it by re-choosing the construction, track to done;
+  surface undissolved tensions as policy-holes.
+
+  + context: You hold a cascade and a sorry stated as IF/HOWEVER tensions, and NO
+    single construction is evident — several candidate constructions exist, none
+    obviously right, and you cannot select or order their contributions by inspection.
+
+  + IF: You hold a cascade and a sorry stated as IF/HOWEVER tensions, and no single
+    construction is evident — several candidate constructions exist, none obviously
+    right, and you cannot select or order their contributions by inspection.
+
+  + HOWEVER: Committing to one path (a fixed pipeline) hard-codes a guess; the
+    governing tension (expressiveness versus parsimony) is not resolved by any one
+    fixed decomposition. You cannot compile an answer you cannot yet see.
+    + FAILURE-MODES:
+        - All candidate constructions are blocked -> output "no known construction"
+          (the under-determination is a structural result, not a failure).
+        - A seemingly-good candidate hides a node as hard as the original sorry.
+
+  + THEN:
+      1. Restate the sorry as IF/HOWEVER tensions (its failure-modes).
+      2. Explore candidate constructions; mark each node solid / open / blocked.
+      3. Triage immediately: kill blocked, prefer parallel; record abandoned approaches and why.
+      4. Name the governing tension precisely: both obligations, the shared parameter, the conflict.
+      5. Dissolve it by re-choosing the construction so both obligations agree.
+      6. Track next-steps to done; surface undissolved tensions as explicit policy-holes.
+
+  + BECAUSE: The governing tension (expressiveness versus parsimony) is not resolved
+    by any one fixed decomposition; you cannot compile an answer you cannot yet see, so
+    the fold must be a search that explores, triages, and dissolves the tension by
+    re-choosing the construction.
+
+  + NEXT-STEPS:
+      - Restate the sorry as IF/HOWEVER tensions and explore candidate constructions, marking each node solid / open / blocked.
+      - Triage immediately (kill blocked, prefer parallel, record abandoned approaches), then name the governing tension precisely and dissolve it by re-choice.
+      - Track next-steps to done; surface undissolved tensions as explicit policy-holes.
+
+  + QUALITY-CRITERIA:
+      Well-applied: candidates sketched with explicit node status; the tension is named and dissolved by re-choice; pivots recorded.
+      Badly-applied: collapsed to one pipeline prematurely; the governing tension left implicit.

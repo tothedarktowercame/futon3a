@@ -1,0 +1,72 @@
+{
+ :id "wiring/fold-engine-alexandrian-aif"
+ :for-sorry "sorry/fold-engine-cascade-to-wiring"
+ :channel "hardened-pragmatic (structural endpoint/type cut + permutation null)"
+ :g-grain "PROXY: epistemic=cos(IF+HOWEVER) ranked WITHIN a hard pragmatic admissibility set (THEN\u2229want-heads); decision margin = permutation-null 95pct (NOT 0.5\u00b7std). Still not real G (no forward model), but the pragmatic term is now HARD not soft."
+ :inner {
+   :tensions {
+     :compose {
+       :decision "abstain"
+       :n_admissible 75
+       :top1 0.454
+       :gap 0.073
+       :null_margin_95 0.147
+       :gap_beats_null false
+       :eff_support 51.65
+       :collapsed false
+       :top "peeragogy/pattern-language"
+       :then "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline. + COMPOSITIONS: (1"}
+     :select {
+       :decision "abstain"
+       :n_admissible 86
+       :top1 0.52
+       :gap 0.064
+       :null_margin_95 0.119
+       :gap_beats_null false
+       :eff_support 39.62
+       :collapsed false
+       :top "coordination/mandatory-pur"
+       :then "require G1 to emit a PUR for the PSR, and reject when criteria are not met"}
+     :topology {
+       :decision "abstain"
+       :n_admissible 189
+       :top1 0.315
+       :gap 0.034
+       :null_margin_95 0.089
+       :gap_beats_null false
+       :eff_support 140.56
+       :collapsed false
+       :top "peeragogy/reciprocal-participation"
+       :then "Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline. + COMPOSITIONS: (1"}
+     :terminate {
+       :decision "abstain"
+       :n_admissible 97
+       :top1 0.393
+       :gap 0.007
+       :null_margin_95 0.115
+       :gap_beats_null false
+       :eff_support 63.89
+       :collapsed false
+       :top "devmap-coherence/next-steps-to-done"
+       :then "insist that each devmap clause tracks a `next[...]` entry\u2014either a procedural move (tests to run, docs to update, evidence to gather) or an "}
+     :verify-surface {
+       :decision "abstain"
+       :n_admissible 346
+       :top1 0.485
+       :gap 0.027
+       :null_margin_95 0.088
+       :gap_beats_null false
+       :eff_support 229.96
+       :collapsed false
+       :top "system-coherence/turn-design-into-checks"
+       :then "Express critical design claims as checks. + COMPOSITIONS: (1) Extract invariants: identify which properties must remain true for the system "}}
+   :committed []
+   :wiring-state "provisional"}
+ :outer {
+   :prediction-backward ["devmap-coherence/next-steps-to-done" "devmap-coherence/prototype-alignment-role" "devmap-coherence/prototype-alignment-tension" "devmap-coherence/prototype-structure-checklist" "math-formalization/tactic-algebra-interference" "math-informal/parametric-tension-dissolution" "math-strategy/constraint-tension-resolution" "math-strategy/route-exploration-and-pivot"]
+   :observation-forward []
+   :verdict "STRUCTURE-LEARNING exit: the HARD pragmatic cut is ALSO flat (no tension peaks above null) \u2014 not the metric now, but genuine under-determination of the sorry: the pattern language is missing a resolver for these tensions. (claude-1: this flatness, unlike soft-cosine flatness, is real signal.)"
+   :timescale "OUTER (slow) \u2014 only fires on the structure-learning exit"}
+ :supersedes "the soft-cosine pass (all-abstain, flat \u2014 signal-without-separation per claude-1)"
+ :provenance {
+   :derived-by "harden_pragmatic.py; claude-1 ratification whistle 2026-06-22 (step ii)"}}

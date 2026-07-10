@@ -1,0 +1,306 @@
+{
+  "cascade": [
+    [
+      "devmap-coherence/prototype-alignment-bridge",
+      0.438,
+      0.131
+    ],
+    [
+      "devmap-coherence/devmap-scope-discipline",
+      0.392,
+      0.51
+    ],
+    [
+      "devmap-coherence/prototype-structure-checklist",
+      0.336,
+      0.437
+    ],
+    [
+      "devmap-coherence/prototype-alignment-role",
+      0.334,
+      0.768
+    ],
+    [
+      "devmap-coherence/prototype-alignment-tension",
+      0.326,
+      0.423
+    ],
+    [
+      "devmap-coherence/next-steps-to-done",
+      0.298,
+      0.388
+    ],
+    [
+      "math-informal/parametric-tension-dissolution",
+      0.365,
+      0.182
+    ],
+    [
+      "math-strategy/constraint-tension-resolution",
+      0.348,
+      0.453
+    ],
+    [
+      "math-formalization/tactic-algebra-interference",
+      0.353,
+      0.529
+    ],
+    [
+      "math-strategy/route-exploration-and-pivot",
+      0.321,
+      0.225
+    ]
+  ],
+  "size": 10,
+  "C": 3.063,
+  "H": 0.873,
+  "T": 3.51,
+  "trajectory": [
+    [
+      1,
+      "devmap-coherence/prototype-alignment-bridge",
+      0.131
+    ],
+    [
+      2,
+      "devmap-coherence/devmap-scope-discipline",
+      0.51
+    ],
+    [
+      3,
+      "devmap-coherence/prototype-structure-checklist",
+      0.437
+    ],
+    [
+      4,
+      "devmap-coherence/prototype-alignment-role",
+      0.768
+    ],
+    [
+      5,
+      "devmap-coherence/prototype-alignment-tension",
+      0.423
+    ],
+    [
+      6,
+      "devmap-coherence/next-steps-to-done",
+      0.388
+    ],
+    [
+      7,
+      "math-informal/parametric-tension-dissolution",
+      0.182
+    ],
+    [
+      8,
+      "math-strategy/constraint-tension-resolution",
+      0.453
+    ],
+    [
+      9,
+      "math-formalization/tactic-algebra-interference",
+      0.529
+    ],
+    [
+      10,
+      "math-strategy/route-exploration-and-pivot",
+      0.225
+    ]
+  ],
+  "posterior_weight": 0.0,
+  "posterior_label": "self-graded",
+  "semi-lattice": {
+    "descent": [
+      [
+        "math-strategy/constraint-tension-resolution",
+        "math-informal/parametric-tension-dissolution"
+      ],
+      [
+        "math-strategy/constraint-tension-resolution",
+        "math-strategy/route-exploration-and-pivot"
+      ],
+      [
+        "devmap-coherence/devmap-scope-discipline",
+        "devmap-coherence/prototype-alignment-bridge"
+      ],
+      [
+        "devmap-coherence/next-steps-to-done",
+        "devmap-coherence/prototype-structure-checklist"
+      ],
+      [
+        "devmap-coherence/prototype-alignment-bridge",
+        "devmap-coherence/prototype-alignment-role"
+      ],
+      [
+        "devmap-coherence/prototype-alignment-bridge",
+        "devmap-coherence/prototype-structure-checklist"
+      ],
+      [
+        "devmap-coherence/prototype-alignment-role",
+        "devmap-coherence/prototype-alignment-bridge"
+      ],
+      [
+        "devmap-coherence/prototype-alignment-role",
+        "devmap-coherence/prototype-structure-checklist"
+      ],
+      [
+        "devmap-coherence/prototype-alignment-tension",
+        "devmap-coherence/prototype-structure-checklist"
+      ],
+      [
+        "devmap-coherence/prototype-structure-checklist",
+        "devmap-coherence/next-steps-to-done"
+      ],
+      [
+        "devmap-coherence/prototype-structure-checklist",
+        "devmap-coherence/prototype-alignment-bridge"
+      ],
+      [
+        "devmap-coherence/prototype-structure-checklist",
+        "devmap-coherence/prototype-alignment-role"
+      ],
+      [
+        "devmap-coherence/prototype-structure-checklist",
+        "devmap-coherence/prototype-alignment-tension"
+      ],
+      [
+        "math-formalization/tactic-algebra-interference",
+        "math-strategy/constraint-tension-resolution"
+      ]
+    ],
+    "co_app": [
+      [
+        "math-strategy/constraint-tension-resolution",
+        "math-strategy/route-exploration-and-pivot",
+        2
+      ],
+      [
+        "math-strategy/constraint-tension-resolution",
+        "math-formalization/tactic-algebra-interference",
+        1
+      ],
+      [
+        "math-informal/parametric-tension-dissolution",
+        "devmap-coherence/prototype-alignment-tension",
+        1
+      ]
+    ]
+  },
+  "non-phylogeny": [
+    "ARGUMENT",
+    "askew-layer",
+    "derive-exits-on-a-minted-sorry",
+    "devmap-xref",
+    "facet-integrity",
+    "futonic-logic",
+    "internal-coherence",
+    "mandatory-psr",
+    "obligations-checker",
+    "pattern-dep",
+    "pattern-propose",
+    "proof-path",
+    "status-keywords",
+    "tradeoff-record",
+    "truth",
+    "xenotype-portability"
+  ],
+  "coverage-candidates": [
+    {
+      "pattern_id": "fulab/pattern-dep",
+      "stem": "pattern-dep",
+      "relevance": 0.396
+    },
+    {
+      "pattern_id": "fulab/devmap-xref",
+      "stem": "devmap-xref",
+      "relevance": 0.377
+    },
+    {
+      "pattern_id": "fulab/pattern-propose",
+      "stem": "pattern-propose",
+      "relevance": 0.366
+    },
+    {
+      "pattern_id": "coordination/ARGUMENT",
+      "stem": "ARGUMENT",
+      "relevance": 0.36
+    },
+    {
+      "pattern_id": "coordination/mandatory-psr",
+      "stem": "mandatory-psr",
+      "relevance": 0.358
+    },
+    {
+      "pattern_id": "pattern-coherence/internal-coherence",
+      "stem": "internal-coherence",
+      "relevance": 0.351
+    },
+    {
+      "pattern_id": "futon-theory/derive-exits-on-a-minted-sorry",
+      "stem": "derive-exits-on-a-minted-sorry",
+      "relevance": 0.348
+    },
+    {
+      "pattern_id": "pattern-coherence/facet-integrity",
+      "stem": "facet-integrity",
+      "relevance": 0.346
+    },
+    {
+      "pattern_id": "devmap-coherence/status-keywords",
+      "stem": "status-keywords",
+      "relevance": 0.338
+    },
+    {
+      "pattern_id": "fulab/tradeoff-record",
+      "stem": "tradeoff-record",
+      "relevance": 0.338
+    },
+    {
+      "pattern_id": "pacspine/obligations-checker",
+      "stem": "obligations-checker",
+      "relevance": 0.316
+    },
+    {
+      "pattern_id": "futon-theory/futonic-logic",
+      "stem": "futonic-logic",
+      "relevance": 0.312
+    },
+    {
+      "pattern_id": "paramitas/truth",
+      "stem": "truth",
+      "relevance": 0.308
+    },
+    {
+      "pattern_id": "vsatlas/askew-layer",
+      "stem": "askew-layer",
+      "relevance": 0.307
+    },
+    {
+      "pattern_id": "futon-theory/proof-path",
+      "stem": "proof-path",
+      "relevance": 0.306
+    },
+    {
+      "pattern_id": "futon-theory/xenotype-portability",
+      "stem": "xenotype-portability",
+      "relevance": 0.304
+    },
+    {
+      "pattern_id": "social/ARGUMENT",
+      "stem": "ARGUMENT",
+      "relevance": 0.299
+    },
+    {
+      "pattern_id": "equity/ARGUMENT",
+      "stem": "ARGUMENT",
+      "relevance": 0.298
+    }
+  ],
+  "phylogeny": {
+    "alpha": 0.3,
+    "edge_count": 17,
+    "edge_density": 0.378,
+    "coverage_gap": true,
+    "low_connectivity": true
+  }
+}
