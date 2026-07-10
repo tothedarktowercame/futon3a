@@ -24,8 +24,10 @@ from cascade_rollout import salient, move_interface
 from alexandrian_aif import parse
 from cascade_construct import load_phylogeny, base_rate_prior, pattern_stem
 import rollout_execute as rx
-from discharge_experiment import GROUND
+from fold_ground_truth import load_records
 from obligation_accuracy import AtomMatcher
+
+GROUND = load_records()   # closure-folds (10) + adjudicated fold-turn deposits
 
 LAMBDA = 0.05
 SEED = 20260710
