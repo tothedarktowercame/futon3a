@@ -27,8 +27,14 @@
   (fold-event move-id sorry-ref ts true))
 
 (defn- valid-sorry-ref? [x]
+  ;; Two ref grammars: meme-arrow sorries (the original CH2 seam) and
+  ;; fold-turn deposit refs (escrow-lane adjudications — deposits carry
+  ;; :proposal/hash attribution but no meme-arrow id; B4, 2026-07-11,
+  ;; flagged during FLIGHTS-2026-07-10 when flight adjudications had no
+  ;; emittable ref form).
   (and (string? x)
-       (boolean (re-matches #".+/sorry/meme-arrow-.+" x))))
+       (boolean (or (re-matches #".+/sorry/meme-arrow-.+" x)
+                    (re-matches #".+/fold-turn/ft-.+" x)))))
 
 (defn- valid-used? [x]
   (or (nil? x)
