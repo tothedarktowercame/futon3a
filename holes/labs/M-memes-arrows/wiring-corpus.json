@@ -1,0 +1,1280 @@
+{
+  "deposits": [
+    {
+      "stem": "ft-action-vocabulary-005",
+      "proposal_hash": null,
+      "n_pattern_ids": 15,
+      "n_wired": 17,
+      "n_non_contributors": 1,
+      "n_edges": 9,
+      "n_wired_pairs": 26,
+      "n_negative_pairs": 14
+    },
+    {
+      "stem": "ft-aif-faithfulness-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-aif-head-004",
+      "proposal_hash": null,
+      "n_pattern_ids": 6,
+      "n_wired": 6,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-autoclock-in-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 4,
+      "n_wired": 4,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-autoclock-in-002",
+      "proposal_hash": "6a5d81ccab989066",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 5,
+      "n_wired_pairs": 5,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-autoclock-in-003",
+      "proposal_hash": "f2ccba63041e1879",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-bayesian-structure-learning-003",
+      "proposal_hash": null,
+      "n_pattern_ids": 15,
+      "n_wired": 14,
+      "n_non_contributors": 1,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 14
+    },
+    {
+      "stem": "ft-bounded-in-flight-state-008",
+      "proposal_hash": null,
+      "n_pattern_ids": 7,
+      "n_wired": 5,
+      "n_non_contributors": 2,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 11
+    },
+    {
+      "stem": "ft-canon-fingerprint-store-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 4,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-canon-fingerprint-store-002",
+      "proposal_hash": "d157be7b848343ca",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 5,
+      "n_wired_pairs": 5,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-canon-fingerprint-store-003",
+      "proposal_hash": "b661f0cb20315323",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-chipwitz-corps-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 3,
+      "n_wired": 3,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-chipwitz-corps-012",
+      "proposal_hash": "0ad620d68d3a9b35",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-chipwitz-corps-013",
+      "proposal_hash": "63ad417adb2734a0",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 5,
+      "n_wired_pairs": 5,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-chipwitz-corps-014",
+      "proposal_hash": "e5bd3c89c552b896",
+      "n_pattern_ids": 9,
+      "n_wired": 9,
+      "n_non_contributors": 0,
+      "n_edges": 8,
+      "n_wired_pairs": 9,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-evaluate-policies-009",
+      "proposal_hash": null,
+      "n_pattern_ids": 12,
+      "n_wired": 8,
+      "n_non_contributors": 4,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 38
+    },
+    {
+      "stem": "ft-first-flights-007",
+      "proposal_hash": null,
+      "n_pattern_ids": 1,
+      "n_wired": 3,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-fold-ansatz-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 6,
+      "n_wired": 6,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-futonzero-generative-011",
+      "proposal_hash": null,
+      "n_pattern_ids": 15,
+      "n_wired": 8,
+      "n_non_contributors": 7,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 77
+    },
+    {
+      "stem": "ft-futonzero-generative-012",
+      "proposal_hash": "ae8d0daea7bd3897",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 5,
+      "n_wired_pairs": 5,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-futonzero-generative-013",
+      "proposal_hash": "cdf7857d2ee36c99",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 4,
+      "n_wired_pairs": 4,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-futonzero-generative-014",
+      "proposal_hash": "47385246a68934e2",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-learning-loop-010",
+      "proposal_hash": null,
+      "n_pattern_ids": 8,
+      "n_wired": 8,
+      "n_non_contributors": 0,
+      "n_edges": 7,
+      "n_wired_pairs": 9,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-learning-loop-012",
+      "proposal_hash": "50eebf78f29c0b64",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 5,
+      "n_wired_pairs": 6,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-learning-loop-013",
+      "proposal_hash": "eb0975c3b7228f48",
+      "n_pattern_ids": 5,
+      "n_wired": 5,
+      "n_non_contributors": 0,
+      "n_edges": 4,
+      "n_wired_pairs": 4,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-learning-loop-014",
+      "proposal_hash": "e51ddfc1f634829e",
+      "n_pattern_ids": 3,
+      "n_wired": 3,
+      "n_non_contributors": 0,
+      "n_edges": 3,
+      "n_wired_pairs": 3,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-legacy-sorry-cleanup-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 11,
+      "n_wired": 8,
+      "n_non_contributors": 3,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 27
+    },
+    {
+      "stem": "ft-legacy-sorry-cleanup-002",
+      "proposal_hash": "94bf96d06a24e008",
+      "n_pattern_ids": 4,
+      "n_wired": 4,
+      "n_non_contributors": 0,
+      "n_edges": 4,
+      "n_wired_pairs": 4,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-legacy-sorry-cleanup-003",
+      "proposal_hash": "835f1303ba31b9e5",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-live-geometric-stack-002",
+      "proposal_hash": null,
+      "n_pattern_ids": 6,
+      "n_wired": 6,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-operational-vocabulary-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 4,
+      "n_wired": 4,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-operational-vocabulary-002",
+      "proposal_hash": "c7bcfcf8ee6674e9",
+      "n_pattern_ids": 3,
+      "n_wired": 3,
+      "n_non_contributors": 0,
+      "n_edges": 3,
+      "n_wired_pairs": 3,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-operational-vocabulary-003",
+      "proposal_hash": "ab1e77e5de2fc3a2",
+      "n_pattern_ids": 1,
+      "n_wired": 1,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-pattern-mining-011",
+      "proposal_hash": null,
+      "n_pattern_ids": 9,
+      "n_wired": 6,
+      "n_non_contributors": 5,
+      "n_edges": 5,
+      "n_wired_pairs": 6,
+      "n_negative_pairs": 30
+    },
+    {
+      "stem": "ft-pattern-mining-012",
+      "proposal_hash": "4dae731fd2ec629a",
+      "n_pattern_ids": 4,
+      "n_wired": 4,
+      "n_non_contributors": 0,
+      "n_edges": 4,
+      "n_wired_pairs": 4,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-pattern-mining-013",
+      "proposal_hash": "b0a514c4a91017ae",
+      "n_pattern_ids": 16,
+      "n_wired": 14,
+      "n_non_contributors": 2,
+      "n_edges": 12,
+      "n_wired_pairs": 12,
+      "n_negative_pairs": 29
+    },
+    {
+      "stem": "ft-peradam-mechanization-006",
+      "proposal_hash": null,
+      "n_pattern_ids": 11,
+      "n_wired": 11,
+      "n_non_contributors": 0,
+      "n_edges": 9,
+      "n_wired_pairs": 11,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-reachable-from-boot-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 6,
+      "n_wired": 6,
+      "n_non_contributors": 1,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 5
+    },
+    {
+      "stem": "ft-state-snapshot-witness-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 6,
+      "n_wired": 6,
+      "n_non_contributors": 0,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-state-snapshot-witness-002",
+      "proposal_hash": "0649e22fc124bc6d",
+      "n_pattern_ids": 4,
+      "n_wired": 4,
+      "n_non_contributors": 0,
+      "n_edges": 4,
+      "n_wired_pairs": 4,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-state-snapshot-witness-003",
+      "proposal_hash": "59fc540364657a55",
+      "n_pattern_ids": 7,
+      "n_wired": 7,
+      "n_non_contributors": 0,
+      "n_edges": 7,
+      "n_wired_pairs": 7,
+      "n_negative_pairs": 0
+    },
+    {
+      "stem": "ft-war-machine-pilot-001",
+      "proposal_hash": null,
+      "n_pattern_ids": 8,
+      "n_wired": 12,
+      "n_non_contributors": 2,
+      "n_edges": 0,
+      "n_wired_pairs": 0,
+      "n_negative_pairs": 13
+    }
+  ],
+  "positive_pairs": {
+    "agency/invariants | storage/graph-memory-contract": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "agent/budget-bounds-exploration | aif/experimental-comparison-of-EFE-variants": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "agent/evidence-over-assertion | system-coherence/turn-design-into-checks": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "agent/handoff-preserves-context | invariant-coherence/state-snapshot-witness": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "agent/handoff-preserves-context | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "agent/handoff-preserves-context | ukrns/publication-cadence": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "agent/intent-handshake-is-binding | futon-theory/task-as-arrow": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "agent/trail-enables-return | hdm/deep-storage-to-active-graph": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "agent/trail-enables-return | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/candidate-pattern-action-space | aif/expected-free-energy-scorecard": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 4
+    },
+    "aif/candidate-pattern-action-space | iching/hexagram-07-shi": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/candidate-pattern-action-space | war-machine/advanceability": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/declare-the-conditioning": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/expected-free-energy-scorecard": {
+      "seq": 0,
+      "copar": 4,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/experimental-comparison-of-EFE-variants": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/hierarchical-budget-aware-action-selection": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "aif/currency-before-merge | aif/placeholder-is-load-bearing": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/term-to-channel-traceability": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | aif/valuation-reads-the-paperwork": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/currency-before-merge | budgeted-action-selection/mana-gated-work": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "aif/expected-free-energy-scorecard | aif/structured-observation-vector": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 4
+    },
+    "aif/experimental-comparison-of-EFE-variants | aif/hierarchical-budget-aware-action-selection": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/experimental-comparison-of-EFE-variants | aif/no-self-certification": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/experimental-comparison-of-EFE-variants | budgeted-action-selection/mana-gated-work": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/experimental-comparison-of-EFE-variants | futon-theory/honest-map-over-flattering-counter": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/no-self-certification | system-coherence/turn-design-into-checks": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/scheduled-observer-entrypoint | futon-theory/event-protocol": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/scheduled-observer-entrypoint | iching/hexagram-43-guai": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "aif/structured-observation-vector | aif/term-to-channel-traceability": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 1
+    },
+    "aif/structured-observation-vector | aif/valuation-reads-the-paperwork": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "aif/structured-observation-vector | data-mining/constrain-extraction-to-the-downstream-vocabulary": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/structured-observation-vector | hdm/deep-storage-to-active-graph": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "aif/term-to-channel-traceability | sidecar/tri-store-separation": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "ants/baseline-cyber-ant | orchestration/pattern-warranted-choice-point": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "budgeted-action-selection/mana-gated-work | coordination/cross-validation-protocol": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "budgeted-action-selection/mana-gated-work | coordination/session-durability-check": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "budgeted-action-selection/mana-gated-work | futon-theory/task-as-arrow": {
+      "seq": 0,
+      "copar": 2,
+      "tensor": 0
+    },
+    "career-coherence/free-solo-vs-rope | collaboration-coherence/determined-fork-proto-psr": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "career-coherence/free-solo-vs-rope | orchestration/consent-gate": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "collaboration-coherence/determined-fork-proto-psr | futon-theory/reverse-morphogenesis": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "collaboration-coherence/determined-fork-proto-psr | futon-theory/task-as-arrow": {
+      "seq": 2,
+      "copar": 0,
+      "tensor": 0
+    },
+    "collaboration-coherence/determined-fork-proto-psr | orchestration/pattern-warranted-choice-point": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "contributing/stack-scan-logging-protocol | devmap-coherence/ifr-f3-piti": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "contributing/stack-scan-logging-protocol | stack-coherence/commit-intent-alignment": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "coordination/cross-validation-protocol | eight-gates/ward-off-boundary": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "coordination/cross-validation-protocol | system-coherence/turn-design-into-checks": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "coordination/task-shape-validation | futon-theory/derive-exits-on-a-minted-sorry": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "coordination/task-shape-validation | futon-theory/mission-interface-signature": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "data-mining/constrain-extraction-to-the-downstream-vocabulary | sidecar/tri-store-separation": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f2-viriya": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f3a-piti-audit": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 1
+    },
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-f3a-piti-audit": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f3-piti | devmap-coherence/ifr-f7-upa-upekkha": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f3-piti | stack-coherence/commit-intent-alignment": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f3a-piti-audit | hdm/deep-storage-to-active-graph": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "devmap-coherence/ifr-f3a-piti-audit | stack-coherence/futon-bridge-health": {
+      "seq": 1,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/ifr-f7-upa-upekkha | storage/graph-memory-contract": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/prototype-alignment-bridge | or2/ukrn-horizon-bridge": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "devmap-coherence/prototype-alignment-bridge | storage/graph-memory-contract": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "devmap-coherence/status-keywords | futon-theory/mission-lifecycle": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "eight-gates/ward-off-boundary | futon-theory/crime-relocates-to-a-scarcer-witness": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "eight-gates/ward-off-boundary | war-machine/operational-not-decorative": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "enrichment/layered-ingestion | exotic/live-sync-source-truth": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "enrichment/layered-ingestion | invariant-coherence/shape-first-identify": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "exotic/full-lift-registry | pattern-discipline/patterns-as-categorical-objects": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "exotic/live-sync-source-truth | futon-theory/structural-tension-as-observation": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "exotic/tri-store-lineage | sidecar/append-only-semantic-audit": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "exotic/tri-store-lineage | sidecar/fact-lifecycle-event-types": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "f6/self-play-loop | iching/hexagram-04-meng": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "f6/self-play-loop | t3/capability-not-functioning": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "f6/self-play-loop | war-machine/ideal-actual-gap": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/curry-howard-operational | futon-theory/task-as-arrow": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/derive-exits-on-a-minted-sorry | futon-theory/structural-tension-as-observation": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/derive-exits-on-a-minted-sorry | invariant-coherence/shape-first-identify": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/derive-exits-on-a-minted-sorry | orchestration/pattern-warranted-choice-point": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/derive-exits-on-a-minted-sorry | structure/what-problem-is-this-actually-solving": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/event-protocol | iching/hexagram-17-sui": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/honest-map-over-flattering-counter | war-machine/operational-not-decorative": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/mission-interface-signature | peripherals/read-existing-seam-before-implementing": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/mission-interface-signature | social/explicit-exit-over-abandonment": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/mission-interface-signature | stack-coherence/stack-blocker-detection": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/mission-interface-signature | storage/deterministic-ingest-pipeline": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/mission-lifecycle | war-machine/advanceability": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/structural-tension-as-observation | invariant-coherence/shape-first-identify": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/structural-tension-as-observation | social/tension-before-code": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "futon-theory/task-as-arrow | orchestration/consent-gate": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/task-as-arrow | pattern-discipline/patterns-as-categorical-objects": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "futon-theory/task-as-arrow | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "iching/hexagram-17-sui | iching/hexagram-43-guai": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "iching/hexagram-17-sui | iching/hexagram-57-xun": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "iching/hexagram-63-jiji | invariant-coherence/state-snapshot-witness": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/protocol-family-naming | invariant-coherence/shape-first-identify": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/protocol-family-naming | realtime/structured-events-only": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/protocol-family-naming | sidecar/append-only-semantic-audit": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "invariant-coherence/protocol-family-naming | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "invariant-coherence/reachable-from-boot | system-coherence/turn-design-into-checks": {
+      "seq": 0,
+      "copar": 0,
+      "tensor": 1
+    },
+    "invariant-coherence/shape-first-identify | invariant-coherence/state-snapshot-witness": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/shape-first-identify | pattern-discipline/patterns-as-categorical-objects": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/state-snapshot-witness | sidecar/append-only-semantic-audit": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "invariant-coherence/state-snapshot-witness | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "or2/ukrn-horizon-bridge | p4ng/bridge-before-portal": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "or2/ukrn-horizon-bridge | scan-coherence/mission-anchored-scan": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "or2/ukrn-horizon-bridge | storage/graph-memory-contract": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "p4ng/bridge-before-portal | storage/graph-memory-contract": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "peripherals/pattern-becomes-peripheral | peripherals/read-existing-seam-before-implementing": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "realtime/structured-events-only | ukrns/design-state-lineage": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "scan-coherence/mission-anchored-scan | storage/graph-memory-contract": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "sidecar/append-only-semantic-audit | structure/interest-event-vocabulary": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "sidecar/tri-store-separation | structure/interest-event-vocabulary": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "social/explicit-exit-over-abandonment | stack-coherence/stack-blocker-detection": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "storage/graph-memory-contract | structure/hinge-entry-slots": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "structure/hinge-entry-slots | structure/interest-event-vocabulary": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "structure/hinge-entry-slots | structure/whose-question-is-this": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "structure/interest-event-vocabulary | structure/whose-question-is-this": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "structure/interest-event-vocabulary | ukrns/design-state-lineage": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "system-coherence/turn-design-into-checks | war-machine/operational-not-decorative": {
+      "seq": 1,
+      "copar": 0,
+      "tensor": 0
+    },
+    "t3/capability-not-functioning | war-machine/ideal-actual-gap": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    },
+    "war-machine/dynamic-over-static | war-machine/ideal-actual-gap": {
+      "seq": 0,
+      "copar": 1,
+      "tensor": 0
+    }
+  },
+  "negative_pairs": {
+    "agent/budget-bounds-exploration | agent/provisional-claims-ledger": 1,
+    "agent/budget-bounds-exploration | agent/sense-deliberate-act": 1,
+    "agent/budget-bounds-exploration | agent/state-is-hypothesis": 1,
+    "agent/budget-bounds-exploration | agent/trail-enables-return": 1,
+    "agent/budget-bounds-exploration | aif/hierarchical-budget-aware-action-selection": 1,
+    "agent/budget-bounds-exploration | aif/no-self-certification": 1,
+    "agent/budget-bounds-exploration | aif/policy-precision-commitment-temperature": 1,
+    "agent/budget-bounds-exploration | ants/baseline-cyber-ant": 1,
+    "agent/budget-bounds-exploration | budgeted-action-selection/mana-gated-work": 1,
+    "agent/budget-bounds-exploration | coordination/session-durability-check": 1,
+    "agent/budget-bounds-exploration | futon-theory/honest-map-over-flattering-counter": 1,
+    "agent/budget-bounds-exploration | futon-theory/local-gain-persistence": 1,
+    "agent/budget-bounds-exploration | invariant-coherence/reachable-from-boot": 1,
+    "agent/budget-bounds-exploration | t3/capability-not-functioning": 1,
+    "agent/budget-bounds-exploration | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "agent/budget-bounds-exploration | ukrns/design-as-function-of-evidence": 1,
+    "agent/intent-handshake-is-binding | agent/provisional-claims-ledger": 1,
+    "agent/intent-handshake-is-binding | software-design/agent-decorator-pattern": 1,
+    "agent/provisional-claims-ledger | agent/state-is-hypothesis": 1,
+    "agent/provisional-claims-ledger | agent/trail-enables-return": 1,
+    "agent/provisional-claims-ledger | aif/expected-free-energy-scorecard": 1,
+    "agent/provisional-claims-ledger | aif/predictive-coding-belief-update": 1,
+    "agent/provisional-claims-ledger | ants/baseline-cyber-ant": 1,
+    "agent/provisional-claims-ledger | budgeted-action-selection/mana-gated-work": 1,
+    "agent/provisional-claims-ledger | coordination/session-durability-check": 1,
+    "agent/provisional-claims-ledger | futon-theory/local-gain-persistence": 1,
+    "agent/provisional-claims-ledger | gauntlet/aif-as-environment-not-instruction": 1,
+    "agent/provisional-claims-ledger | software-design/agent-command-pattern": 1,
+    "agent/provisional-claims-ledger | software-design/agent-decorator-pattern": 1,
+    "agent/provisional-claims-ledger | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "agent/sense-deliberate-act | agent/trail-enables-return": 1,
+    "agent/sense-deliberate-act | ants/baseline-cyber-ant": 1,
+    "agent/sense-deliberate-act | budgeted-action-selection/mana-gated-work": 1,
+    "agent/sense-deliberate-act | coordination/session-durability-check": 1,
+    "agent/sense-deliberate-act | futon-theory/local-gain-persistence": 1,
+    "agent/sense-deliberate-act | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "agent/state-is-hypothesis | agent/trail-enables-return": 1,
+    "agent/state-is-hypothesis | aif/hierarchical-budget-aware-action-selection": 1,
+    "agent/state-is-hypothesis | ants/baseline-cyber-ant": 1,
+    "agent/state-is-hypothesis | budgeted-action-selection/mana-gated-work": 1,
+    "agent/state-is-hypothesis | coordination/session-durability-check": 1,
+    "agent/state-is-hypothesis | futon-theory/local-gain-persistence": 1,
+    "agent/state-is-hypothesis | software-design/agent-decorator-pattern": 1,
+    "agent/state-is-hypothesis | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "agent/trail-enables-return | aif/no-self-certification": 1,
+    "agent/trail-enables-return | ants/baseline-cyber-ant": 1,
+    "agent/trail-enables-return | budgeted-action-selection/mana-gated-work": 1,
+    "agent/trail-enables-return | coordination/session-durability-check": 1,
+    "agent/trail-enables-return | futon-theory/honest-map-over-flattering-counter": 1,
+    "agent/trail-enables-return | futon-theory/local-gain-persistence": 1,
+    "agent/trail-enables-return | invariant-coherence/reachable-from-boot": 1,
+    "agent/trail-enables-return | t3/capability-not-functioning": 1,
+    "agent/trail-enables-return | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "agent/trail-enables-return | ukrns/design-as-function-of-evidence": 1,
+    "aif/belief-aware-risk-term | aif/candidate-pattern-action-space": 1,
+    "aif/belief-aware-risk-term | aif/hierarchical-budget-aware-action-selection": 1,
+    "aif/belief-aware-risk-term | aif/valuation-reads-the-paperwork": 1,
+    "aif/belief-aware-risk-term | structure/interest-event-vocabulary": 1,
+    "aif/belief-aware-risk-term | system-coherence/facet-before-aggregating": 1,
+    "aif/belief-state-operational-hypotheses | aif/hierarchical-budget-aware-action-selection": 1,
+    "aif/candidate-pattern-action-space | aif/declare-the-conditioning": 1,
+    "aif/candidate-pattern-action-space | aif/experimental-comparison-of-EFE-variants": 1,
+    "aif/candidate-pattern-action-space | aif/no-self-certification": 1,
+    "aif/candidate-pattern-action-space | aif/placeholder-is-load-bearing": 1,
+    "aif/candidate-pattern-action-space | aif/policy-precision-commitment-temperature": 1,
+    "aif/candidate-pattern-action-space | aif/predictive-entropy-as-ambiguity": 1,
+    "aif/candidate-pattern-action-space | aif/term-to-channel-traceability": 1,
+    "aif/candidate-pattern-action-space | aif/valuation-reads-the-paperwork": 1,
+    "aif/candidate-pattern-action-space | structure/interest-event-vocabulary": 1,
+    "aif/candidate-pattern-action-space | system-coherence/facet-before-aggregating": 1,
+    "aif/currency-before-merge | aif/policy-precision-commitment-temperature": 1,
+    "aif/declare-the-conditioning | aif/hierarchical-budget-aware-action-selection": 1,
+    "aif/declare-the-conditioning | aif/policy-precision-commitment-temperature": 1,
+    "aif/declare-the-conditioning | aif/valuation-reads-the-paperwork": 1,
+    "aif/declare-the-conditioning | structure/interest-event-vocabulary": 1,
+    "aif/declare-the-conditioning | system-coherence/facet-before-aggregating": 1,
+    "aif/expected-free-energy-scorecard | aif/hierarchical-budget-aware-action-selection": 1,
+    "aif/expected-free-energy-scorecard | aif/policy-precision-commitment-temperature": 1,
+    "aif/expected-free-energy-scorecard | aif/valuation-reads-the-paperwork": 1,
+    "aif/expected-free-energy-scorecard | software-design/agent-decorator-pattern": 1,
+    "aif/expected-free-energy-scorecard | structure/interest-event-vocabulary": 1,
+    "aif/expected-free-energy-scorecard | system-coherence/facet-before-aggregating": 1,
+    "aif/experimental-comparison-of-EFE-variants | aif/policy-precision-commitment-temperature": 1,
+    "aif/experimental-comparison-of-EFE-variants | aif/valuation-reads-the-paperwork": 1,
+    "aif/experimental-comparison-of-EFE-variants | structure/interest-event-vocabulary": 1,
+    "aif/experimental-comparison-of-EFE-variants | system-coherence/facet-before-aggregating": 1,
+    "aif/free-energy-as-tick-scalar | aif/hierarchical-budget-aware-action-selection": 1,
+    "aif/hierarchical-budget-aware-action-selection | aif/policy-precision-commitment-temperature": 1,
+    "aif/hierarchical-budget-aware-action-selection | aif/predictive-entropy-as-ambiguity": 1,
+    "aif/hierarchical-budget-aware-action-selection | aif/shared-kernel-predictive-forward-model": 1,
+    "aif/hierarchical-budget-aware-action-selection | aif/structured-observation-vector": 1,
+    "aif/hierarchical-budget-aware-action-selection | aif/term-to-channel-traceability": 1,
+    "aif/hierarchical-budget-aware-action-selection | f6/learning-event-detection": 1,
+    "aif/hierarchical-budget-aware-action-selection | structure/interest-event-vocabulary": 1,
+    "aif/no-self-certification | aif/policy-precision-commitment-temperature": 1,
+    "aif/no-self-certification | aif/valuation-reads-the-paperwork": 1,
+    "aif/no-self-certification | ants/baseline-cyber-ant": 1,
+    "aif/no-self-certification | budgeted-action-selection/mana-gated-work": 1,
+    "aif/no-self-certification | coordination/session-durability-check": 1,
+    "aif/no-self-certification | futon-theory/local-gain-persistence": 1,
+    "aif/no-self-certification | structure/interest-event-vocabulary": 1,
+    "aif/no-self-certification | system-coherence/facet-before-aggregating": 1,
+    "aif/no-self-certification | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "aif/placeholder-is-load-bearing | aif/policy-precision-commitment-temperature": 1,
+    "aif/placeholder-is-load-bearing | aif/valuation-reads-the-paperwork": 1,
+    "aif/placeholder-is-load-bearing | structure/interest-event-vocabulary": 1,
+    "aif/placeholder-is-load-bearing | system-coherence/facet-before-aggregating": 1,
+    "aif/policy-precision-commitment-temperature | aif/structured-observation-vector": 1,
+    "aif/policy-precision-commitment-temperature | aif/term-to-channel-traceability": 1,
+    "aif/policy-precision-commitment-temperature | aif/valuation-reads-the-paperwork": 1,
+    "aif/policy-precision-commitment-temperature | budgeted-action-selection/mana-gated-work": 1,
+    "aif/policy-precision-commitment-temperature | futon-theory/honest-map-over-flattering-counter": 1,
+    "aif/predictive-coding-belief-update | software-design/agent-decorator-pattern": 1,
+    "aif/predictive-entropy-as-ambiguity | aif/valuation-reads-the-paperwork": 1,
+    "aif/predictive-entropy-as-ambiguity | structure/interest-event-vocabulary": 1,
+    "aif/predictive-entropy-as-ambiguity | system-coherence/facet-before-aggregating": 1,
+    "aif/term-to-channel-traceability | aif/valuation-reads-the-paperwork": 1,
+    "aif/term-to-channel-traceability | structure/interest-event-vocabulary": 1,
+    "aif/term-to-channel-traceability | system-coherence/facet-before-aggregating": 1,
+    "aif/valuation-reads-the-paperwork | structure/interest-event-vocabulary": 1,
+    "aif/valuation-reads-the-paperwork | system-coherence/facet-before-aggregating": 1,
+    "ants/baseline-cyber-ant | budgeted-action-selection/mana-gated-work": 1,
+    "ants/baseline-cyber-ant | coordination/session-durability-check": 1,
+    "ants/baseline-cyber-ant | futon-theory/honest-map-over-flattering-counter": 1,
+    "ants/baseline-cyber-ant | futon-theory/local-gain-persistence": 1,
+    "ants/baseline-cyber-ant | invariant-coherence/reachable-from-boot": 1,
+    "ants/baseline-cyber-ant | t3/capability-not-functioning": 1,
+    "ants/baseline-cyber-ant | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "ants/baseline-cyber-ant | ukrns/design-as-function-of-evidence": 1,
+    "budgeted-action-selection/mana-gated-work | coordination/session-durability-check": 1,
+    "budgeted-action-selection/mana-gated-work | futon-theory/honest-map-over-flattering-counter": 1,
+    "budgeted-action-selection/mana-gated-work | futon-theory/local-gain-persistence": 1,
+    "budgeted-action-selection/mana-gated-work | invariant-coherence/reachable-from-boot": 1,
+    "budgeted-action-selection/mana-gated-work | t3/capability-not-functioning": 1,
+    "budgeted-action-selection/mana-gated-work | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "budgeted-action-selection/mana-gated-work | ukrns/design-as-function-of-evidence": 1,
+    "contributing/stack-scan-logging-protocol | coordination/session-durability-check": 1,
+    "contributing/stack-scan-logging-protocol | exotic/tri-store-lineage": 1,
+    "contributing/stack-scan-logging-protocol | orchestration/state-in-substrate-deltas-in-messages": 1,
+    "contributing/stack-scan-logging-protocol | storage/durability-throughput-gate": 1,
+    "contributing/stack-scan-logging-protocol | storage/postcommit-materialization-gate": 1,
+    "coordination/par-as-obligation | coordination/task-shape-validation": 1,
+    "coordination/par-as-obligation | exotic/full-lift-registry": 1,
+    "coordination/par-as-obligation | futon-theory/derive-exits-on-a-minted-sorry": 1,
+    "coordination/par-as-obligation | futon-theory/mission-interface-signature": 1,
+    "coordination/par-as-obligation | futon-theory/structural-tension-as-observation": 1,
+    "coordination/par-as-obligation | futon-theory/task-as-arrow": 1,
+    "coordination/par-as-obligation | invariant-coherence/shape-first-identify": 1,
+    "coordination/par-as-obligation | p4ng/agent-pattern-triad": 1,
+    "coordination/par-as-obligation | pattern-discipline/patterns-as-categorical-objects": 1,
+    "coordination/par-as-obligation | peripherals/pattern-becomes-peripheral": 1,
+    "coordination/par-as-obligation | peripherals/read-existing-seam-before-implementing": 1,
+    "coordination/par-as-obligation | social/tension-before-code": 1,
+    "coordination/par-as-obligation | storage/deterministic-ingest-pipeline": 1,
+    "coordination/par-as-obligation | structure/interest-event-vocabulary": 1,
+    "coordination/par-as-obligation | structure/what-problem-is-this-actually-solving": 1,
+    "coordination/session-durability-check | devmap-coherence/ifr-f1-dhammavicaya": 1,
+    "coordination/session-durability-check | exotic/tri-store-lineage": 1,
+    "coordination/session-durability-check | futon-theory/derive-exits-on-a-minted-sorry": 1,
+    "coordination/session-durability-check | futon-theory/honest-map-over-flattering-counter": 1,
+    "coordination/session-durability-check | futon-theory/local-gain-persistence": 2,
+    "coordination/session-durability-check | futon-theory/mission-interface-signature": 1,
+    "coordination/session-durability-check | invariant-coherence/reachable-from-boot": 1,
+    "coordination/session-durability-check | invariant-coherence/shape-first-identify": 1,
+    "coordination/session-durability-check | sidecar/append-only-semantic-audit": 1,
+    "coordination/session-durability-check | stack-coherence/commit-intent-alignment": 1,
+    "coordination/session-durability-check | storage/durability-throughput-gate": 1,
+    "coordination/session-durability-check | t3/capability-not-functioning": 1,
+    "coordination/session-durability-check | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "coordination/session-durability-check | ukrns/design-as-function-of-evidence": 1,
+    "coordination/task-shape-validation | p4ng/agent-pattern-triad": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f4-passaddhi": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f5-samadhi": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f6-upekkha": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | exotic/tri-store-lineage": 1,
+    "devmap-coherence/ifr-f1-dhammavicaya | storage/durability-throughput-gate": 1,
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-f4-passaddhi": 1,
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-f5-samadhi": 1,
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-f6-upekkha": 1,
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f2-viriya | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f3a-piti-audit | devmap-coherence/ifr-f4-passaddhi": 1,
+    "devmap-coherence/ifr-f3a-piti-audit | devmap-coherence/ifr-f5-samadhi": 1,
+    "devmap-coherence/ifr-f3a-piti-audit | devmap-coherence/ifr-f6-upekkha": 1,
+    "devmap-coherence/ifr-f3a-piti-audit | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f3a-piti-audit | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f4-passaddhi | devmap-coherence/ifr-f5-samadhi": 1,
+    "devmap-coherence/ifr-f4-passaddhi | devmap-coherence/ifr-f6-upekkha": 1,
+    "devmap-coherence/ifr-f4-passaddhi | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f4-passaddhi | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f4-passaddhi | stack-coherence/futon-bridge-health": 1,
+    "devmap-coherence/ifr-f5-samadhi | devmap-coherence/ifr-f6-upekkha": 1,
+    "devmap-coherence/ifr-f5-samadhi | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f5-samadhi | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f5-samadhi | stack-coherence/futon-bridge-health": 1,
+    "devmap-coherence/ifr-f6-upekkha | devmap-coherence/ifr-f7-upa-upekkha": 1,
+    "devmap-coherence/ifr-f6-upekkha | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f6-upekkha | stack-coherence/futon-bridge-health": 1,
+    "devmap-coherence/ifr-f7-upa-upekkha | devmap-coherence/ifr-state-convergence": 1,
+    "devmap-coherence/ifr-f7-upa-upekkha | stack-coherence/futon-bridge-health": 1,
+    "devmap-coherence/ifr-state-convergence | stack-coherence/futon-bridge-health": 1,
+    "eight-gates/ward-off-boundary | futon-theory/stop-the-line": 1,
+    "enrichment/churn-as-signal | orchestration/state-in-substrate-deltas-in-messages": 1,
+    "enrichment/churn-as-signal | storage/postcommit-materialization-gate": 1,
+    "exotic/full-lift-registry | p4ng/agent-pattern-triad": 1,
+    "exotic/tri-store-lineage | futon-theory/derive-exits-on-a-minted-sorry": 1,
+    "exotic/tri-store-lineage | futon-theory/local-gain-persistence": 1,
+    "exotic/tri-store-lineage | futon-theory/mission-interface-signature": 1,
+    "exotic/tri-store-lineage | invariant-coherence/shape-first-identify": 1,
+    "exotic/tri-store-lineage | sidecar/append-only-semantic-audit": 1,
+    "exotic/tri-store-lineage | stack-coherence/commit-intent-alignment": 1,
+    "exotic/tri-store-lineage | storage/durability-throughput-gate": 1,
+    "futon-theory/all-or-nothing | futon-theory/stop-the-line": 1,
+    "futon-theory/all-or-nothing | orchestration/state-in-substrate-deltas-in-messages": 1,
+    "futon-theory/all-or-nothing | storage/postcommit-materialization-gate": 1,
+    "futon-theory/derive-exits-on-a-minted-sorry | p4ng/agent-pattern-triad": 1,
+    "futon-theory/derive-exits-on-a-minted-sorry | storage/durability-throughput-gate": 1,
+    "futon-theory/honest-map-over-flattering-counter | futon-theory/local-gain-persistence": 1,
+    "futon-theory/honest-map-over-flattering-counter | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "futon-theory/local-gain-persistence | invariant-coherence/reachable-from-boot": 1,
+    "futon-theory/local-gain-persistence | storage/durability-throughput-gate": 1,
+    "futon-theory/local-gain-persistence | t3/capability-not-functioning": 1,
+    "futon-theory/local-gain-persistence | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "futon-theory/local-gain-persistence | ukrns/design-as-function-of-evidence": 1,
+    "futon-theory/mission-interface-signature | p4ng/agent-pattern-triad": 1,
+    "futon-theory/mission-interface-signature | storage/durability-throughput-gate": 1,
+    "futon-theory/stop-the-line | invariant-coherence/reachable-from-boot": 1,
+    "futon-theory/stop-the-line | storage/invariants-vs-repair": 1,
+    "futon-theory/stop-the-line | system-coherence/turn-design-into-checks": 1,
+    "futon-theory/structural-tension-as-observation | p4ng/agent-pattern-triad": 1,
+    "futon-theory/task-as-arrow | p4ng/agent-pattern-triad": 1,
+    "gauntlet/aif-as-environment-not-instruction | software-design/agent-decorator-pattern": 1,
+    "invariant-coherence/reachable-from-boot | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "invariant-coherence/shape-first-identify | p4ng/agent-pattern-triad": 1,
+    "invariant-coherence/shape-first-identify | storage/durability-throughput-gate": 1,
+    "orchestration/state-in-substrate-deltas-in-messages | storage/durability-throughput-gate": 1,
+    "orchestration/state-in-substrate-deltas-in-messages | storage/invariants-vs-repair": 1,
+    "orchestration/state-in-substrate-deltas-in-messages | storage/postcommit-materialization-gate": 1,
+    "p4ng/agent-pattern-triad | pattern-discipline/patterns-as-categorical-objects": 1,
+    "p4ng/agent-pattern-triad | peripherals/pattern-becomes-peripheral": 1,
+    "p4ng/agent-pattern-triad | peripherals/read-existing-seam-before-implementing": 1,
+    "p4ng/agent-pattern-triad | social/tension-before-code": 1,
+    "p4ng/agent-pattern-triad | storage/deterministic-ingest-pipeline": 1,
+    "p4ng/agent-pattern-triad | structure/interest-event-vocabulary": 1,
+    "p4ng/agent-pattern-triad | structure/what-problem-is-this-actually-solving": 1,
+    "sidecar/append-only-semantic-audit | storage/durability-throughput-gate": 1,
+    "software-design/agent-command-pattern | software-design/agent-decorator-pattern": 1,
+    "stack-coherence/commit-intent-alignment | storage/durability-throughput-gate": 1,
+    "storage/durability-throughput-gate | storage/postcommit-materialization-gate": 1,
+    "storage/invariants-vs-repair | storage/postcommit-materialization-gate": 1,
+    "structure/interest-event-vocabulary | system-coherence/facet-before-aggregating": 1,
+    "t3/capability-not-functioning | ukrns/calibrate-impact-promises-to-current-indicator-capacity": 1,
+    "ukrns/calibrate-impact-promises-to-current-indicator-capacity | ukrns/design-as-function-of-evidence": 1
+  },
+  "stats": {
+    "n_deposits": 42,
+    "n_positive_pairs": 118,
+    "n_negative_pairs": 255,
+    "total_positive_edges": 132,
+    "total_negative_edges": 256
+  }
+}
