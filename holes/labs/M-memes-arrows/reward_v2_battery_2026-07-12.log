@@ -1,0 +1,18 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 7865.94it/s]
+[1mBertModel LOAD REPORT[0m from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+labels: 39 records / 22 LOMO groups (13 success / 26 fail)
+tau grid (predeclared): [0.15, 0.25, 0.5, 1.0] ; N normalization=len(training records)
+A1 LOMO v2 AUC=0.645 null95=0.701 ; v1.2 AUC=0.675 null95=0.695
+per-fold tau choices: E-mission-head=0.15, a-sorry-enterprise=0.15, action-vocabulary=0.15, aif2=0.15, artificial-stack-exchange=0.15, bounded-in-flight-state=0.15, canon-fingerprint-store=0.15, cold-chain=0.15, daily-scan=0.25, fold-ansatz=0.15, futonzero-generative=0.15, hypergraph-operator=0.15, kit-cadence=0.15, kit-intake=0.15, kit-outbox=0.15, peeragogy-rewrite=0.15, peradam-mechanization=0.15, single-entry-point=0.15, trip-journal=0.15, war-machine-wiring=0.15, weird-modernism=0.15, wm-flight=0.15
+A1 LOO S3 v2 AUC=0.698 null95=0.683
+A3 tau=inf regression max_abs_diff=0.000e+00 tolerance=1.0e-09 PASS
+A4 hard checks v2: trivial=PASS bloated=PASS degeneracy=PASS
+fitted w v2 default tau=0.25: [1.903, 1.035, 1.0, -0.394]
+{"n": 39, "groups": 22, "tau_grid": [0.15, 0.25, 0.5, 1.0], "lomo_v2_auc": 0.6449704142011834, "lomo_v2_null95": 0.7011834319526628, "lomo_v1_auc": 0.6745562130177515, "lomo_v1_null95": 0.6952662721893491, "loo_s3_v2_auc": 0.6982248520710059, "loo_s3_v2_null95": 0.6834319526627219, "tau_choices": {"E-mission-head": 0.15, "a-sorry-enterprise": 0.15, "action-vocabulary": 0.15, "aif2": 0.15, "artificial-stack-exchange": 0.15, "bounded-in-flight-state": 0.15, "canon-fingerprint-store": 0.15, "cold-chain": 0.15, "daily-scan": 0.25, "fold-ansatz": 0.15, "futonzero-generative": 0.15, "hypergraph-operator": 0.15, "kit-cadence": 0.15, "kit-intake": 0.15, "kit-outbox": 0.15, "peeragogy-rewrite": 0.15, "peradam-mechanization": 0.15, "single-entry-point": 0.15, "trip-journal": 0.15, "war-machine-wiring": 0.15, "weird-modernism": 0.15, "wm-flight": 0.15}}
