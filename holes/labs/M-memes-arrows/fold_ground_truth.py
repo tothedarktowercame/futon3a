@@ -20,6 +20,7 @@ sys.path.insert(0, LAB)
 from discharge_experiment import GROUND  # noqa: E402
 
 ADJUDICATIONS = Path("/home/joe/code/futon6/holes/fold-turn-adjudications.edn")
+MARK_LABELS = Path("/home/joe/code/futon3a/holes/labs/M-memes-arrows/mark-labels.edn")
 
 
 def _parse_adjudications(path=ADJUDICATIONS):
@@ -38,11 +39,21 @@ def _parse_adjudications(path=ADJUDICATIONS):
     return out
 
 
-def load_records():
+def _parse_mark_labels(path=None):
+    path = path or MARK_LABELS
+    if not path.exists():
+        return []
+    from mark_labels import load_mark_labels
+    return load_mark_labels(path)
+
+
+def load_records(include_mark_labels=False):
     records = [{"scope": g["scope"], "success": bool(g["success"]),
                 "used": g.get("used") or [], "problem": g["problem"]}
                for g in GROUND if g.get("used")]
     records += _parse_adjudications()
+    if include_mark_labels:
+        records += _parse_mark_labels()
     return records
 
 
