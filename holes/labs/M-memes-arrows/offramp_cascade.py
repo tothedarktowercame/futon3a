@@ -38,8 +38,8 @@ def main():
     best = None
     for e in EPS:
         r = construct_cascade(psi, epsilon=e, phylogeny=phy)
-        if best is None or r["F-free-energy"] > best[1]:
-            best = (e, r["F-free-energy"], r)
+        if best is None or r["cascade-score"] > best[1]:
+            best = (e, r["cascade-score"], r)
     eps, F, r = best
     ids = [p for (p, _rl, _mc) in r["cascade"]]
     sl = chosen_semi_lattice(ids, phy)

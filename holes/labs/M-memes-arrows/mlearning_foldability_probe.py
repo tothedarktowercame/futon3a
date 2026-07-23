@@ -65,8 +65,8 @@ def main():
     bestF = None
     for e in [0.02, 0.08, 0.12, 0.15, 0.18, 0.22, 0.30, 0.45]:
         r = cc.construct_cascade(psi, epsilon=e, phylogeny=phy)
-        if bestF is None or r["F-free-energy"] > bestF[1]:
-            bestF = (e, r["F-free-energy"], r)
+        if bestF is None or r["cascade-score"] > bestF[1]:
+            bestF = (e, r["cascade-score"], r)
     e, F, r = bestF
     chosen = [stem(p) for (p, _rl, _mc) in r["cascade"]]
     print(f"\n=== argmax-F cascade actually chosen: eps*={e} F={F:.3f} size={r['size']} ===")
@@ -80,7 +80,7 @@ def main():
         r = cc.construct_cascade(psi, epsilon=e, phylogeny=phy)
         ids = [stem(p) for (p, _rl, _mc) in r["cascade"]]
         foldable_boxes = [p for p in ids if RULES.get(p) in BOX_ROLES]
-        print(f"  eps={e:<4} size={r['size']:<2} F={r['F-free-energy']:>6.3f}  "
+        print(f"  eps={e:<4} size={r['size']:<2} score={r['cascade-score']:>6.3f}  "
               f"box-foldables={foldable_boxes or '[]'}  cascade={ids}")
 
 if __name__ == "__main__":

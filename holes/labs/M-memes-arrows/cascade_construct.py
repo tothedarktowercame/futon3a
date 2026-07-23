@@ -13,7 +13,7 @@ construct_cascade(psi_query, epsilon) -> {
               (= Salingaros life L). NB this is NOT Salingaros disorder C = T·(10−H); the old key
               "C" was a misnomer (it returned T·H = L). Renamed 2026-06-24 (C/L are the same
               quantity under two bad names → one descriptive name).
-  :H-coherence, :T-intensity, :accuracy, :complexity, :F-free-energy   (F = accuracy − λ·complexity)
+  :H-coherence, :T-intensity, :coverage-reward, :prior-cost, :cascade-score
   :trajectory   the marginal-coverage curve (so you can SEE where saturation bites)
 }
 
@@ -37,8 +37,9 @@ DEFAULT_GROUNDED_POSTERIORS = Path("/home/joe/code/futon6/data/pattern_posterior
 DEFAULT_SEEDS = Path("/home/joe/code/futon6/data/pattern-seeds.json")
 
 # F-score (M-wm-policies omission 2, AIF grounding 2026-06-24): grain-2 cascade quality as a
-# real marginal-likelihood F = accuracy - lambda*complexity (Bayesian Occam), replacing the
-# Salingaros C analogy. accuracy = total ψ-coverage; complexity = sum of -log(base-rate prior)
+# Engineering model-selection score: coverage reward minus a prior-derived
+# inclusion cost. This is not variational free energy or marginal likelihood:
+# coverage is a task proxy, not an expected log likelihood.
 # of the selected patterns (the report's open-Q3 map: (10-H) "architectural entropy" -> KL of
 # the ψ-conditioned selection from the co-application base-rate prior). lambda set from data
 # (the rich/thin F-knee), NOT hand-guessed; this default is provisional pending the sweep.
@@ -230,11 +231,11 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
             break
         chosen.append(best); cand.remove(best); traj.append((len(chosen), best[0], round(m, 3)))
     ids = [c for c, _ in chosen]
-    # --- F = accuracy - lambda*complexity (real marginal-likelihood; replaces C-as-analogy)
+    # --- Honest engineering score: coverage reward - lambda * prior cost.
     prior, default_prior = base_rate_prior(phylogeny, seed_stems=load_seed_stems())
     accuracy = sum(m for _, _, m in traj)                               # total ψ-coverage
     complexity = sum(-math.log(prior.get(pattern_stem(c), default_prior)) for c, _ in chosen)
-    free_energy = accuracy - lam * complexity                           # Bayesian Occam; >0 = accept
+    cascade_score = accuracy - lam * complexity
     intensity = sum(rel for _, rel in chosen)                           # Salingaros T
     pairs = [(i, j) for i in range(len(ids)) for j in range(i+1, len(ids))]
     coherence = (sum(4*cos(EMB[ids[i]], EMB[ids[j]])*(1-cos(EMB[ids[i]], EMB[ids[j]])) for i, j in pairs)/len(pairs)) if pairs else 1.0
@@ -247,8 +248,8 @@ def construct_cascade(psi_query, epsilon=0.15, pool=40, posterior_weight=0.0, po
     return {"cascade": [(c, round(r, 3), mc) for (c, r), (_, _, mc) in zip(chosen, traj)],
             "size": len(chosen), "wholeness": round(intensity*coherence, 3),
             "H-coherence": round(coherence, 3), "T-intensity": round(intensity, 3),
-            "accuracy": round(accuracy, 3), "complexity": round(complexity, 3),
-            "F-free-energy": round(free_energy, 3), "lambda": float(lam),
+            "coverage-reward": round(accuracy, 3), "prior-cost": round(complexity, 3),
+            "cascade-score": round(cascade_score, 3), "lambda": float(lam),
             "trajectory": traj,
             "posterior_weight": float(posterior_weight),
             "posterior_label": posterior_table.get("label", "self-graded"),

@@ -6,7 +6,7 @@ construct the coverage-saturated coherence-greedy cascade, apply the live-judge 
 (parsimony ceiling, set from data), and emit JSON the Clojure judge can read.
 
 Usage:  cascade_serve.py "<psi query text>" [budget=6] [epsilon=0.15]
-Emits:  {"psi","size","wholeness","H-coherence","T-intensity","accuracy","complexity","F-free-energy","budget","shown":[...],"truncated"}
+Emits:  {"psi","size","wholeness","H-coherence","T-intensity","coverage-reward","prior-cost","cascade-score","budget","shown":[...],"truncated"}
 """
 import sys
 import json
@@ -32,10 +32,9 @@ def main():
         "psi": psi,
         "size": r["size"],            # full coverage-saturated size
         "wholeness": r["wholeness"], "H-coherence": r["H-coherence"], "T-intensity": r["T-intensity"],
-        # F-free-energy = accuracy - lambda*complexity: the real marginal-likelihood grain-2 act-gate
-        # leg (M-wm-policies omission 2); F>0 = accept the expansion (Bayesian Occam).
-        "accuracy": r["accuracy"], "complexity": r["complexity"],
-        "F-free-energy": r["F-free-energy"], "lambda": r["lambda"],
+        # Engineering score only: coverage reward minus prior inclusion cost.
+        "coverage-reward": r["coverage-reward"], "prior-cost": r["prior-cost"],
+        "cascade-score": r["cascade-score"], "lambda": r["lambda"],
         "budget": budget,
         "shown": shown,               # the top-budget strong centres (what the WM displays)
         "semilattice": semilattice,
