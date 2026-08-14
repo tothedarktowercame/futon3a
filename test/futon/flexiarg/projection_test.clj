@@ -17,8 +17,19 @@
                                 "test/fixtures/flexiarg-conformance.json")))]
     (doseq [{:strs [name source tree]} (get corpus "cases")]
       (let [block (slurp (io/file futon3-root source))]
-        (is (= tree (mapv component-tree (projection/parse-components block)))
+        (is (= tree (mapv component-tree (projection/parse-tree block)))
             name)))))
+
+(deftest nested-components-are-not-projection-peers
+  (let [block (slurp (io/file futon3-root
+                              "library/pattern-discipline/pattern-to-code-receipts.flexiarg"))
+        clauses (projection/parse-components block)
+        names (mapv :name-key clauses)
+        then-clause (some #(when (= "then" (:name-key %)) %) clauses)]
+    (is (= ["conclusion" "context" "if" "however" "then" "because" "next-steps"]
+           names))
+    (is (= ["evidence" "mechanism" "counterfactual"]
+           (mapv :name-key (:children then-clause))))))
 
 (defn- temp-dir []
   (doto (io/file (System/getProperty "java.io.tmpdir")
@@ -44,18 +55,20 @@
     (is (= "conclusion" (:name-key (first (:pattern/clauses packet)))))
     (is (= "BHK-ARROW-SEMANTICS"
            (:name (some #(when (= "bhk-arrow-semantics" (:slug %)) %)
-                        (:pattern/clauses packet)))))
+                        (mapcat :children (:pattern/clauses packet))))))
     (is (str/includes? (:pattern/conclusion packet) "BHK arrow"))))
 
-(deftest preserves-bespoke-clauses-without-flattening
+(deftest preserves-bespoke-clauses-as-children
   (let [packet (first (projection/parse-file
                        "/home/joe/code/futon3/library/structure/block-as-futonic-revolution.flexiarg"
                        {:futon3-root futon3-root}))
-        clause-names (set (map :name (:pattern/clauses packet)))]
+        top-level-names (set (map :name (:pattern/clauses packet)))
+        child-names (set (map :name (mapcat :children (:pattern/clauses packet))))]
     (is (= :ok (:pattern/status packet)))
-    (is (contains? clause-names "APPLICATION-TO-WORKING-TREE"))
-    (is (contains? clause-names "ANTI-PATTERNS"))
-    (is (contains? clause-names "COMPOSITION-WITH-SIBLINGS"))))
+    (is (not (contains? top-level-names "APPLICATION-TO-WORKING-TREE")))
+    (is (contains? child-names "APPLICATION-TO-WORKING-TREE"))
+    (is (contains? child-names "ANTI-PATTERNS"))
+    (is (contains? child-names "COMPOSITION-WITH-SIBLINGS"))))
 
 (deftest anchored-extract-meta-does-not-match-body-prose
   (let [text (str "@flexiarg foo/bar\n"

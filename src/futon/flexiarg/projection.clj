@@ -11,7 +11,7 @@
 (def ^:private default-embed-json-output "resources/notions/pattern-embedding-records.json")
 (def ^:private default-source-roots ["library" "holes"])
 (def ^:private flexiarg-exts #{".flexiarg" ".multiarg"})
-(def ^:private section-header-re #"^\s*[!+]\s+([^:]+):\s*(.*)$")
+(def ^:private section-header-re #"^(\s*)[!+]\s+([^:]+):\s*(.*)$")
 (def ^:private indented-block-header-re #"(?m)^\s+@(arg|flexiarg|multiarg)\s+\S+")
 (def ^:private sigil-block-re #"\[[^\]]+\]")
 (def ^:private sigil-token-re #"[^\s\[\]]+/[^\s\[\]]+")
@@ -73,42 +73,65 @@
           (conj blocks (str/join "\n" current))
           [(or text "")])))))
 
-(defn parse-components
-  "Parse all !/+ sections from a block, preserving original clause names while
-   also emitting a lower-cased lookup key and slug."
+(defn- finish-section [{:keys [indent label lines]}]
+  (let [clean (trim-empty-lines lines)
+        original (str/trim label)]
+    (sorted-map* :children []
+                 :indent indent
+                 :name original
+                 :name-key (str/lower-case original)
+                 :slug (slugify original)
+                 :text (str/trimr (str/join "\n" clean)))))
+
+(defn- sections-at-level [sections parent-indent]
+  (loop [remaining sections
+         nodes []]
+    (if-let [section (first remaining)]
+      (if (<= (:indent section) parent-indent)
+        [nodes remaining]
+        (let [[children tail] (sections-at-level (rest remaining)
+                                                 (:indent section))]
+          (recur tail (conj nodes (assoc section :children children)))))
+      [nodes []])))
+
+(defn- strip-parser-fields [component]
+  (-> component
+      (dissoc :indent)
+      (update :children #(mapv strip-parser-fields %))))
+
+(defn parse-tree
+  "Parse all !/+ sections into the indentation-defined flexiarg tree."
   [block]
   (let [lines (str/split-lines (or block ""))]
     (loop [remaining lines
            current nil
            sections []]
       (if-let [line (first remaining)]
-        (if-let [[_ label trailing] (re-matches section-header-re line)]
-          (let [next-section (when current
-                               (let [clean (trim-empty-lines (:lines current))
-                                     original (str/trim (:label current))]
-                                 (sorted-map* :name original
-                                              :name-key (str/lower-case original)
-                                              :slug (slugify original)
-                                              :text (str/trimr (str/join "\n" clean)))))
+        (if-let [[_ whitespace label trailing] (re-matches section-header-re line)]
+          (let [next-section (when current (finish-section current))
                 new-lines (cond-> []
                             (and trailing (not (str/blank? trailing)))
                             (conj trailing))]
             (recur (rest remaining)
-                   {:label label :lines new-lines}
+                   {:indent (count whitespace) :label label :lines new-lines}
                    (cond-> sections next-section (conj next-section))))
           (recur (rest remaining)
                  (if current
                    (update current :lines conj line)
                    current)
                  sections))
-        (let [final-section (when current
-                              (let [clean (trim-empty-lines (:lines current))
-                                    original (str/trim (:label current))]
-                                (sorted-map* :name original
-                                             :name-key (str/lower-case original)
-                                             :slug (slugify original)
-                                             :text (str/trimr (str/join "\n" clean)))))]
-          (cond-> sections final-section (conj final-section)))))))
+        (let [flat-sections (cond-> sections current (conj (finish-section current)))]
+          (mapv strip-parser-fields
+                (first (sections-at-level flat-sections -1))))))))
+
+(defn parse-components
+  "Return projection clauses in the historical root-plus-facets shape.
+
+   Children below a facet remain nested and are never promoted to peer clauses."
+  [block]
+  (mapv identity
+        (mapcat (fn [root] (cons root (:children root)))
+                (parse-tree block))))
 
 (defn- parse-list-directive [value]
   (let [trimmed (some-> value str/trim)]
