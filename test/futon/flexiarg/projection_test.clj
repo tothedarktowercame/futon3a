@@ -18,7 +18,12 @@
     (doseq [{:strs [name source tree]} (get corpus "cases")]
       (let [block (slurp (io/file futon3-root source))]
         (is (= tree (mapv component-tree (projection/parse-tree block)))
-            name)))))
+            name)))
+    (doseq [{:strs [source parent children]} (get corpus "nested-cases")]
+      (let [tree (projection/parse-tree (slurp (io/file futon3-root source)))
+            parent-node (some #(when (= parent (:name-key %)) %)
+                              (:children (first tree)))]
+        (is (= children (mapv :name-key (:children parent-node))) source)))))
 
 (deftest nested-components-are-not-projection-peers
   (let [block (slurp (io/file futon3-root
