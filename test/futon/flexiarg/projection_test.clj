@@ -1,10 +1,24 @@
 (ns futon.flexiarg.projection-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon.flexiarg.projection :as projection]))
 
 (def futon3-root "/home/joe/code/futon3")
+
+(defn- component-tree [component]
+  {"name" (:name-key component)
+   "children" (mapv component-tree (:children component))})
+
+(deftest shared-conformance-corpus
+  (let [corpus (json/read-str
+                (slurp (io/file futon3-root
+                                "test/fixtures/flexiarg-conformance.json")))]
+    (doseq [{:strs [name source tree]} (get corpus "cases")]
+      (let [block (slurp (io/file futon3-root source))]
+        (is (= tree (mapv component-tree (projection/parse-components block)))
+            name)))))
 
 (defn- temp-dir []
   (doto (io/file (System/getProperty "java.io.tmpdir")
