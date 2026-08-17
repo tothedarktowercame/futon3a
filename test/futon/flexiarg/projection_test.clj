@@ -183,3 +183,21 @@
       (is (= "    line-1\n\n    line-2"
              (:text (some #(when (= "context" (:name-key %)) %)
                           (:pattern/clauses (second packets-1)))))))))
+
+(deftest per-file-parse-is-silent-by-default
+  ;; Reporting is a BATCH concern. It used to default ON, so any caller that did
+  ;; not know to pass :report? false printed one summary line per file -- 889 of
+  ;; the 1151 library files carry a non-standard directive, so a full pass
+  ;; printed 889 summary lines instead of the one the standard asks for.
+  (let [tmp (java.io.File/createTempFile "silent-probe" ".flexiarg")]
+    (try
+      (spit tmp "@flexiarg probe/silent\n@title Probe\n@bits 101010\n\n! conclusion:\n  x\n")
+      (is (= "" (with-out-str (projection/parse-file tmp {:report? false})))
+          "explicit :report? false is silent")
+      (is (= "" (with-out-str (projection/parse-file tmp {})))
+          "and silence is the DEFAULT -- a caller must opt IN to reporting")
+      (is (seq (with-out-str
+                 (projection/report-directives!
+                  (projection/parse-file tmp {:report? false}))))
+          "the batch reporter still speaks when asked")
+      (finally (.delete tmp)))))

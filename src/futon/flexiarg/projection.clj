@@ -373,7 +373,14 @@
      (try
        (let [packets (->> (split-arg-blocks (slurp file))
                           (mapv #(parse-block file % opts)))]
-         (when (not= false report?)
+         ;; Reporting is a BATCH concern and defaults OFF. It used to default ON,
+         ;; so any caller that did not know to pass :report? false printed one
+         ;; summary line PER FILE -- 889 of the 1151 library files carry a
+         ;; non-standard directive, so a full pass printed 889 summary lines
+         ;; instead of the one the standard asks for. parse-roots and the futon3c
+         ;; watcher adapter both passed :report? false and were fine; every other
+         ;; caller, including a plain dry run, was not.
+         (when (true? report?)
            (report-directives! packets))
          packets)
        (catch Exception ex
