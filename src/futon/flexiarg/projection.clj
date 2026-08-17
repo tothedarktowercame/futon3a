@@ -347,6 +347,7 @@
                       :pattern/conclusion (first-conclusion components)
                       :pattern/directive-report (dissoc projection :directives)
                       :pattern/directives (into (sorted-map) directives)
+                      :pattern/cross-list (vec (:cross-list directives))
                       :pattern/id pattern-id
                       :pattern/keywords (vec (:keywords directives))
                       :pattern/projection-version "flexiarg-v0"
@@ -356,12 +357,14 @@
                       ;; raw reference list until the per-edge migration.
                       :pattern/references (parse-list-directive
                                            (extract-meta block "references"))
+                      :pattern/see-also (vec (:see-also directives))
                       :pattern/scores (sorted-map)
                       :pattern/sigils all-sigils
                       :pattern/source-path (relative-path file futon3-root)
                       :pattern/sources []
                       :pattern/status :ok
                       :pattern/title (or (:title directives) pattern-id)
+                      :pattern/why (vec (:why directives))
                       :pattern/typed-slots nil))))))
 
 (defn parse-file

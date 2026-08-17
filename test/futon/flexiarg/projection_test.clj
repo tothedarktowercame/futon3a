@@ -96,7 +96,10 @@
     (is (= ["math-strategy/a" "math-formalization/b"] (:why directives)))
     (is (= ["math-informal/c" "memory/e-1"] (:how directives)))
     (is (= ["demo/d" "demo/e"] (:see-also directives)))
-    (is (= ["FA" "PR"] (:cross-list directives)))))
+    (is (= ["FA" "PR"] (:cross-list directives)))
+    (is (= ["math-strategy/a" "math-formalization/b"] (:pattern/why packet)))
+    (is (= ["demo/d" "demo/e"] (:pattern/see-also packet)))
+    (is (= ["FA" "PR"] (:pattern/cross-list packet)))))
 
 (deftest unknown-directive-is-loud-and-family-scoped-is-summary-only
   (let [dir (temp-dir)
