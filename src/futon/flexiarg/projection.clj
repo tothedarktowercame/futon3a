@@ -4,6 +4,7 @@
    The projection preserves ordered clause structure and emits a deterministic
    packet suitable for indexing, retrieval, and downstream derivations."
   (:require [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
@@ -15,6 +16,8 @@
 (def ^:private indented-block-header-re #"(?m)^\s+@(arg|flexiarg|multiarg)\s+\S+")
 (def ^:private sigil-block-re #"\[[^\]]+\]")
 (def ^:private sigil-token-re #"[^\s\[\]]+/[^\s\[\]]+")
+(def ^:private directive-line-re #"(?m)^@([A-Za-z0-9_-]+)(?:\s+(.+?))?\s*$")
+(def ^:private directive-ontology-name "flexiarg-directives.edn")
 
 (defn- path-like? [line]
   (or (str/starts-with? line "@arg ")
@@ -146,11 +149,120 @@
              (remove str/blank?)
              vec)))))
 
-(defn- parse-keywords [value]
-  (->> (str/split (or value "") #",")
-       (map str/trim)
-       (remove str/blank?)
-       vec))
+(defn- parse-comma-or-space-list [value]
+  (let [trimmed (some-> value str/trim)
+        inner (if (and trimmed
+                       (str/starts-with? trimmed "[")
+                       (str/ends-with? trimmed "]"))
+                (subs trimmed 1 (dec (count trimmed)))
+                trimmed)]
+    (if (str/blank? inner)
+      []
+      (->> (str/split inner #"[\s,]+")
+           (map str/trim)
+           (remove str/blank?)
+           vec))))
+
+(defn- parse-comma-list [value]
+  (let [trimmed (some-> value str/trim)
+        inner (if (and trimmed
+                       (str/starts-with? trimmed "[")
+                       (str/ends-with? trimmed "]"))
+                (subs trimmed 1 (dec (count trimmed)))
+                trimmed)]
+    (if (str/blank? inner)
+      []
+      (->> (str/split inner #",")
+           (map str/trim)
+           (remove str/blank?)
+           vec))))
+
+(defn- parse-citation-list [value]
+  (let [trimmed (some-> value str/trim)]
+    (if (str/blank? trimmed)
+      []
+      (if (and (str/starts-with? trimmed "[")
+               (str/ends-with? trimmed "]"))
+        (try
+          (let [parsed (edn/read-string trimmed)]
+            (if (sequential? parsed) (mapv str parsed) [trimmed]))
+          (catch Exception _ (parse-comma-list trimmed)))
+        (parse-comma-list trimmed)))))
+
+(defn- parse-directive-value [value-type value]
+  (cond
+    (contains? #{:pattern-id-list :subject-code-list :list} value-type)
+    (parse-comma-or-space-list value)
+
+    (= :word-list value-type) (parse-comma-list value)
+    (= :citation-list value-type) (parse-citation-list value)
+
+    ;; Scalar, id, and pattern-id values deliberately retain their historical
+    ;; string representation. Non-standard value types never reach this fn.
+    :else value))
+
+(defn load-directive-ontology
+  "Load the semantic directive gate from the futon3 data file."
+  [futon3-root]
+  (let [requested (io/file futon3-root directive-ontology-name)
+        path (if (.isFile requested)
+               requested
+               (io/file (or (System/getenv "FUTON3_ROOT") "../futon3")
+                        directive-ontology-name))
+        ontology (edn/read-string (slurp path))]
+    (when-not (map? (:directives ontology))
+      (throw (ex-info "Invalid flexiarg directive ontology"
+                      {:path (.getPath path)})))
+    ontology))
+
+(defn- raw-directives [block]
+  (mapv (fn [[_ label value]]
+          [(keyword label) (some-> value str/trim)])
+        (re-seq directive-line-re (or block ""))))
+
+(defn- project-directives [block ontology]
+  (reduce
+   (fn [{:keys [directives] :as acc} [label value]]
+     (if-let [{:keys [status] value-type :value} (get-in ontology [:directives label])]
+       (if (= :standard status)
+         (assoc acc :directives
+                (assoc directives label (parse-directive-value value-type value)))
+         (update-in acc [:known-not-ingested label] (fnil inc 0)))
+       (update-in acc [:unknown label] (fnil inc 0))))
+   {:directives {} :known-not-ingested {} :unknown {}}
+   (raw-directives block)))
+
+(defn report-unknown-directives!
+  "Print loud per-file reports for directive labels absent from the ontology."
+  [packets]
+  (let [unknown-packets (filter #(seq (get-in % [:pattern/directive-report :unknown]))
+                                packets)]
+    (doseq [packet unknown-packets]
+      (println (format "FLEXIARG DIRECTIVE UNKNOWN %s: %s"
+                       (:pattern/source-path packet)
+                       (str/join ", "
+                                 (map (fn [[label n]] (str "@" (name label) "=" n))
+                                      (sort-by key (get-in packet [:pattern/directive-report
+                                                                  :unknown])))))))
+    unknown-packets))
+
+(defn report-directives!
+  "Print one pass summary for known non-standard directives and loud per-file
+   reports for labels missing from the ontology. Returns report counts."
+  [packets]
+  (let [known (apply merge-with + (map #(get-in % [:pattern/directive-report
+                                                    :known-not-ingested] {}) packets))
+        unknown-packets (report-unknown-directives! packets)]
+    (when (seq known)
+      (println (format "FLEXIARG DIRECTIVES known-not-ingested: %d occurrences across %d directives"
+                       (reduce + (vals known)) (count known))))
+    {:known-not-ingested (reduce + 0 (vals known))
+     :known-directives (count known)
+     :unknown-files (count unknown-packets)
+     :unknown-occurrences (reduce + 0
+                                  (mapcat #(vals (get-in % [:pattern/directive-report
+                                                           :unknown]))
+                                          unknown-packets))}))
 
 (defn- parse-sigil-token [token]
   (let [[emoji hanzi] (some-> token (str/split #"/" 2))]
@@ -208,8 +320,10 @@
   "Parse one flexiarg block into the canonical packet."
   ([file block]
    (parse-block file block {}))
-  ([file block {:keys [futon3-root]}]
+  ([file block {:keys [futon3-root directive-ontology]}]
    (let [file (io/file file)
+         futon3-root (or futon3-root "../futon3")
+         ontology (or directive-ontology (load-directive-ontology futon3-root))
          pattern-id (or (extract-meta block "arg")
                         (extract-meta block "flexiarg")
                         (extract-meta block "multiarg"))]
@@ -227,34 +341,21 @@
              direct-sigils (parse-list-directive (extract-meta block "sigils"))
              all-sigils (vec (distinct (concat direct-sigils
                                               (sigils-in-text block))))
-             directives (reduce
-                         (fn [acc key]
-                           (let [value (extract-meta block key)]
-                             (cond
-                               (and value (= key "keywords"))
-                               (assoc acc :keywords (parse-keywords value))
-
-                               (and value (= key "references"))
-                               (assoc acc :references (parse-list-directive value))
-
-                               (and value (= key "sigils"))
-                               (assoc acc :sigils (parse-list-directive value))
-
-                               value
-                               (assoc acc (keyword key) value)
-
-                               :else
-                               acc)))
-                         {}
-                         ["title" "sigils" "keywords" "references" "pattern-ref"
-                          "audience" "tone" "factor" "style" "energy"])]
+             projection (project-directives block ontology)
+             directives (:directives projection)]
          (sorted-map* :pattern/clauses components
                       :pattern/conclusion (first-conclusion components)
+                      :pattern/directive-report (dissoc projection :directives)
                       :pattern/directives (into (sorted-map) directives)
                       :pattern/id pattern-id
                       :pattern/keywords (vec (:keywords directives))
                       :pattern/projection-version "flexiarg-v0"
-                      :pattern/references (vec (:references directives))
+                      ;; Compatibility projection only. @references is a
+                      ;; catalogued :split directive and is therefore absent
+                      ;; from :pattern/directives; existing readers retain the
+                      ;; raw reference list until the per-edge migration.
+                      :pattern/references (parse-list-directive
+                                           (extract-meta block "references"))
                       :pattern/scores (sorted-map)
                       :pattern/sigils all-sigils
                       :pattern/source-path (relative-path file futon3-root)
@@ -267,11 +368,14 @@
   "Parse one .flexiarg/.multiarg file into one or more canonical packets."
   ([path]
    (parse-file path {}))
-  ([path {:keys [futon3-root] :as opts}]
+  ([path {:keys [futon3-root report?] :as opts}]
    (let [file (io/file path)]
      (try
-       (->> (split-arg-blocks (slurp file))
-            (mapv #(parse-block file % opts)))
+       (let [packets (->> (split-arg-blocks (slurp file))
+                          (mapv #(parse-block file % opts)))]
+         (when (not= false report?)
+           (report-directives! packets))
+         packets)
        (catch Exception ex
          [(sorted-map* :pattern/error (sorted-map* :kind :read-error
                                                    :message (.getMessage ex))
@@ -315,13 +419,18 @@
 (defn parse-roots
   "Project all flexiarg files under the configured roots."
   [{:keys [source-roots] :as opts}]
-  (let [root (resolve-futon3-root opts)]
-    (->> (source-files root source-roots)
-         (mapcat #(parse-file % {:futon3-root root}))
-         (sort-by (fn [packet]
-                    [(:pattern/source-path packet)
-                     (or (:pattern/id packet) "")]))
-         vec)))
+  (let [root (resolve-futon3-root opts)
+        ontology (load-directive-ontology root)
+        packets (->> (source-files root source-roots)
+                     (mapcat #(parse-file % {:futon3-root root
+                                             :directive-ontology ontology
+                                             :report? false}))
+                     (sort-by (fn [packet]
+                                [(:pattern/source-path packet)
+                                 (or (:pattern/id packet) "")]))
+                     vec)]
+    (report-directives! packets)
+    packets))
 
 (defn write-projections!
   "Write the projected packets to an EDN file deterministically."

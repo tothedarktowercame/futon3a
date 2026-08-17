@@ -82,6 +82,47 @@
                   "  + context: this body mentions @title fake-title but is not a directive\n")]
     (is (nil? (projection/extract-meta text "title")))))
 
+(deftest ontology-standard-list-directives-reach-projection
+  (let [block (str "@flexiarg demo/relations\n"
+                   "@why math-strategy/a, math-formalization/b\n"
+                   "@how [math-informal/c memory/e-1]\n"
+                   "@see-also demo/d, demo/e\n"
+                   "@cross-list [FA, PR]\n"
+                   "! conclusion:\n  relation fixture\n")
+        packet (projection/parse-block
+                (io/file futon3-root "library/demo/relations.flexiarg")
+                block {:futon3-root futon3-root})
+        directives (:pattern/directives packet)]
+    (is (= ["math-strategy/a" "math-formalization/b"] (:why directives)))
+    (is (= ["math-informal/c" "memory/e-1"] (:how directives)))
+    (is (= ["demo/d" "demo/e"] (:see-also directives)))
+    (is (= ["FA" "PR"] (:cross-list directives)))))
+
+(deftest unknown-directive-is-loud-and-family-scoped-is-summary-only
+  (let [dir (temp-dir)
+        file (io/file dir "directives.flexiarg")]
+    (spit file (str "@flexiarg demo/directives\n"
+                    "@bits 01010101\n"
+                    "@wibble invented\n"
+                    "! conclusion:\n  directive fixture\n"))
+    (let [packets (projection/parse-file file {:futon3-root futon3-root
+                                                :report? false})
+          packet (first packets)
+          output (with-out-str (projection/report-directives! packets))]
+      (is (not (contains? (:pattern/directives packet) :bits)))
+      (is (not (contains? (:pattern/directives packet) :wibble)))
+      (is (= {:bits 1}
+             (get-in packet [:pattern/directive-report :known-not-ingested])))
+      (is (= {:wibble 1}
+             (get-in packet [:pattern/directive-report :unknown])))
+      (is (= 2 (count (str/split-lines output)))
+          "one tier-2 summary plus one tier-3 report are separate lines")
+      (is (str/includes? output "known-not-ingested: 1 occurrences"))
+      (is (str/includes? output "FLEXIARG DIRECTIVE UNKNOWN"))
+      (is (str/includes? output "@wibble=1"))
+      (is (not (str/includes? output "@bits="))
+          "known family-scoped labels never receive per-file reports"))))
+
 (deftest malformed-blocks-produce-visible-errors
   (let [dir (temp-dir)
         file (io/file dir "bad.flexiarg")]
