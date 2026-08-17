@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """compose_fugue.py — the OUTPUT of an LLM-turn fold over a music-theory cascade.
 
-This is NOT a deterministic compiler. The NL patterns in music-cascade.flexiarg were
+This is NOT a deterministic compiler. The NL patterns in music-cascade.multiarg were
 read by an LLM turn (claude-2, 2026-06-24) which GROUNDED each pattern's IF/HOWEVER
 against the circumstance ("compose a 3-voice fugue exposition in C major") and emitted
 this construction. The score below is that fold's product; this script just renders it.

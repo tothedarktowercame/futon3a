@@ -1,7 +1,7 @@
 # E-llm-fold — the cascade fold is an LLM turn (toy: NL patterns → a fugue)
 
 **Date:** 2026-06-24 · **Owner:** claude-2 (E-prefix excursion) · **Parents:** E-fold-engine, M-wm-policies
-(Car-3 Part-B). **Artifacts:** `futon3a/holes/labs/llm-fold/` — `music-cascade.flexiarg` (the NL cascade),
+(Car-3 Part-B). **Artifacts:** `futon3a/holes/labs/llm-fold/` — `music-cascade.multiarg` (the NL cascade),
 `compose_fugue.py` (the fold's output), `fugue-c-major.{mid,mp3}` (listen).
 
 ## The breakthrough (Joe, 2026-06-24)
@@ -24,7 +24,7 @@ This retires build (b)'s "learn the rule-table" program in favour of "the fold i
 ## The toy — proof on a domain OUTSIDE the stack
 
 Music theory has crisp right/wrong and is nowhere near the futon stack, so it's a fair test. **Cascade** =
-7 NL patterns (`music-cascade.flexiarg`): `fugue-subject · subject-answer · countersubject ·
+7 NL patterns (`music-cascade.multiarg`): `fugue-subject · subject-answer · countersubject ·
 exposition-entries · episode-by-sequence · voice-leading · authentic-cadence`. **Circumstance** = "compose a
 3-voice fugue exposition in C major." **The fold** = an LLM turn (claude-2) read the patterns + circumstance and
 emitted the construction (`compose_fugue.py` → `fugue-c-major.mid`).
@@ -62,7 +62,7 @@ These are the music's "free will": the place the structure stops and taste begin
 ## Second data point — 12-bar blues (the A/B control, Joe 2026-06-24)
 
 To be moderately scientific: a *different* genre, its *own* 7 patterns, same mechanism. **Cascade** =
-`blues-cascade.flexiarg` (`twelve-bar-form · dominant-sevenths · quick-change · blues-scale-melody ·
+`blues-cascade.multiarg` (`twelve-bar-form · dominant-sevenths · quick-change · blues-scale-melody ·
 call-and-response · shuffle-feel · turnaround`). **Circumstance** = "compose one 12-bar blues chorus in A."
 **Fold** = an LLM turn → `compose_blues.py` → `blues-A.mid` / **`blues-A.mp3`** (~34s; tenor-sax head, e-piano
 comp, boogie bass, shuffle drums).

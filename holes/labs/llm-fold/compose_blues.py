@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""compose_blues.py — the OUTPUT of an LLM-turn fold over blues-cascade.flexiarg.
+"""compose_blues.py — the OUTPUT of an LLM-turn fold over blues-cascade.multiarg.
 
 2nd data point for E-llm-fold (same mechanism, different genre). The 7 NL blues patterns
 were read by an LLM turn (claude-2, 2026-06-24) and grounded against the circumstance
