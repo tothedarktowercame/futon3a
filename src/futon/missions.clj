@@ -17,6 +17,7 @@
    - embedding ranking is delegated to the existing MiniLM helper
    - both run in parallel per D10; divergence emits per D11"
   (:require [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon.mission-trace :as trace]
@@ -105,16 +106,35 @@
        (let [conn (-> (java.net.URL. url)
                       .openConnection)]
          (.setRequestProperty conn "Accept" "application/json")
-         (.setConnectTimeout conn 2000)
-         (.setReadTimeout conn 5000)
+         (.setConnectTimeout conn 5000)
+         ;; 5s was not enough: the corpus grew past what substrate-2 serves in
+         ;; that window (limit 100 returns, limit 1000 times out), and the
+         ;; `catch Exception _ nil` below turns a timeout into a SILENT fall
+         ;; back to the cached mission_records.json. That froze the corpus at
+         ;; 311 records / 277 missions while the live substrate held 338, and
+         ;; the 30 missing ones rendered at one fallback coordinate on the EFE
+         ;; field. (claude-13, 2026-08-25.)
+         (.setReadTimeout conn 60000)
          (let [code (.getResponseCode conn)]
            (when (= 200 code)
              (let [body (slurp (.getInputStream conn))
                    parsed (json/read-str body :key-fn keyword)
                    hxes (:hyperedges parsed)]
+               ;; futon1b serves `hx/props` INCONSISTENTLY: as a JSON object
+               ;; for some edges and as an EDN string (a pr-str of the same
+               ;; map) for others -- 73 vs 299 on the mission-doc set,
+               ;; 2026-08-25. `(get props :mission/id)` on a string is nil, so
+               ;; every string-shaped edge mapped to the degenerate record
+               ;; `mission/M-@`. Parse the string form rather than dropping it;
+               ;; the upstream serialization is the real defect.
+               ;; (claude-13, 2026-08-25.)
                (->> hxes
                     (map :hx/props)
-                    (filter some?)
+                    (map (fn [p]
+                           (if (string? p)
+                             (try (edn/read-string p) (catch Exception _ nil))
+                             p)))
+                    (filter map?)
                     vec)))))
        (catch Exception _ nil)))))
 
