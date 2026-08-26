@@ -5,7 +5,17 @@ ROOT=/home/joe/code
 FUTON3A="$ROOT/futon3a"
 FUTON3="$ROOT/futon3"
 NOTIONS="$ROOT/data/notions"
-HYPEREDGES_URL="${FUTON1A_URL:-http://localhost:7073}/api/alpha/hyperedges?type=code%2Fv05%2Fmission-doc&limit=500"
+# The drift check MUST NOT share a limit with the thing it checks:
+# futon.missions fetches mission-doc hyperedges at limit 500 by default, so once
+# the corpus passes 500 the two truncate together and the delta reads 0 while
+# both are short. 1000 is the API ceiling (futon1b API-CONTRACT.md: hyperedges
+# limit is capped at 1000, 400 above it), so we take the ceiling and treat
+# "returned exactly the limit" as a truncation tell rather than a count.
+# NOTE: the corpus is 372 today. Past 500 the INDEXER starts truncating
+# silently, which is the bug this pipeline exists to catch, arriving from the
+# other side. (claude-13, 2026-08-26.)
+HYPEREDGE_LIMIT=1000
+HYPEREDGES_URL="${FUTON1A_URL:-http://localhost:7073}/api/alpha/hyperedges?type=code%2Fv05%2Fmission-doc&limit=${HYPEREDGE_LIMIT}"
 response_tmp=""
 
 cleanup() {
@@ -13,6 +23,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
+report_drift() {
+phase="$1"
 response_tmp="$(mktemp "${TMPDIR:-/tmp}/notions-mission-docs.XXXXXX.edn")"
 curl --fail --silent --show-error --max-time 90 "$HYPEREDGES_URL" > "$response_tmp"
 
@@ -54,12 +66,25 @@ substrate_missions="$({
 
 pattern_delta=$((shelf_patterns - embedded_patterns))
 mission_delta=$((substrate_missions - embedded_missions))
-echo "[notions-reembed] drift pattern_delta=$pattern_delta shelf_pattern_ids=$shelf_patterns embedded_pattern_ids=$embedded_patterns mission_delta=$mission_delta substrate_mission_docs=$substrate_missions embedded_mission_basenames=$embedded_missions"
+echo "[notions-reembed] drift ($phase) pattern_delta=$pattern_delta shelf_pattern_ids=$shelf_patterns embedded_pattern_ids=$embedded_patterns mission_delta=$mission_delta substrate_mission_docs=$substrate_missions embedded_mission_basenames=$embedded_missions"
+if [[ "$substrate_missions" -ge "$HYPEREDGE_LIMIT" ]]; then
+  echo "[notions-reembed] FATAL: mission-doc fetch returned exactly the limit ($HYPEREDGE_LIMIT); the drift figure is a floor, not a count" >&2
+  exit 1
+fi
+}
+
+report_drift before
 
 CLJ_CMD=clojure FUTON1A_URL="${FUTON1A_URL:-http://localhost:7073}" \
   "$FUTON3A/scripts/index_patterns.sh" \
   --minilm --include-missions --out-dir "$NOTIONS"
 
 "$ROOT/futon6/scripts/daily_reembed.sh"
+
+# Report drift AFTER the rebuild too. The pre-rebuild line says what was
+# wrong; only this one says whether the run fixed it. Without it, a rebuild
+# that exits 0 without closing the gap looks exactly like one that worked.
+# (claude-13, 2026-08-26.)
+report_drift after
 
 echo "[notions-reembed] pipeline complete"
