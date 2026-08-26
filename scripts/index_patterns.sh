@@ -32,6 +32,14 @@ FASTTEXT_PATH=""
 MINILM_MODEL=""
 INCLUDE_MISSIONS=0
 MISSIONS_ROOTS=""
+minilm_pattern_tmp=""
+minilm_mission_tmp=""
+
+cleanup() {
+  [[ -z "$minilm_pattern_tmp" ]] || rm -f "$minilm_pattern_tmp"
+  [[ -z "$minilm_mission_tmp" ]] || rm -f "$minilm_mission_tmp"
+}
+trap cleanup EXIT
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -252,6 +260,7 @@ if [[ -n "$MINILM_MODEL" ]]; then
   )
   assert_embedding_parity "$OUT_DIR/pattern-embedding-records.json" "$minilm_pattern_tmp" "MiniLM pattern"
   mv "$minilm_pattern_tmp" "$OUT_DIR/minilm_pattern_embeddings.json"
+  minilm_pattern_tmp=""
   mkdir -p "$FUTON3_ROOT/resources/embeddings"
   copy_if_distinct "$OUT_DIR/minilm_pattern_embeddings.json" \
     "$FUTON3_ROOT/resources/embeddings/minilm_pattern_embeddings.json"
@@ -267,6 +276,7 @@ if [[ "$INCLUDE_MISSIONS" -eq 1 && -n "$MINILM_MODEL" && -f "$OUT_DIR/mission_re
   )
   assert_embedding_parity "$OUT_DIR/mission_records.json" "$minilm_mission_tmp" "MiniLM mission"
   mv "$minilm_mission_tmp" "$OUT_DIR/minilm_mission_embeddings.json"
+  minilm_mission_tmp=""
 fi
 
 if [[ -f "$OUT_DIR/minilm_pattern_embeddings.json" || -f "$OUT_DIR/minilm_mission_embeddings.json" ]]; then
