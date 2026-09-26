@@ -1,5 +1,8 @@
 # futon3a — Sidecar & Portal
 
+> **New to FUTON? Start with [futon0/INSTALL.md](https://github.com/tothedarktowercame/futon0/blob/main/INSTALL.md)**, the single guide to
+> installing and running the stack. Needed on disk for the core install (on Agency's classpath); you don't run it separately.
+
 futon3a is a lightweight sidecar for agents that need pattern guidance without
 running the full futon3 stack. It provides Drawbridge-based queries to futon1's
 pattern registry and structured logging for selections, actions, and evidence.
