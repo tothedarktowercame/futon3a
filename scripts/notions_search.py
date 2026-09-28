@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import sys
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
@@ -52,11 +54,73 @@ def _rank(query_vec: List[float], entries: List[Dict[str, object]], top: int) ->
     return scored[:top]
 
 
+def _result_payload(ranked: List[Tuple[float, Dict[str, object]]]) -> List[Dict[str, object]]:
+    results = []
+    for idx, (score, entry) in enumerate(ranked, start=1):
+        payload = {
+            "rank": idx,
+            "id": entry.get("id", "unknown"),
+            "title": entry.get("title", ""),
+            "score": round(float(score), 4),
+        }
+        for key in ("type", "source", "summary", "status", "phase", "path", "home_repo"):
+            if key in entry:
+                payload[key] = entry.get(key)
+        results.append(payload)
+    return results
+
+
+class ResidentSearch:
+    """One loaded encoder and one pre-normalised embedding matrix."""
+
+    def __init__(self, model_name: str, embeddings: Path, filter_type: str | None) -> None:
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+        try:
+            import numpy as np
+            from sentence_transformers import SentenceTransformer  # type: ignore
+        except ImportError as exc:
+            raise SystemExit("sentence-transformers and numpy are required for resident search") from exc
+
+        self._np = np
+        self._model = SentenceTransformer(model_name, local_files_only=True)
+        entries = _load_embeddings(embeddings)
+        if filter_type:
+            entries = [entry for entry in entries if _entry_type(entry) == filter_type]
+        usable = [(entry, entry.get("vector")) for entry in entries]
+        usable = [(entry, vec) for entry, vec in usable if isinstance(vec, list)]
+        self._entries = [entry for entry, _ in usable]
+        matrix = np.asarray([vec for _, vec in usable], dtype=np.float32)
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+        norms[norms == 0.0] = 1.0
+        self._matrix = matrix / norms
+
+    def search(self, query: str, top: int) -> List[Dict[str, object]]:
+        query_vec = self._model.encode([query], normalize_embeddings=True)[0]
+        scores = self._matrix @ self._np.asarray(query_vec, dtype=self._np.float32)
+        order = self._np.argsort(-scores, kind="stable")[:top]
+        ranked = [(float(scores[idx]), self._entries[int(idx)]) for idx in order]
+        return _result_payload(ranked)
+
+    def serve(self) -> None:
+        for raw in sys.stdin:
+            try:
+                request = json.loads(raw)
+                query = request["query"]
+                top = int(request.get("top", 8))
+                if not isinstance(query, str) or not query or top <= 0:
+                    raise ValueError("query must be non-empty and top must be positive")
+                response: object = self.search(query, top)
+            except Exception as exc:  # one bad request must not kill the resident
+                response = {"error": type(exc).__name__, "message": str(exc)}
+            print(json.dumps(response), flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fuzzy search patterns with MiniLM embeddings.")
     parser.add_argument("--embeddings", default="resources/notions/minilm_pattern_embeddings.json",
                         help="Embeddings JSON file (list of {id, vector, title}).")
-    parser.add_argument("--query", required=True, help="Query text.")
+    parser.add_argument("--query", help="Query text (required outside resident mode).")
     parser.add_argument("--top", type=int, default=8, help="Number of matches to show.")
     parser.add_argument("--model", default="sentence-transformers/all-MiniLM-L6-v2",
                         help="SentenceTransformer model name or path.")
@@ -64,7 +128,15 @@ def main() -> None:
                         help="Restrict results to entries carrying a matching type field.")
     parser.add_argument("--json", action="store_true",
                         help="Output results as JSON array.")
+    parser.add_argument("--resident", action="store_true",
+                        help="Read JSON requests from stdin and write one JSON result line each.")
     args = parser.parse_args()
+
+    if args.resident:
+        ResidentSearch(args.model, Path(args.embeddings), args.filter_type).serve()
+        return
+    if not args.query:
+        parser.error("--query is required outside resident mode")
 
     try:
         from sentence_transformers import SentenceTransformer  # type: ignore
@@ -81,19 +153,7 @@ def main() -> None:
     ranked = _rank(query_vec, entries, args.top)
 
     if args.json:
-        results = []
-        for idx, (score, entry) in enumerate(ranked, start=1):
-            payload = {
-                "rank": idx,
-                "id": entry.get("id", "unknown"),
-                "title": entry.get("title", ""),
-                "score": round(score, 4),
-            }
-            for key in ("type", "source", "summary", "status", "phase", "path", "home_repo"):
-                if key in entry:
-                    payload[key] = entry.get(key)
-            results.append(payload)
-        print(json.dumps(results))
+        print(json.dumps(_result_payload(ranked)))
     else:
         for idx, (score, entry) in enumerate(ranked, start=1):
             pid = entry.get("id", "unknown")
