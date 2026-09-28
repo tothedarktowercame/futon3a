@@ -76,7 +76,7 @@ class ResidentSearch:
     def __init__(self, model_name: str, embeddings: Path, filter_type: str | None) -> None:
         os.environ.setdefault("HF_HUB_OFFLINE", "1")
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
-        os.environ["OMP_NUM_THREADS"] = "1"
+        os.environ["OMP_NUM_THREADS"] = "2"
         os.environ["OPENBLAS_NUM_THREADS"] = "1"
         try:
             import numpy as np
@@ -88,7 +88,7 @@ class ResidentSearch:
         self._np = np
         # The resident answers one query at a time. PyTorch's large default CPU
         # pool costs more in scheduling than MiniLM spends on this small batch.
-        torch.set_num_threads(1)
+        torch.set_num_threads(2)
         try:
             torch.set_num_interop_threads(1)
         except RuntimeError:
