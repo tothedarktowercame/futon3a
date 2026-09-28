@@ -78,11 +78,19 @@ class ResidentSearch:
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
         try:
             import numpy as np
+            import torch
             from sentence_transformers import SentenceTransformer  # type: ignore
         except ImportError as exc:
             raise SystemExit("sentence-transformers and numpy are required for resident search") from exc
 
         self._np = np
+        # The resident answers one query at a time. PyTorch's large default CPU
+        # pool costs more in scheduling than MiniLM spends on this small batch.
+        torch.set_num_threads(1)
+        try:
+            torch.set_num_interop_threads(1)
+        except RuntimeError:
+            pass
         self._model = SentenceTransformer(model_name, local_files_only=True)
         entries = _load_embeddings(embeddings)
         if filter_type:
