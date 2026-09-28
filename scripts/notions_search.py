@@ -76,6 +76,8 @@ class ResidentSearch:
     def __init__(self, model_name: str, embeddings: Path, filter_type: str | None) -> None:
         os.environ.setdefault("HF_HUB_OFFLINE", "1")
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+        os.environ["OMP_NUM_THREADS"] = "1"
+        os.environ["OPENBLAS_NUM_THREADS"] = "1"
         try:
             import numpy as np
             import torch
