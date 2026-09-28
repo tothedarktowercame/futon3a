@@ -103,6 +103,7 @@ class ResidentSearch:
         return _result_payload(ranked)
 
     def serve(self) -> None:
+        print(json.dumps({"resident": "ready"}), flush=True)
         for raw in sys.stdin:
             try:
                 request = json.loads(raw)
