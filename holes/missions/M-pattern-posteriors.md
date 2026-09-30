@@ -1,6 +1,15 @@
 # Mission: M-pattern-posteriors
 
-Status: IDENTIFY
+**Status:** OPEN — IDENTIFY
+
+## Acceptance checklist (2026-09-30)
+
+- [x] `holes/labs/M-memes-arrows/pattern_posteriors.py` rebuilds an inspectable per-pattern posterior table with evidence references and an explicit drop log. (evidence: futon3a `6402ceb`)
+- [x] `holes/labs/M-memes-arrows/cascade_construct.py` accepts the posterior as an optional bounded multiplier without replacing the coherence or saturation rules. (evidence: futon3a `6402ceb`)
+- [x] `holes/labs/M-memes-arrows/pattern_posteriors_ab.self_graded.md` records the real-query self-graded A/B result and its sparse-data null finding. (evidence: `holes/labs/M-memes-arrows/pattern_posteriors_ab.self_graded.md`)
+- [x] The mission records the ratified used-subset credit rule, non-double-counting rule, and released STANDARD-VERIFY contract for fold-grounded updates. (evidence: `holes/missions/M-pattern-posteriors.md`, “Grounded-learning convergence”)
+- [ ] `futon6/holes/closure-folds.edn` contains at least one attempted-but-unclosed fold with a non-empty `:used` set, so a rebuild can increment β rather than observing success-only evidence.
+- [ ] `holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md` reports a non-uniform, discriminating grounded A/B from the rebuilt posterior while preserving the bounded positive-margin and coverage-saturation invariants.
 
 *Keep score on which patterns actually help, and let that score — auditable,
 per-pattern — inform which patterns get picked next time. This is the mission that
