@@ -21,3 +21,6 @@ resources/notions/*.png
 # Generated notions data (embeddings/projections/indexes) lives externally —
 # resources/notions is a symlink to ~/code/data/notions. See README-data.md.
 /resources/notions
+
+# self-symlink (ln -s into the repo); caused the 09-30 504 storm and recurred 11-07
+/futon3a
