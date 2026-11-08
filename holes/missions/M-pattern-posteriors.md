@@ -1,5 +1,7 @@
 # Mission: M-pattern-posteriors
 
+> **Closure check 2026-11-08: partly done.** Done: the fifth checklist box holds: `futon6/holes/closure-folds.edn` has two `:success false` folds (`hypergraph-operator/argue`, `/derive`) whose `:used` is `math-formalization/continuous-linear-map-composition` (futon6 b3b3b6f era, 2026-06-10); and the "UPDATE" section of `holes/labs/M-memes-arrows/pattern_posteriors_ab.grounded.md` (1d4c972) reports a non-uniform grounded table (that pattern α 0 / β 2, multiplier 0.850; eight closers boosted to 1.100) with 283/1070 patterns re-ranked and the failer demoted, not excluded. Remains for the sixth box: the file does not show the coverage-saturation invariant being checked, and its own Caveat says the A/B is a reduced cosine-relevance run over a single pattern-as-query, not `construct_cascade` over free-text queries, with the selection-changing "competitive β" still pending. Either record that the reduced A/B meets the box, or run the full one. Checked by misc in the closure pass (claude-6, FIX/WONTFIX sheet).
+
 **Status:** OPEN — IDENTIFY
 
 ## Acceptance checklist (2026-09-30)
