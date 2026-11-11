@@ -9,6 +9,7 @@
   that the compass demonstrator uses."
   (:require [clojure.data.json :as json]
             [futon.flexiarg.projection :as projection]
+            [futon.pattern-index :as pattern-index]
             [futon.text :as text]
             [clojure.java.io :as io]
             [clojure.set :as set]
@@ -16,27 +17,13 @@
   (:import (java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter)
            (java.util UUID)))
 
-;; --- TSV Index (keyword matching) ---
-
-(defn- parse-tsv-line [line]
-  (let [parts (str/split line #"\t" -1)]
-    (when (>= (count parts) 5)
-      {:id (nth parts 0)
-       :tokipona (nth parts 1)
-       :sigil (nth parts 2)
-       :rationale (nth parts 3)
-       :hotwords (set (str/split (nth parts 4) #",\s*"))})))
+;; --- Sidecar index (keyword matching) ---
 
 (defn load-pattern-index
-  "Load the patterns-index.tsv file."
-  ([] (load-pattern-index "resources/notions/patterns-index.tsv"))
+  "Load TSV-compatible lexical rows from the pattern-index sidecar."
+  ([] (mapv #(update % :hotwords set) (pattern-index/load-patterns)))
   ([path]
-   (with-open [rdr (io/reader path)]
-     (->> (line-seq rdr)
-          (drop 1)  ; skip header
-          (map parse-tsv-line)
-          (remove nil?)
-          vec))))
+   (mapv #(update % :hotwords set) (pattern-index/load-patterns path))))
 
 (defn- score-pattern-keywords [tokens pattern]
   (let [hotwords (:hotwords pattern)
@@ -74,8 +61,7 @@
   (env-or-prop "EMBED_TEXT_PATH" "scripts/embed_text.py"))
 
 (defn- embeddings-path []
-  (env-or-prop "NOTIONS_EMBEDDINGS_PATH"
-               "resources/notions/minilm_pattern_embeddings.json"))
+  (env-or-prop "FUTON3A_PATTERN_INDEX_DB" pattern-index/default-db-path))
 
 (defn- venv-python []
   (let [env-python (or (System/getProperty "NOTIONS_PYTHON")
@@ -232,9 +218,13 @@
   "Search patterns using MiniLM embeddings (requires sentence-transformers)."
   ([query] (search-embeddings query 5))
   ([query top-k]
-   (let [results (search-embeddings-file query
-                                         :embeddings-path (embeddings-path)
-                                         :top-k top-k)]
+   (let [entries (pattern-index/load-embeddings (embeddings-path))
+         results (when (seq entries)
+                   (when-let [query-vec (embed-query query)]
+                     (->> (rank-embedding-entries query-vec entries top-k)
+                          (map-indexed (fn [idx entry]
+                                         (assoc entry :rank (inc idx))))
+                          vec)))]
      (if (seq results)
        results
        ;; Fallback to keywords if embedding search fails
@@ -249,11 +239,8 @@
   [patterns]
   (into {} (map (juxt :id identity) patterns)))
 
-(defonce ^:private tsv-index-cache (atom nil))
-
 (defn- get-tsv-index []
-  (or @tsv-index-cache
-      (reset! tsv-index-cache (index-by-id (load-pattern-index)))))
+  (index-by-id (load-pattern-index)))
 
 (defn get-tsv-data
   "Get TSV data for a pattern ID."

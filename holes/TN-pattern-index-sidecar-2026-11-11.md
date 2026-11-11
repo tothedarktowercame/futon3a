@@ -115,9 +115,31 @@ preference and scope-reingest's debounce):
    shape).
 5. Replaces: `minilm_pattern_embeddings.json` first, then
    `patterns-index.tsv`; `bge/fasttext/glove_pattern_embeddings.json` are
-   already never-read and just stop being written.  `data/notions/` vs
-   `resources/notions/` writer disagreement disappears with the single
-   sidecar path.
+already never-read and just stop being written.  `data/notions/` vs
+`resources/notions/` writer disagreement disappears with the single
+sidecar path.
+
+## 6. Tracked TSV-reader cache census (packet 4, 2026-11-11)
+
+This distinguishes stale long-running readers from commands which reopen the
+generated compatibility export for every invocation.  "Fresh" here means no
+in-process catalog survives between uses; it does not make the TSV the future
+authority.
+
+| reader | cache behaviour | stale risk / disposition |
+|---|---|---|
+| futon2 `aif/interpretation_request.clj` | descriptor only; the selected subprocess opens its index per request | fresh |
+| futon3 `fuclaude`, `fucodex` | pass the catalog path into their peripheral | inherits peripheral cache below |
+| futon3 `scripts/fuclaude-peripheral.ts`, `fucodex-peripheral.ts` | `PatternIndex.loaded` prevents a second load for the process lifetime | **stale**; a later reader-migration packet must checkpoint-refresh these |
+| futon3 `src/futon3/checks.clj` | `load-index` opens and parses on each check call | fresh |
+| futon3 `src/futon3/fulab/pattern_competence.clj` | `read-pattern-ids` opens on each call | fresh |
+| futon3 `scripts/build_sigil_matrices.clj`, `build_sigils_density.clj` | load once during a one-shot build process | fresh on each invocation |
+| futon3 `scripts/ingest_patterns.sh` | one-shot reader; its EDN cache records ingestion progress, not a resident TSV parse | fresh on each invocation |
+| futon3a `scripts/bootstrap_meme.clj` | loads once in one-shot `-main` | fresh on each invocation |
+| futon3c `emacs/session-mode.el` | global `session-mode--pattern-sigils`, populated only when nil | **stale** for the Emacs lifetime; migrate separately without touching Joe's daemon |
+| futon5 `scripts/import_futon3a_patterns.clj` | one-shot import opens once | fresh on each invocation |
+| futon6 `cas_select.py`, `lexical_prior.py`, `preflight.py`, `reflow_campaign.py`, `run_manifest.py`, `session_threads.py`, `verify_check.py`, `tag-patterns.bb` | command-local load or path declaration; no resident service cache | fresh on each invocation |
+| futon6 `linode_stepper.py` | mentions the TSV in emitted guidance; it does not parse the file | not a data reader |
 
 ## Correction (claude-13, 2026-11-11, reviewing packet 5)
 
