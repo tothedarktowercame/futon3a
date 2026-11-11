@@ -160,6 +160,15 @@ def embed_texts(model_name: str, texts: list) -> list:
     return [[float(x) for x in v] for v in vecs]
 
 
+def embed_stub(_model_name: str, texts: list) -> list:
+    """TEST-ONLY (--embed-stub): deterministic hash vectors, no model load."""
+    out = []
+    for t in texts:
+        d = hashlib.sha256(t.encode()).digest()
+        out.append([b / 255.0 for b in d[:8]])
+    return out
+
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS pattern (
   id TEXT PRIMARY KEY,
@@ -224,8 +233,17 @@ def build(futon3_root: Path, db_path: str, model: str = DEFAULT_MODEL,
     stored = {r[0]: r[1] for r in conn.execute("SELECT id, file_sha256 FROM pattern")}
     ids = set(inventory)
     deleted = sorted(set(stored) - ids)
+    # self-heal: rows whose embedding is missing for this model or whose
+    # embedding was computed from a different file_sha256 (the gate's
+    # staleness figure) re-embed even when the pattern file is unchanged
+    stale_emb = {r[0] for r in conn.execute(
+        "SELECT p.id FROM pattern p LEFT JOIN embedding e"
+        " ON e.pattern_id = p.id AND e.model = ?"
+        " WHERE e.pattern_id IS NULL OR e.file_sha256 <> p.file_sha256",
+        (model,))}
     changed = sorted(pid for pid in ids
-                     if full or stored.get(pid) != inventory[pid]["file_sha256"])
+                     if full or pid in stale_emb
+                     or stored.get(pid) != inventory[pid]["file_sha256"])
     n_embedded = 0
     vectors = {}
     if changed:
@@ -287,8 +305,13 @@ def status(db_path: str, futon3_root: Path | None = None) -> dict:
                          "drift": json.loads(drift), "finished_at": finished,
                          "seq": seq}
     indexed = {r[0] for r in conn.execute("SELECT id FROM pattern")}
+    n_stale_emb = conn.execute(
+        "SELECT count(*) FROM embedding e JOIN pattern p"
+        " ON p.id = e.pattern_id WHERE e.file_sha256 <> p.file_sha256"
+    ).fetchone()[0]
     conn.close()
-    out = {"db": db_path, "checkpoints": latest, "indexed": len(indexed)}
+    out = {"db": db_path, "checkpoints": latest, "indexed": len(indexed),
+           "stale-embeddings": n_stale_emb}
     if futon3_root:
         live = set(scan_library(futon3_root))
         out["live-drift"] = {"missing": sorted(live - indexed),
@@ -333,6 +356,8 @@ def main():
     b.add_argument("--model", default=DEFAULT_MODEL)
     b.add_argument("--db", default=DEFAULT_DB)
     b.add_argument("--full", action="store_true")
+    b.add_argument("--embed-stub", action="store_true",
+                   help="TEST ONLY: deterministic hash vectors, no model load")
     s = sub.add_parser("status")
     s.add_argument("--db", default=DEFAULT_DB)
     s.add_argument("--futon3-root", default=None,
@@ -345,7 +370,8 @@ def main():
     q.add_argument("--json", action="store_true")
     args = p.parse_args()
     if args.cmd == "build":
-        stats = build(Path(args.futon3_root), args.db, args.model, args.full)
+        stats = build(Path(args.futon3_root), args.db, args.model, args.full,
+                      embed_fn=(embed_stub if args.embed_stub else None))
         print(json.dumps(stats, indent=1))
     elif args.cmd == "status":
         root = Path(args.futon3_root) if args.futon3_root else None
