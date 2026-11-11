@@ -51,6 +51,8 @@ TITLE = re.compile(r"^@title\s+(.*)$", re.M)
 SOURCE_ROOTS = ("library", "holes")  # what projection.clj covers (l.13)
 
 FUTON3A_ROOT = Path(__file__).resolve().parent.parent
+FUTON3_CODE_ROOT = Path(os.environ.get(
+    "FUTON3_CODE_ROOT", str(Path.home() / "code/futon3")))
 FUTON3C_OCC = Path.home() / "code/futon3c/scripts/occurrence_square.py"
 
 
@@ -294,6 +296,34 @@ def build(futon3_root: Path, db_path: str, model: str = DEFAULT_MODEL,
             "embedded": n_embedded, "seconds": round(time.time() - t0, 2)}
 
 
+def build_sigil_snapshot(futon3_root: Path, db_path: str,
+                         model: str = DEFAULT_MODEL) -> dict:
+    """Run futon3's canonical Clojure derivation, then export TSV from the
+    sidecar. No sigil, rationale, hotword, or devmap rule is duplicated here."""
+    clojure = os.environ.get("FUTON3_CLJ", "clojure")
+    export = futon3_root / "resources/sigils/patterns-index.tsv"
+    conn = sqlite3.connect(db_path)
+    embedding_seq = conn.execute(
+        "SELECT max(seq) FROM checkpoint WHERE model=?", (model,)).fetchone()[0]
+    conn.close()
+    cmd = [clojure, "-M", "-m", "futon3.pattern-index.derivation",
+           "--futon3-root", str(futon3_root), "--db", db_path,
+           "--library-head", library_head(futon3_root) or "",
+           "--embedding-seq", str(embedding_seq),
+           "--export-tsv", str(export), "--no-examples"]
+    proc = subprocess.run(cmd, cwd=str(FUTON3_CODE_ROOT), text=True,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode:
+        raise RuntimeError(
+            f"canonical sigil snapshot failed ({proc.returncode}): {proc.stderr}")
+    conn = sqlite3.connect(db_path)
+    row = conn.execute(
+        "SELECT rows_indexed, seq FROM sigil_checkpoint ORDER BY seq DESC LIMIT 1"
+    ).fetchone()
+    conn.close()
+    return {"rows": row[0], "checkpoint_seq": row[1], "export": str(export)}
+
+
 def status(db_path: str, futon3_root: Path | None = None) -> dict:
     conn = connect(db_path)
     rows = conn.execute(
@@ -372,6 +402,8 @@ def main():
     if args.cmd == "build":
         stats = build(Path(args.futon3_root), args.db, args.model, args.full,
                       embed_fn=(embed_stub if args.embed_stub else None))
+        stats["sigils"] = build_sigil_snapshot(Path(args.futon3_root), args.db,
+                                                args.model)
         print(json.dumps(stats, indent=1))
     elif args.cmd == "status":
         root = Path(args.futon3_root) if args.futon3_root else None
