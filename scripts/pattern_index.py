@@ -215,8 +215,7 @@ def library_head(futon3_root: Path):
 
 
 def build(futon3_root: Path, db_path: str, model: str = DEFAULT_MODEL,
-          full: bool = False, embed_fn=None, records=None,
-          checkpoint_in_transaction=True) -> dict:
+          full: bool = False, embed_fn=None, records=None) -> dict:
     """Incremental build.  Returns a stats dict.  embed_fn(model, texts) is
     injectable for tests; records (id -> text) likewise."""
     t0 = time.time()
@@ -264,14 +263,10 @@ def build(futon3_root: Path, db_path: str, model: str = DEFAULT_MODEL,
             (model,)).fetchone()[0])
         ckpt = (model, library_head(futon3_root), len(indexed),
                 json.dumps(sorted(ids)), json.dumps(drift), now, seq)
-        if checkpoint_in_transaction:
-            conn.execute("INSERT INTO checkpoint VALUES (?,?,?,?,?,?,?)", ckpt)
-            conn.commit()
-        else:
-            # PLANT (b): checkpoint outside the transaction.
-            conn.commit()
-            conn.execute("INSERT INTO checkpoint VALUES (?,?,?,?,?,?,?)", ckpt)
-            conn.commit()
+        # The checkpoint is written inside the transaction, so a reader never
+        # sees patterns without the checkpoint that describes them.
+        conn.execute("INSERT INTO checkpoint VALUES (?,?,?,?,?,?,?)", ckpt)
+        conn.commit()
     except Exception:
         conn.rollback()
         conn.close()
