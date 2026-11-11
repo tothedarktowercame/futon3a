@@ -3,8 +3,8 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/index_patterns.sh [--futon3-root PATH] [--out-dir PATH] [--glove PATH]
-                                 [--fasttext PATH] [--minilm] [--minilm-model NAME]
+Usage: scripts/index_patterns.sh [--futon3-root PATH] [--out-dir PATH]
+                                 [--minilm] [--minilm-model NAME]
                                  [--include-missions]
                                  [--missions-roots PATH[,PATH...]]
 
@@ -13,12 +13,17 @@ Build a local notions index from Futon3 library patterns.
 Options:
   --futon3-root PATH  Path to Futon3 repo (default: ../futon3).
   --out-dir PATH      Output directory (default: resources/notions).
-  --glove PATH        Optional path to GloVe vectors; generates neighbors report.
-  --fasttext PATH     Optional path to fastText .vec or .bin vectors; writes embeddings.
   --minilm            Use default MiniLM model (all-MiniLM-L6-v2).
   --minilm-model NAME Optional SentenceTransformer model name/path for MiniLM embeddings.
   --include-missions  Refresh mission_records + mission embeddings from substrate-2/cache.
   --missions-roots X  Deprecated compatibility alias; mission roots are no longer used.
+
+Removed 2026-11-11 (M-repl-circus packet 5): --glove and --fasttext pattern
+embeddings and their file copies.  glove_pattern_embeddings.json and
+fasttext_pattern_embeddings.json had no reader but the offline 2-D
+projector, and that projector has read minilm_corpus_embeddings.json all
+along.  glove_pattern_neighbors.json stays: futon3 pattern_hints.clj:43
+reads it.
 EOF
 }
 
@@ -27,8 +32,6 @@ FUTON3A_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEFAULT_FUTON3_ROOT="$(cd "${SCRIPT_DIR}/../../futon3" && pwd)"
 FUTON3_ROOT="${FUTON3_ROOT:-$DEFAULT_FUTON3_ROOT}"
 OUT_DIR="${OUT_DIR:-${SCRIPT_DIR}/../resources/notions}"
-GLOVE_PATH=""
-FASTTEXT_PATH=""
 MINILM_MODEL=""
 INCLUDE_MISSIONS=0
 MISSIONS_ROOTS=""
@@ -51,13 +54,10 @@ while [[ $# -gt 0 ]]; do
       OUT_DIR="$2"
       shift 2
       ;;
-    --glove)
-      GLOVE_PATH="$2"
+    --glove|--fasttext)
+      echo "Removed option: $1 (packet 5, 2026-11-11: glove/fasttext pattern embeddings were written-never-read)" >&2
       shift 2
-      ;;
-    --fasttext)
-      FASTTEXT_PATH="$2"
-      shift 2
+      exit 2
       ;;
     --minilm-model)
       MINILM_MODEL="$2"
@@ -224,29 +224,17 @@ fi
 (
   cd "$FUTON3_ROOT"
   "$CLJ_CMD" -M -m scripts.build-pattern-index
-  if [[ -n "$GLOVE_PATH" ]]; then
-    "$PYTHON_BIN" scripts/embed_patterns_glove.py --glove "$GLOVE_PATH"
-  fi
-  if [[ -n "$FASTTEXT_PATH" ]]; then
-    "$PYTHON_BIN" scripts/embed_patterns_fasttext.py --fasttext "$FASTTEXT_PATH"
-  fi
 )
 
 copy_if_distinct "$FUTON3_ROOT/resources/sigils/patterns-index.tsv" "$OUT_DIR/patterns-index.tsv"
-copy_if_distinct "$FUTON3_ROOT/resources/sigils/rationale-examples.edn" "$OUT_DIR/rationale-examples.edn"
 copy_if_distinct "$FUTON3_ROOT/resources/sigils/index.edn" "$OUT_DIR/sigil-index.edn"
 
+# glove_pattern_neighbors.json has a live reader (futon3 pattern_hints.clj:43),
+# so its copy stays; the glove/fasttext pattern EMBEDDINGS were
+# written-never-read and are no longer written or copied (packet 5).
 if [[ -f "$FUTON3_ROOT/resources/embeddings/glove_pattern_neighbors.json" ]]; then
   copy_if_distinct "$FUTON3_ROOT/resources/embeddings/glove_pattern_neighbors.json" \
     "$OUT_DIR/glove_pattern_neighbors.json"
-fi
-if [[ -f "$FUTON3_ROOT/data/glove_pattern_embeddings.json" ]]; then
-  copy_if_distinct "$FUTON3_ROOT/data/glove_pattern_embeddings.json" \
-    "$OUT_DIR/glove_pattern_embeddings.json"
-fi
-if [[ -f "$FUTON3_ROOT/resources/embeddings/fasttext_pattern_embeddings.json" ]]; then
-  copy_if_distinct "$FUTON3_ROOT/resources/embeddings/fasttext_pattern_embeddings.json" \
-    "$OUT_DIR/fasttext_pattern_embeddings.json"
 fi
 
 if [[ -n "$MINILM_MODEL" ]]; then

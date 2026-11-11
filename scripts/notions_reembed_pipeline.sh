@@ -4,7 +4,11 @@ set -euo pipefail
 ROOT=/home/joe/code
 FUTON3A="$ROOT/futon3a"
 FUTON3="$ROOT/futon3"
-NOTIONS="$ROOT/data/notions"
+# One home (M-repl-circus packet 5, 2026-11-11): the canonical notions home is
+# futon3a/resources/notions (what pattern_search/proof_backend/live_efe_map
+# read; symlinks into storage/futon3a).  This pipeline used to divert writes
+# to ~/code/data/notions, which no serving reader reads.
+NOTIONS="$FUTON3A/resources/notions"
 # The drift check MUST NOT share a limit with the thing it checks:
 # futon.missions fetches mission-doc hyperedges at limit 500 by default, so once
 # the corpus passes 500 the two truncate together and the delta reads 0 while
