@@ -23,6 +23,40 @@ def _dot(a: List[float], b: List[float]) -> float:
     return sum(x * y for x, y in zip(a, b))
 
 
+def _load_sidecar_embeddings(db_path: Path, model: str) -> List[Dict[str, object]]:
+    """Vectors from the pattern-index sidecar (packet 1), joined to titles."""
+    import sqlite3
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=30)
+    rows = conn.execute(
+        "SELECT p.id, p.title, e.vector FROM embedding e"
+        " JOIN pattern p ON p.id = e.pattern_id WHERE e.model=?", (model,)).fetchall()
+    conn.close()
+    import struct
+    return [{"id": pid, "title": title or "",
+             "vector": list(struct.unpack("<%df" % (len(blob) // 4), blob))}
+            for pid, title, blob in rows]
+
+
+def _sidecar_checkpoint_seq(db_path: Path) -> int:
+    """The newest checkpoint seq — one cheap read; the reload signal."""
+    import sqlite3
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=30)
+    try:
+        return conn.execute("SELECT COALESCE(MAX(seq),0) FROM checkpoint").fetchone()[0]
+    except sqlite3.OperationalError:  # no checkpoint table yet
+        return 0
+    finally:
+        conn.close()
+
+
+def _stub_vec(text: str) -> List[float]:
+    """TEST-ONLY (--embed-stub): the same hash vector pattern_index.py's
+    embed_stub writes, so a stub-built sidecar and a stub query agree."""
+    import hashlib
+    d = hashlib.sha256(text.encode()).digest()
+    return [b / 255.0 for b in d[:8]]
+
+
 def _load_embeddings(path: Path) -> List[Dict[str, object]]:
     payload = json.loads(path.read_text())
     if isinstance(payload, dict):
@@ -71,41 +105,90 @@ def _result_payload(ranked: List[Tuple[float, Dict[str, object]]]) -> List[Dict[
 
 
 class ResidentSearch:
-    """One loaded encoder and one pre-normalised embedding matrix."""
+    """One loaded encoder and one pre-normalised embedding matrix.
 
-    def __init__(self, model_name: str, embeddings: Path, filter_type: str | None) -> None:
+    With sidecar=PATH the matrix comes from the pattern-index sidecar and
+    reloads by itself: before each query (at most once a second) the newest
+    checkpoint seq is re-read (one cheap SQLite read); only when it moved are
+    the vectors reloaded.  No JVM-side restart after a rebuild."""
+
+    RELOAD_CHECK_SECONDS = 1.0
+
+    def __init__(self, model_name: str, embeddings: Path, filter_type: str | None,
+                 sidecar: Path | None = None, stub: bool = False) -> None:
         os.environ.setdefault("HF_HUB_OFFLINE", "1")
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
         os.environ["OMP_NUM_THREADS"] = "2"
         os.environ["OPENBLAS_NUM_THREADS"] = "1"
-        try:
-            import numpy as np
-            import torch
-            from sentence_transformers import SentenceTransformer  # type: ignore
-        except ImportError as exc:
-            raise SystemExit("sentence-transformers and numpy are required for resident search") from exc
+        import time
+        self._time = time
+        self._sidecar = sidecar
+        self._stub = stub
+        self._checkpoint_seq = -1
+        self._last_seq_check = 0.0
+        self._np = None
+        if stub:
+            self._model = None
+        else:
+            try:
+                import numpy as np
+                import torch
+                from sentence_transformers import SentenceTransformer  # type: ignore
+            except ImportError as exc:
+                raise SystemExit("sentence-transformers and numpy are required for resident search") from exc
 
-        self._np = np
-        # The resident answers one query at a time. PyTorch's large default CPU
-        # pool costs more in scheduling than MiniLM spends on this small batch.
-        torch.set_num_threads(2)
-        try:
-            torch.set_num_interop_threads(1)
-        except RuntimeError:
-            pass
-        self._model = SentenceTransformer(model_name, local_files_only=True)
-        entries = _load_embeddings(embeddings)
-        if filter_type:
-            entries = [entry for entry in entries if _entry_type(entry) == filter_type]
+            self._np = np
+            # The resident answers one query at a time. PyTorch's large default CPU
+            # pool costs more in scheduling than MiniLM spends on this small batch.
+            torch.set_num_threads(2)
+            try:
+                torch.set_num_interop_threads(1)
+            except RuntimeError:
+                pass
+            self._model = SentenceTransformer(model_name, local_files_only=True)
+        self._model_name = model_name
+        self._filter_type = filter_type
+        self._embeddings_path = embeddings
+        self._load()
+
+    def _load(self) -> None:
+        if self._sidecar is not None:
+            entries = _load_sidecar_embeddings(self._sidecar, self._model_name)
+            self._checkpoint_seq = _sidecar_checkpoint_seq(self._sidecar)
+        else:
+            entries = _load_embeddings(self._embeddings_path)
+        if self._filter_type:
+            entries = [entry for entry in entries if _entry_type(entry) == self._filter_type]
         usable = [(entry, entry.get("vector")) for entry in entries]
         usable = [(entry, vec) for entry, vec in usable if isinstance(vec, list)]
         self._entries = [entry for entry, _ in usable]
-        matrix = np.asarray([vec for _, vec in usable], dtype=np.float32)
-        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-        norms[norms == 0.0] = 1.0
-        self._matrix = matrix / norms
+        if self._np is None:  # stub mode: plain python lists
+            self._matrix = [_normalize(vec) for _, vec in usable]
+        else:
+            matrix = self._np.asarray([vec for _, vec in usable], dtype=self._np.float32) \
+                if usable else self._np.zeros((0, 384), dtype=self._np.float32)
+            norms = self._np.linalg.norm(matrix, axis=1, keepdims=True)
+            norms[norms == 0.0] = 1.0
+            self._matrix = matrix / norms if usable else matrix
+
+    def _maybe_reload(self) -> None:
+        if self._sidecar is None:
+            return
+        now = self._time.monotonic()
+        if now - self._last_seq_check < self.RELOAD_CHECK_SECONDS:
+            return
+        self._last_seq_check = now
+        if _sidecar_checkpoint_seq(self._sidecar) != self._checkpoint_seq:
+            self._load()
 
     def search(self, query: str, top: int) -> List[Dict[str, object]]:
+        self._maybe_reload()
+        if self._stub:
+            q = _normalize(_stub_vec(query))
+            ranked = sorted(
+                ((_dot(q, vec), entry) for vec, entry in zip(self._matrix, self._entries)),
+                key=lambda x: x[0], reverse=True)[:top]
+            return _result_payload(ranked)
         query_vec = self._model.encode([query], normalize_embeddings=True)[0]
         scores = self._matrix @ self._np.asarray(query_vec, dtype=self._np.float32)
         order = self._np.argsort(-scores, kind="stable")[:top]
@@ -141,24 +224,37 @@ def main() -> None:
                         help="Output results as JSON array.")
     parser.add_argument("--resident", action="store_true",
                         help="Read JSON requests from stdin and write one JSON result line each.")
+    parser.add_argument("--sidecar", default=None,
+                        help="Read embeddings from the pattern-index sidecar SQLite at PATH "
+                             "instead of --embeddings; in --resident mode the matrix reloads "
+                             "when the sidecar's checkpoint seq moves.")
+    parser.add_argument("--embed-stub", action="store_true",
+                        help="TEST ONLY: hash-based query embedding matching "
+                             "pattern_index.py --embed-stub builds (no model load).")
     args = parser.parse_args()
 
     if args.resident:
-        ResidentSearch(args.model, Path(args.embeddings), args.filter_type).serve()
+        ResidentSearch(args.model, Path(args.embeddings), args.filter_type,
+                       sidecar=(Path(args.sidecar) if args.sidecar else None),
+                       stub=args.embed_stub).serve()
         return
     if not args.query:
         parser.error("--query is required outside resident mode")
 
-    try:
-        from sentence_transformers import SentenceTransformer  # type: ignore
-    except ImportError as exc:
-        raise SystemExit("sentence-transformers is required for MiniLM search") from exc
+    if args.embed_stub:
+        query_vec = _stub_vec(args.query)
+    else:
+        try:
+            from sentence_transformers import SentenceTransformer  # type: ignore
+        except ImportError as exc:
+            raise SystemExit("sentence-transformers is required for MiniLM search") from exc
 
-    model = SentenceTransformer(args.model)
-    query_vec = model.encode([args.query], normalize_embeddings=True)[0]
-    query_vec = [float(x) for x in query_vec]
+        model = SentenceTransformer(args.model)
+        query_vec = model.encode([args.query], normalize_embeddings=True)[0]
+        query_vec = [float(x) for x in query_vec]
 
-    entries = _load_embeddings(Path(args.embeddings))
+    entries = (_load_sidecar_embeddings(Path(args.sidecar), args.model)
+               if args.sidecar else _load_embeddings(Path(args.embeddings)))
     if args.filter_type:
         entries = [entry for entry in entries if _entry_type(entry) == args.filter_type]
     ranked = _rank(query_vec, entries, args.top)
