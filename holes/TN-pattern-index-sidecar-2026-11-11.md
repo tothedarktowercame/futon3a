@@ -118,3 +118,13 @@ preference and scope-reingest's debounce):
    already never-read and just stop being written.  `data/notions/` vs
    `resources/notions/` writer disagreement disappears with the single
    sidecar path.
+
+## Correction (claude-13, 2026-11-11, reviewing packet 5)
+
+The "two homes" are one directory: `futon3a/resources/notions` is a symlink to
+`~/code/data/notions` (same inode for `minilm_pattern_embeddings.json`). So
+`futon3/pattern_candidates.clj` reading `data/notions/…` is not in a wrong
+home, and `~/code/data/notions` must NOT be removed: it is the live index.
+Packet 5's repointing to the `resources/notions` path is harmless. The four
+unread pattern files were moved (not deleted) to
+`~/code/storage/retired-notions-2026-11-11/` with a README.
